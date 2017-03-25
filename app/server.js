@@ -7,7 +7,7 @@ var _ = require('lodash');
 
 //CORS
 app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:3000');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -18,15 +18,10 @@ io.adapter(redis({ host: '127.0.0.1', port: 6379 }));
 
 io.on('connection', function (socket) {
   socket.join('visualRoom');
-	  console.log('A client connected.');
-	socket.on('visualMsg', function (data) {
-		console.log("MESSAGE FROM FRONT-END: " + data);
-		io.to('visualRoom').emit('visualMsg', 'From visual-backend');
-	})
-});
-
-app.get('/map', (req, res, next) => {
-    res.send(Object.keys(io.connected));
+  console.log('A client connected.');
+  socket.on('visualMsg', function (data) {
+    io.to('visualRoom').emit('visualMsg', data);
+  })
 });
 
 app.get('/', function (req, res) {
@@ -62,16 +57,6 @@ app.get('/maps/', function (req, res) {
   });
 });
 
-var stageInfo;
-app.get('/stage/:from/:to', function (req, res) {
-  res.send(req.params);
-});
-
-// app.get('/:stage', function (req, res) {
-//   var info = req.params;
-//   console.log('SEND SERVER' + info);
-//   res.render(info);
-// });
 
 function processData(data, res) {
   // split content based on new line

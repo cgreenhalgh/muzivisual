@@ -1,4 +1,9 @@
 /* app css stylesheet */
+@import url('https://fonts.googleapis.com/css?family=Pangolin');
+
+html {
+  font-family: 'Pangolin', cursive;
+}
 
 .menu {
   list-style: none;

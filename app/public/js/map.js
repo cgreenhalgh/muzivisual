@@ -22,17 +22,19 @@ map.controller('schangeCtrl', ['$scope', '$http', '$routeParams', function ($sco
 }]);
 
 map.controller('mapCtrl', ['$scope', '$http', 'socket', function ($scope, $http, socket) {
-  $scope.currentStage = 'basecamp';
-  $scope.sebseStage = false;
+  $scope.pstage = '';
+  $scope.cstage = '';
 
-  $scope.sendStage = function () {
-    socket.emit('visualMsg', 'FROM visual-FRONT');
-    console.log("msg sent");
-  }
+  // $scope.sendStage = function () {
+  //   socket.emit('visualMsg', 'FROM visual-FRONT');
+  //   console.log("msg sent");
+  // }
 
   socket.on('visualMsg', function (data) {
     console.log("visual-front receive: " + data);
-    $scope.message = data;
+    var stages = data.split('->')
+    $scope.pstage = stages[0];
+    $scope.cstage = stages[1];
   });
 
   // $scope.$watch('message', (after, before) => {
@@ -41,7 +43,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', function ($scope, $http,
   // })
 
   $http.get('/maps/').success(function (data) {
-    $scope.testData = data;
+    $scope.iniData = data;
   });
 
   // room: room name (default "default")
@@ -72,17 +74,14 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
     restrict: 'EA',
     scope: false,
     link: function (scope, element, attrs) {
-      // scope.$watch('mapData', function(newValue, oldValue){
-      //    console.log('D3MAP SCOPE: ' + scope.mapData + "\n" + newValue);
-      // });
 
       $http.get('/maps/').success(function (data) {
-        var testData = data;
-        console.log("GOT MAP: " + JSON.stringify(testData));
+        var iniData = data;
+        console.log("GOT MAP: " + JSON.stringify(iniData));
 
         // EXTRACT INFO FROM DATA 
         // get normal stages (except bc and summit)
-        var stages = _.remove(testData, function (n) {
+        var stages = _.remove(iniData, function (n) {
           if (n.stage === 'summit' || n.stage === 'basecamp')
             return false;
           return true;
@@ -109,7 +108,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
         // DISPLAY SETTINGS
         //var NUM_COLUMN = 3; // column of the map
         //var NUM_ROW = 10; // row of the map
-        var RECT_WIDTH = 100;
+        var RECT_WIDTH = 120;
         var RECT_HEIGHT = 40;
 
         var MAP_WIDTH = $window.innerWidth;
@@ -124,7 +123,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
         X_OFFSET = MAP_WIDTH / (NUM_COLUMN * 2) + RECT_WIDTH / 2;
         Y_OFFSET = (MAP_HEIGHT - 50) / (NUM_ROW * 2) + RECT_HEIGHT / 2;
 
-        var LEFT_X = MAP_WIDTH / (NUM_COLUMN * 2) - RECT_WIDTH / 2;
+        var LEFT_X = MAP_WIDTH / (NUM_COLUMN * 2) - RECT_WIDTH / 2 ;
 
         // DRAW
         d3Service.d3().then(function (d3) {
@@ -138,7 +137,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
 
           // DATA PROCESS 
           // data are processed seperately: summit + normal stages + basecamp
-          var summitData = _.find(testData, { 'stage': 'summit' });
+          var summitData = _.find(iniData, { 'stage': 'summit' });
           // if the summit exists, draw summit
           if (summitData.visual) {
             summitData.x = (NUM_COLUMN - 1) / 2;
@@ -160,7 +159,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
             data = _.concat(data, pathData);
           });
 
-          var bcData = _.find(testData, { 'stage': 'basecamp' });
+          var bcData = _.find(iniData, { 'stage': 'basecamp' });
           if (bcData.visual) {
             // change state for the basecamp and its subsequent stage
             bcData.state = "active";
@@ -168,7 +167,6 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
             _.forEach(cueList, function (cue) {
               var stage = _.find(data, { stage: cue });
               stage.state = "revealed";
-              // console.log(_.find(data, { stage: cue }));
             });
 
             bcData.x = (NUM_COLUMN - 1) / 2;
@@ -178,47 +176,52 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
           }
 
 
-          // MAP MANIPULATION
+          // Data updated
           var customPath = [];
-          scope.$watch(scope.sebseStage, function () {
-
-            if (scope.sebseStage) {
+          scope.$watch('cstage', function () {
+            console.log("??/");
+            if (scope.cstage) {
 
               // turn the previous active stage into past -  succ / fail
-              var cs = _.find(data, { 'stage': scope.currentStage })
-              console.log(cs);
-              cs.state = "rev_succ";
-              customPath.push(scope.currentStage)
-              console.log("ADD STAGE " + scope.currentStage + " TO CUSTOM PATH");
+              var ps = _.find(data, { 'stage': scope.pstage })
+              console.log(ps);
+              ps.state = "rev_succ";
+              customPath.push(scope.pstage)
+              console.log("ADD STAGE " + scope.pstage + " TO CUSTOM PATH");
+              updateMapStage(ps, 0);
 
               // active new path
-              var ss = _.find(data, { 'stage': scope.sebseStage });
-              ss.state = 'active'
+              var cs = _.find(data, { 'stage': scope.cstage });
+              console.log(cs);
+              cs.state = 'active';
+              updateMapStage(cs, 2);
 
               // get missed stages
               var revealeds = _.filter(data, { 'state': 'revealed' })
               console.log(revealeds);
-              _.forEach(revealeds, function (r) {
-                console.log(r);
-                if (_.isObject(r))
-                  r.state = 'missed';
+              _.forEach(revealeds, function (rs) {
+                console.log(rs);
+                if (_.isObject(rs))
+                  rs.state = 'missed';
+                updateMapStage(rs, 3);
               });
 
               // reveal new stages
-              var cues = _.split(ss.cue, '/');
-              _.forEach(cues, function (c) {
-                var ob = _.find(data, { 'stage': c })
-                ob.state = 'revealed';
+              var fss = _.split(cs.cue, '/');
+              console.log(fss);
+              _.forEach(fss, function (c) {
+                var fs = _.find(data, { 'stage': c })
+                fs.state = 'revealed';
+                updateMapStage(fs, 3);
               });
 
-              scope.currentStage = scope.sebseStage;
-              drawArrow(canvas, data);
-              drawStage(canvas, data);
+              updateMapLine(ps, cs);
 
               // CALL IMAGE DISPLAY / CONTENT / WHATSOEVER
               // END DATA PROCESS
             }
           });
+
 
           // COLLECT CUSTOM PATH
           // DRAW 
@@ -226,25 +229,27 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
           drawStage(canvas, data);
 
           function drawArrow(canvas, data) {
-            _.forEach(data, function (da) {
-              if (da && da.cue) {
+            _.forEach(data, function (cStageDatum) {
+              if (cStageDatum && cStageDatum.cue) {
                 // get all the cues of this stage
-                var cueList = _.split(da.cue, '/');
+                var cueList = _.split(cStageDatum.cue, '/');
 
-                var cueStageInfo;
+                var cueStageDatum;
                 _.forEach(cueList, function (cueStage) {
-                  cueStageInfo = _.find(data, { 'stage': _.trim(cueStage) });
+                  cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
                   canvas
                     .append('line')
-                    .attr("x1", function () { return LEFT_X + da.x * X_OFFSET + RECT_WIDTH / 2 })
-                    .attr("y1", function () { return INI_Y + da.y * Y_OFFSET + RECT_HEIGHT / 2 })
-                    .attr("x2", function () { return LEFT_X + cueStageInfo.x * X_OFFSET + RECT_WIDTH / 2 })
-                    .attr("y2", function () { return INI_Y + cueStageInfo.y * Y_OFFSET + RECT_HEIGHT / 2 })
-                    .attr('stroke', function () { return checkTextAndRectBorderColor(da); })
+                    .attr("x1", function () { return LEFT_X + cStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                    .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                    .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                    .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                    .attr('stroke', function () { return getLineColor(cStageDatum); })
                     .attr('stroke-width', '2px')
-                    .attr("id", function () { return cueStageInfo.stage ? (cueStageInfo.stage + '_' + cueStage.stage) : (cueStageInfo.stage + '_line') })
-                    .attr('opacity', function () { return getLineOpacity(da, cueStageInfo) })
-
+                    .attr("id", function () {
+                      return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
+                      ) : ('line_' + cStageDatum.stage)
+                    })
+                    .attr('opacity', function () { return getLineOpacity(cStageDatum.state, cueStageDatum.state) })
                 });
               }
             });
@@ -261,10 +266,11 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
               .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
               .attr('width', RECT_WIDTH)
               .attr('height', RECT_HEIGHT)
-              .attr('fill', function (d) { return getRectFillColor(d); })
-              .attr('stroke', function (d) { return checkTextAndRectBorderColor(d) })
+              .attr('fill', function (d) { return getRectFillColor(d.state); })
+              .attr('stroke', function (d) { return getLineColor(d.state) })
               .attr('stroke-width', '2px')
-              .attr('opacity', function (d) { return getOpacity(d); })
+              .attr('opacity', function (d) { return getStageOpacity(d.state); })
+              .attr('id', function (d) { return 'rect_' + d.stage })
             canvas
               .selectAll('text')
               .data(data)
@@ -275,64 +281,116 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
               .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + 25 })
               .attr('text-anchor', 'middle')
               .attr('font-size', '20px')
-              .attr('fill', function (d) { return checkTextAndRectBorderColor(d) })
+              .attr('fill', function (d) { return getTextColor(d.state) })
               .attr('id', function (d) { return d.stage })
-              .attr('opacity', function (d) { return getOpacity(d); })
+              .attr('opacity', function (d) { return getStageOpacity(d.state); })
           }
-
-          // var test
-          // var defs = canvas.append('svg:defs');
-          // defs.selectAll('svg:marker')
-          //   .data(test)
-          //   .enter()
-          //   .append('svg:marker')
-          //   .attr('markerHeight', 5)
-          //   .attr('markerWidth', 5)
-          //   .attr('orient', 'auto')
-          //   .attr('refX', 0)
-          //   .attr('refY', 0)
-          //   .attr('viewBox', '0 -5 10 10')
-          //   .append("svg:path")
-          //   .attr("d", "M0,-5L10,0L0,5")
-          //   .attr('fill', 'red');
         });
       })
 
-      function getLineOpacity(activeS, cueS) {
-        if (activeS.state === 'rev_succ' && cueS.state === 'active') {
+
+      var INTERVAL = 1000;
+      function updateMapStage(stage, delay) {
+        var sname = stage.stage;
+        var state;
+        if (_.indexOf(sname) === 'path') {
+          state = 'path';  // speical 
+        } else {
+          state = stage.state;
+        }
+
+        console.log(sname);
+        d3Service.d3().then(function (d3) {
+          // update rect
+          d3.select('#rect_' + sname)
+            .transition()
+            .delay(delay * INTERVAL)
+            .duration(INTERVAL)
+            .attr('fill', function () { return getRectFillColor(state) })
+            .attr('stroke', function () { return getLineColor(state) })
+            .attr('opacity', function () { return getStageOpacity(state) })
+
+          // update text
+          d3.select('#' + sname)
+            .transition()
+            .delay(delay * INTERVAL)
+            .duration(INTERVAL)
+            .attr('fill', function () { return getTextColor(state) })
+            .attr('opacity', function () { return getStageOpacity(state) })
+        })
+      }
+
+      function updateMapLine(p, c) {
+        var pstage = p.stage;
+        var cstage = c.stage;
+        var ps = p.state;
+        var cs = c.state;
+
+        d3Service.d3().then(function (d3) {
+          if (ps !== 'summit') {
+            d3.select('#' + pstage + '_' + cstage)
+              .transition()
+              .delay(INTERVAL)
+              .duration(INTERVAL)
+              .attr('opacity', function () { return getLineOpacity(ps, cs) })
+              .attr('stroke', function () { return getLineColor(ps) })
+          } else {
+            d3.select('#line_' + ps)
+              .transition()
+              .delay(INTERVAL)
+              .duration(INTERVAL)
+              .attr('opacity', function () { return getLineOpacity(ps, cs) })
+              .attr('stroke', function () { return getLineColor(ps) })
+          }
+        })
+      }
+
+      function getLineOpacity(pstate, cstate) {
+        if ((pstate === 'rev_succ' && cstate === 'active') || (pstate === 'rev_fail' && cstate === 'active')) {
           return 1;
         } else {
           return 0; // should be 0
         }
       }
 
-      function getRectFillColor(d) { // check if its a path or a stage Î
-        if (_.includes(d.stage, 'path')) {
+      function getRectFillColor(state) { // check if its a path or a stage Î
+        if (state === 'path') {
           return '#C5C9FF';  // blue
-        } else if (d.state === 'active') {
+        } else if (state === 'active') {
           return 'black';
         } else {
           return 'white';
         }
       }
 
-      function checkTextAndRectBorderColor(d) {
-        if (d.state === 'rev_succ') {
+      function getTextColor(state) {
+        if (state === 'rev_succ') {
           return 'green';
-        } else if (d.state === 'rev_fail') {
+        } else if (state === 'rev_fail') {
           return 'red';
         }
-        else if (d.state === 'active') {
+        else if (state === 'active') {
           return 'white';
         } else {
           return 'black';
         }
       }
 
-      function getOpacity(d) {
-        if (d.state === 'missed') {
-          return 0.4;
-        } else if (d.state === 'hidden') {
+      function getLineColor(state) {
+        if (state === 'rev_succ') {
+          return 'green';
+        } else if (state === 'rev_fail') {
+          return 'red';
+        }
+        else {
+          return 'black';
+        }
+      }
+
+      function getStageOpacity(state) {
+        if (state === 'missed') {
+          return 0.2;
+        } else if (state === 'hidden') {
           return 0;
         } else {
           return 1;
