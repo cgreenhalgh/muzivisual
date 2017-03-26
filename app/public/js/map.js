@@ -63,7 +63,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', function ($scope, $http,
   //   })
 }])
 
-map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $http, $window) {
+map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d3Service, $http, $window, $timeout) {
   return {
     restrict: 'EA',
     scope: false,
@@ -100,10 +100,8 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
         });
 
         // DISPLAY SETTINGS
-        //var NUM_COLUMN = 3; // column of the map
-        //var NUM_ROW = 10; // row of the map
-        var RECT_WIDTH = 120;
-        var RECT_HEIGHT = 40;
+        var RECT_WIDTH = MAP_WIDTH / (NUM_COLUMN * 2);
+        var RECT_HEIGHT = MAP_HEIGHT / (NUM_ROW * 4);
 
         //scope.imgWidth = MAP_WIDTH;
         console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
@@ -120,6 +118,8 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
         d3Service.d3().then(function (d3) {
           d3.select('#visualImg').style('width', '100%')
             .style('max-height', MAP_HEIGHT + 'px')
+
+          scope.performing = 0;
 
           // .style('clip-path', 'inset(0px 0px 100px 0px)');
           var canvas = d3.select(element[0]).append('svg').attr('width', MAP_WIDTH).attr('height', MAP_HEIGHT).attr('id', 'map-container');
@@ -178,41 +178,41 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
           // cs - current stage, the triggered one
           // fs - future stage, the stages cued next
           var customPath = [];
+          var timer = 1;  // inital
 
-          scope.$watch('cstage', function () {
+          scope.$watch('cstage', function (ns, os) {
+            if (scope.performing) {
+              exitPerformMode(scope.pstage);
+              console.log('stage change: ' + os + '-> ' + ns);
+            }
+
             if (scope.cstage) {
-
               var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0;
+
+              // active new path
+              cs = _.find(data, { 'stage': scope.cstage });
+              cs.state = 'active';
+              updateMapStage(cs, timer + 1);
+
               // turn the previous active stage into past -  succ / fail
               if (scope.pstage) {
                 ps = _.find(data, { 'stage': scope.pstage })
                 ps.state = "rev_succ";
                 customPath.push(scope.pstage)
-                updateMapStage(ps, 0);
-              }
+                updateMapStage(ps, timer);
 
-              // active new path
-              cs = _.find(data, { 'stage': scope.cstage });
-              cs.state = 'active';
-              updateMapStage(cs, 1);
-              scope.visualImg = cs.img;
-              scope.performing = true;
-
-
-              if (scope.pstage) {
                 // ps cue stage
                 psCues = ps.cue.split('/');
                 psCuesWithoutCs = _.filter(psCues, function (s) { return s !== cs.stage });
+
+                // get missed stages
+                var revealeds = _.filter(data, { 'state': 'revealed' })
+                _.forEach(revealeds, function (rs) {
+                  if (_.isObject(rs))
+                    rs.state = 'missed';
+                  updateMapStage(rs, timer + 2);
+                });
               }
-
-              // get missed stages
-              var revealeds = _.filter(data, { 'state': 'revealed' })
-
-              _.forEach(revealeds, function (rs) {
-                if (_.isObject(rs))
-                  rs.state = 'missed';
-                updateMapStage(rs, 1);
-              });
 
               // reveal new stages
               fss = _.split(cs.cue, '/');
@@ -221,13 +221,77 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
                 fs = _.find(data, { 'stage': c })
                 fs.state = 'revealed';
                 flist.push(fs);
-                updateMapStage(fs, 2);
+                updateMapStage(fs, timer + 4);
               });
 
-              updateMapLine(ps, cs, flist, psCuesWithoutCs, 1);
+              updateMapLine(ps, cs, flist, psCuesWithoutCs, timer + 1);
+              startPerformMode(cs);
+              // }
+              // else {
+              //   startPerformMode(cs);
+              // }
+            }
+
+            function exitPerformMode(stageDatum) {
+              d3Service.d3().then(function (d3) {
+                console.log('fade out animation')
+                $timeout(function () { scope.performing = false; console.log('performMode on') }, INTERVAL);
+                d3.select('#visualImg')
+                  .style('opacity', 1)
+                  .transition()
+                  .duration(1000)
+                  .style('opacity', 0)
+              });
+            }
+
+            function startPerformMode(stageDatum) {
+              var sname = stageDatum.stage;
+              $timeout(function () { scope.performing = true; console.log('performMode on') }, INTERVAL * (timer + 7.5));
+
+              $timeout(function () {
+                d3Service.d3().then(function (d3) {
+                  d3.select('#' + sname)
+                    .transition()
+                    .duration(200)
+                    .attr('fill', 'black')
+                    .transition()
+                    .duration(200)
+                    .attr('fill', 'white')
+                    .transition()
+                    .duration(200)
+                    .attr('fill', 'black')
+                    .transition()
+                    .duration(200)
+                    .attr('fill', 'white')
+
+                  d3.select('#rect_' + sname)
+                    .transition()
+                    .duration(200)
+                    .attr('fill', 'white')
+                    .transition()
+                    .duration(200)
+                    .attr('fill', 'black')
+                    .transition()
+                    .duration(200)
+                    .attr('fill', 'white')
+                    .transition()
+                    .duration(200)
+                    .attr('fill', 'black')
+
+
+                  d3.select('#visualImg')
+                    .attr('src', cs.img)
+                    .style('opacity', 0)
+                    .transition()
+                    .delay(INTERVAL * (timer+1))
+                    .duration(2000)
+                    .style('opacity', 1)
+                });
+              }, INTERVAL * (timer + 6))
             }
           });
         });
+
 
         function revealBaseCamp() {
           scope.cstage = 'basecamp';
@@ -258,15 +322,27 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
             }
           });
 
+          var center;
+          var minWidth = RECT_HEIGHT * 3;
           canvas
             .selectAll('rect')
             .data(data)
             .enter()
             .append('rect')
-            .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET })
+            .attr('x', function (d) { // make sure the rect always big enough to wrap the stage names
+              if (RECT_WIDTH >= minWidth)
+                return LEFT_X + d.x * X_OFFSET
+              else {
+                center = LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2;
+                return (center - minWidth / 2); // new LEFT
+              }
+            })
             .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
-            .attr('width', RECT_WIDTH)
+            .style('width', function () {
+              return RECT_WIDTH < minWidth ? minWidth : RECT_WIDTH
+            })
             .attr('height', RECT_HEIGHT)
+            .style('min-width', RECT_HEIGHT * 5)
             .attr('id', function (d) { return 'rect_' + d.stage })
             .attr('fill', 'white')
             .attr('stroke-width', '2px')
@@ -279,14 +355,13 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
             .append('text')
             .text('')
             .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2 })
-            .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + 25 })
+            .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + RECT_HEIGHT / 1.5 })
             .attr('id', function (d) { return d.stage })
             .attr('text-anchor', 'middle')
-            .attr('font-size', '20px')
+            .attr('font-size', function () { return RECT_HEIGHT / 2 })
             .attr('opacity', 0)
         }
       })
-
 
       function updateMapStage(stage, delay) {
         var sname = stage.stage;
@@ -346,7 +421,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
               // update lines linking cstage and fstage -> black dotted-line
               d3.select('#' + cstage + '_' + fstage)
                 .transition()
-                .delay(INTERVAL * (delay + 1))  // depends on to show in what order
+                .delay(INTERVAL * (delay + 2))  // depends on to show in what order
                 .duration(INTERVAL)
                 .style("stroke-dasharray", ("6, 6"))
                 .attr('opacity', function () { return getLineOpacity(cs, fs) })
@@ -363,13 +438,13 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
           }
 
 
-          // past cues stage 
+          // past cues stage links
           if (pcstages) {
             _.forEach(pcstages, function (pcstage) {
               // the line linking pstage and missed stage -> disappear
               d3.select('#' + pstage + '_' + pcstage)
                 .transition()
-                .delay(INTERVAL * 1)
+                .delay(INTERVAL * (delay + 1))
                 .duration(INTERVAL)
                 .attr('opacity', function () { return getLineOpacity(ps, pcstage) })
             })
