@@ -1,9 +1,9 @@
 <div>
-  {{pstage}} {{cstage}} {{fstage}}
   <div ng-show="!performing">
     <d3-map></d3-map>
   </div>
   <div ng-show="performing">
-    <img ng-src="{{visual_img}}" alt="visual img">
+    <img id="visualImg" ng-src="{{visualImg}}" alt="visual image" >
   </div>
 </div>
+ <!--{{pstage}} {{cstage}} {{fstage}}-->

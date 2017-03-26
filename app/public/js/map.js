@@ -4,6 +4,7 @@
 var map = angular.module('myApp.map', ['ngRoute']);
 // used as unit for time delay
 var INTERVAL = 1000
+var MAP_WIDTH, MAP_HEIGHT;
 
 map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
   $routeProvider.when('/', {
@@ -67,7 +68,8 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
     restrict: 'EA',
     scope: false,
     link: function (scope, element, attrs) {
-
+      MAP_WIDTH = $window.innerWidth;
+      MAP_HEIGHT = $window.innerHeight;
       $http.get('/maps/').success(function (data) {
         var iniData = data;
         console.log("GOT MAP: " + JSON.stringify(iniData));
@@ -103,8 +105,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
         var RECT_WIDTH = 120;
         var RECT_HEIGHT = 40;
 
-        var MAP_WIDTH = $window.innerWidth;
-        var MAP_HEIGHT = $window.innerHeight;
+        //scope.imgWidth = MAP_WIDTH;
         console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
 
         var INI_X, RECT_X, INI_Y, RECT_Y, TEXT_X, TEXT_Y, X_OFFSET, Y_OFFSET, LEFT_X;
@@ -116,8 +117,11 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
 
         LEFT_X = MAP_WIDTH / (NUM_COLUMN * 2) - RECT_WIDTH / 2;
 
-
         d3Service.d3().then(function (d3) {
+          d3.select('#visualImg').style('width', '100%')
+            .style('max-height', MAP_HEIGHT + 'px')
+
+          // .style('clip-path', 'inset(0px 0px 100px 0px)');
           var canvas = d3.select(element[0]).append('svg').attr('width', MAP_WIDTH).attr('height', MAP_HEIGHT).attr('id', 'map-container');
 
           var data = []; // data contains data with x, y and are ordered
@@ -130,7 +134,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
           // data are processed seperately: summit + normal stages + basecamp
           var summitData = _.find(iniData, { 'stage': 'summit' });
           // if the summit exists, draw summit
-          if (summitData.visual) {
+          if (summitData.img) {
             summitData.x = (NUM_COLUMN - 1) / 2;
             summitData.y = 0;
             summitData = _.castArray(summitData);
@@ -177,6 +181,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
 
           scope.$watch('cstage', function () {
             if (scope.cstage) {
+
               var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0;
               // turn the previous active stage into past -  succ / fail
               if (scope.pstage) {
@@ -190,6 +195,9 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
               cs = _.find(data, { 'stage': scope.cstage });
               cs.state = 'active';
               updateMapStage(cs, 1);
+              scope.visualImg = cs.img;
+              scope.performing = true;
+
 
               if (scope.pstage) {
                 // ps cue stage
@@ -221,7 +229,6 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
           });
         });
 
-
         function revealBaseCamp() {
           scope.cstage = 'basecamp';
         }
@@ -245,7 +252,6 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
                     return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
                     ) : ('line_' + cStageDatum.stage)
                   })
-                  .attr('stroke', 'white')
                   .attr('opacity', 0)
                   .attr('stroke-width', '2px')
               });

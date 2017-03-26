@@ -37,3 +37,10 @@ table {
    border-collapse: collapse;
    margin:10px;
 }
+
+#visualImg{
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+    /*width: 100%;*/
+}

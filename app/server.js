@@ -70,7 +70,7 @@ function processData(data, res) {
     var stageData = {
       "stage": stageRow[0],
       "cue": stageRow[1],
-      "visual": stageRow[2],
+      "img": stageRow[2],
       "state": "hidden"
     }
     resp.push(stageData);
