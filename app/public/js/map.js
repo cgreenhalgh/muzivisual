@@ -70,6 +70,8 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
     link: function (scope, element, attrs) {
       MAP_WIDTH = $window.innerWidth;
       MAP_HEIGHT = $window.innerHeight;
+      $window.setInterval(function () { console.log("tick") }, 1000);
+
       $http.get('/maps/').success(function (data) {
         var iniData = data;
         console.log("GOT MAP: " + JSON.stringify(iniData));
@@ -178,7 +180,8 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
           // cs - current stage, the triggered one
           // fs - future stage, the stages cued next
           var customPath = [];
-          var timer = 1;  // inital
+          var timer = 1;  // inital - control delay
+          var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
 
           scope.$watch('cstage', function (ns, os) {
             if (scope.performing) {
@@ -187,7 +190,6 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
             }
 
             if (scope.cstage) {
-              var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0;
 
               // active new path
               cs = _.find(data, { 'stage': scope.cstage });
@@ -206,7 +208,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
                 psCuesWithoutCs = _.filter(psCues, function (s) { return s !== cs.stage });
 
                 // get missed stages
-                var revealeds = _.filter(data, { 'state': 'revealed' })
+                revealeds = _.filter(data, { 'state': 'revealed' })
                 _.forEach(revealeds, function (rs) {
                   if (_.isObject(rs))
                     rs.state = 'missed';
@@ -216,7 +218,6 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
 
               // reveal new stages
               fss = _.split(cs.cue, '/');
-              var flist = [];
               _.forEach(fss, function (c) {
                 fs = _.find(data, { 'stage': c })
                 fs.state = 'revealed';
@@ -226,20 +227,19 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
 
               updateMapLine(ps, cs, flist, psCuesWithoutCs, timer + 1);
               startPerformMode(cs);
-              // }
-              // else {
-              //   startPerformMode(cs);
-              // }
             }
 
             function exitPerformMode(stageDatum) {
+              if (timer === 1) {
+                timer = 4;
+              }
               d3Service.d3().then(function (d3) {
                 console.log('fade out animation')
-                $timeout(function () { scope.performing = false; console.log('performMode on') }, INTERVAL);
+                $timeout(function () { scope.performing = false; console.log('performMode end') }, INTERVAL * 1.5);  // should be the same with following duration
                 d3.select('#visualImg')
                   .style('opacity', 1)
                   .transition()
-                  .duration(1000)
+                  .duration(1500)
                   .style('opacity', 0)
               });
             }
@@ -278,13 +278,12 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
                     .duration(200)
                     .attr('fill', 'black')
 
-
                   d3.select('#visualImg')
                     .attr('src', cs.img)
                     .style('opacity', 0)
                     .transition()
-                    .delay(INTERVAL * (timer+1))
-                    .duration(2000)
+                    .delay(INTERVAL)
+                    .duration(2500)
                     .style('opacity', 1)
                 });
               }, INTERVAL * (timer + 6))
@@ -320,6 +319,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
                   .attr('stroke-width', '2px')
               });
             }
+            console.log('map initialized')
           });
 
           var center;
@@ -422,7 +422,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
               d3.select('#' + cstage + '_' + fstage)
                 .transition()
                 .delay(INTERVAL * (delay + 2))  // depends on to show in what order
-                .duration(INTERVAL)
+                .duration(INTERVAL - 200)
                 .style("stroke-dasharray", ("6, 6"))
                 .attr('opacity', function () { return getLineOpacity(cs, fs) })
                 .attr('stroke', function () { return getLineColor(cs) })
