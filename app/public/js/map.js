@@ -115,15 +115,14 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
         var MAP_HEIGHT = $window.innerHeight;
         console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
 
-        var INI_X, RECT_X, INI_Y, RECT_Y, TEXT_X, TEXT_Y, X_OFFSET, Y_OFFSET;
-        // x and y of rectangulars
-        INI_X = RECT_X = (MAP_WIDTH - RECT_WIDTH) / 2;
-        INI_Y = RECT_Y = 50;
+        var INI_X, RECT_X, INI_Y, RECT_Y, TEXT_X, TEXT_Y, X_OFFSET, Y_OFFSET, LEFT_X;
 
-        X_OFFSET = MAP_WIDTH / (NUM_COLUMN * 2) + RECT_WIDTH / 2;
-        Y_OFFSET = (MAP_HEIGHT - 50) / (NUM_ROW * 2) + RECT_HEIGHT / 2;
+        INI_Y = RECT_Y = MAP_HEIGHT * 0.1;
 
-        var LEFT_X = MAP_WIDTH / (NUM_COLUMN * 2) - RECT_WIDTH / 2 ;
+        X_OFFSET = MAP_WIDTH / NUM_COLUMN;
+        Y_OFFSET = MAP_HEIGHT * 0.8 / NUM_ROW;
+
+        LEFT_X = MAP_WIDTH / (NUM_COLUMN * 2) - RECT_WIDTH / 2;
 
         // DRAW
         d3Service.d3().then(function (d3) {
@@ -194,7 +193,14 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
               var cs = _.find(data, { 'stage': scope.cstage });
               console.log(cs);
               cs.state = 'active';
-              updateMapStage(cs, 2);
+              updateMapStage(cs, 1);
+
+              // ps cue stage
+              var psCues = ps.cue.split('/');
+              console.log(psCues);
+              console.log(cs.stage);
+              var psCuesWithoutCs = _.filter(psCues, function (s) { return s !== cs.stage });
+              console.log(psCuesWithoutCs);
 
               // get missed stages
               var revealeds = _.filter(data, { 'state': 'revealed' })
@@ -203,19 +209,21 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
                 console.log(rs);
                 if (_.isObject(rs))
                   rs.state = 'missed';
-                updateMapStage(rs, 3);
+                updateMapStage(rs, 1);
               });
 
               // reveal new stages
               var fss = _.split(cs.cue, '/');
+              var flist = []
               console.log(fss);
               _.forEach(fss, function (c) {
                 var fs = _.find(data, { 'stage': c })
                 fs.state = 'revealed';
-                updateMapStage(fs, 3);
+                flist.push(fs);
+                updateMapStage(fs, 2);
               });
 
-              updateMapLine(ps, cs);
+              updateMapLine(ps, cs, flist, psCuesWithoutCs);
 
               // CALL IMAGE DISPLAY / CONTENT / WHATSOEVER
               // END DATA PROCESS
@@ -243,6 +251,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
                     .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
                     .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
                     .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                    .style("stroke-dasharray", ("6, 6"))
                     .attr('stroke', function () { return getLineColor(cStageDatum); })
                     .attr('stroke-width', '2px')
                     .attr("id", function () {
@@ -320,21 +329,38 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
         })
       }
 
-      function updateMapLine(p, c) {
+      function updateMapLine(p, c, fss, pcstages) {
         var pstage = p.stage;
         var cstage = c.stage;
         var ps = p.state;
         var cs = c.state;
+        var fs, fstage;
 
         d3Service.d3().then(function (d3) {
-          if (ps !== 'summit') {
-            d3.select('#' + pstage + '_' + cstage)
-              .transition()
-              .delay(INTERVAL)
-              .duration(INTERVAL)
-              .attr('opacity', function () { return getLineOpacity(ps, cs) })
-              .attr('stroke', function () { return getLineColor(ps) })
-          } else {
+          if (fss) {
+            _.forEach(fss, function (f) {
+              fstage = f.stage;
+              fs = f.state;
+
+              // the line linking pstage and cstage -> turn solid and change color
+              d3.select('#' + pstage + '_' + cstage)
+                .transition()
+                .delay(INTERVAL)
+                .duration(INTERVAL)
+                .style("stroke-dasharray", ("0, 0"))
+                .attr('opacity', function () { return getLineOpacity(ps, cs) })
+                .attr('stroke', function () { return getLineColor(ps) })
+              // the line linking cstage and fstage -> black dotted-line
+              d3.select('#' + cstage + '_' + fstage)
+                .transition()
+                .delay(INTERVAL * 2)
+                .duration(INTERVAL)
+                .style("stroke-dasharray", ("6, 6"))
+                .attr('opacity', function () { return getLineOpacity(cs, fs) })
+                .attr('stroke', function () { return getLineColor(cs) })
+            })
+          }
+          else {
             d3.select('#line_' + ps)
               .transition()
               .delay(INTERVAL)
@@ -342,11 +368,25 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
               .attr('opacity', function () { return getLineOpacity(ps, cs) })
               .attr('stroke', function () { return getLineColor(ps) })
           }
-        })
+
+          console.log(pcstages)
+          // past cues stage 
+          _.forEach(pcstages, function (pcstage) {
+            // the line linking pstage and missed stage -> disappear
+            d3.select('#' + pstage + '_' + pcstage)
+              .transition()
+              .delay(INTERVAL * 1)
+              .duration(INTERVAL)
+              .attr('opacity', function () { return getLineOpacity(ps, pcstage) })
+          })
+
+
+
+        });
       }
 
       function getLineOpacity(pstate, cstate) {
-        if ((pstate === 'rev_succ' && cstate === 'active') || (pstate === 'rev_fail' && cstate === 'active')) {
+        if ((pstate === 'rev_succ' && cstate === 'active') || (pstate === 'rev_fail' && cstate === 'active') || (pstate === 'active' && cstate === 'revealed')) {
           return 1;
         } else {
           return 0; // should be 0
