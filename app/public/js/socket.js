@@ -2,7 +2,6 @@
 
 var socket = angular.module('myApp.socket', []);
 socket.factory('socket', ['$rootScope', '$location', function ($rootScope, $location) {
-    console.log("shahfasf");
     console.log($location.absUrl());
     var socket = io.connect();  // connect to visual channel 
     return {

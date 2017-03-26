@@ -2,6 +2,8 @@
 'use strict'
 
 var map = angular.module('myApp.map', ['ngRoute']);
+// used as unit for time delay
+var INTERVAL = 1000
 
 map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
   $routeProvider.when('/', {
@@ -114,7 +116,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
 
         LEFT_X = MAP_WIDTH / (NUM_COLUMN * 2) - RECT_WIDTH / 2;
 
-        // DRAW
+
         d3Service.d3().then(function (d3) {
           var canvas = d3.select(element[0]).append('svg').attr('width', MAP_WIDTH).attr('height', MAP_HEIGHT).attr('id', 'map-container');
 
@@ -149,44 +151,51 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
           });
 
           var bcData = _.find(iniData, { 'stage': 'basecamp' });
-          if (bcData.visual) {
-            // change state for the basecamp and its subsequent stage
-            bcData.state = "active";
-            var cueList = _.split(bcData.cue, '/');
-            _.forEach(cueList, function (cue) {
-              var stage = _.find(data, { stage: cue });
-              stage.state = "revealed";
-            });
+          // change state for the basecamp and its subsequent stage
+          bcData.state = "active";
+          var cueList = _.split(bcData.cue, '/');
+          _.forEach(cueList, function (cue) {
+            var stage = _.find(data, { stage: cue });
+            stage.state = "revealed";
+          });
 
-            bcData.x = (NUM_COLUMN - 1) / 2;
-            bcData.y = NUM_ROW - 1;
-            bcData = _.castArray(bcData);
-            data = _.concat(data, bcData);
+          bcData.x = (NUM_COLUMN - 1) / 2;
+          bcData.y = NUM_ROW - 1;
+          bcData = _.castArray(bcData);
+          data = _.concat(data, bcData);
+
+          if (!scope.pstage) {
+            initializeMap(canvas, data);
+            revealBaseCamp();
           }
-
 
           // Data updated
           // ps - previous stage, the passed one
           // cs - current stage, the triggered one
           // fs - future stage, the stages cued next
           var customPath = [];
+
           scope.$watch('cstage', function () {
             if (scope.cstage) {
-
+              var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0;
               // turn the previous active stage into past -  succ / fail
-              var ps = _.find(data, { 'stage': scope.pstage })
-              ps.state = "rev_succ";
-              customPath.push(scope.pstage)
-              updateMapStage(ps, 0);
+              if (scope.pstage) {
+                ps = _.find(data, { 'stage': scope.pstage })
+                ps.state = "rev_succ";
+                customPath.push(scope.pstage)
+                updateMapStage(ps, 0);
+              }
 
               // active new path
-              var cs = _.find(data, { 'stage': scope.cstage });
+              cs = _.find(data, { 'stage': scope.cstage });
               cs.state = 'active';
               updateMapStage(cs, 1);
 
-              // ps cue stage
-              var psCues = ps.cue.split('/');
-              var psCuesWithoutCs = _.filter(psCues, function (s) { return s !== cs.stage });
+              if (scope.pstage) {
+                // ps cue stage
+                psCues = ps.cue.split('/');
+                psCuesWithoutCs = _.filter(psCues, function (s) { return s !== cs.stage });
+              }
 
               // get missed stages
               var revealeds = _.filter(data, { 'state': 'revealed' })
@@ -198,92 +207,81 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
               });
 
               // reveal new stages
-              var fss = _.split(cs.cue, '/');
+              fss = _.split(cs.cue, '/');
               var flist = [];
               _.forEach(fss, function (c) {
-                var fs = _.find(data, { 'stage': c })
+                fs = _.find(data, { 'stage': c })
                 fs.state = 'revealed';
                 flist.push(fs);
                 updateMapStage(fs, 2);
               });
 
-              updateMapLine(ps, cs, flist, psCuesWithoutCs);
+              updateMapLine(ps, cs, flist, psCuesWithoutCs, 1);
+            }
+          });
+        });
 
-              // CALL IMAGE DISPLAY / CONTENT / WHATSOEVER
-              // END DATA PROCESS
+
+        function revealBaseCamp() {
+          scope.cstage = 'basecamp';
+        }
+
+        function initializeMap(canvas, data) {
+          _.forEach(data, function (cStageDatum) {
+            if (cStageDatum && cStageDatum.cue) {
+              // get all the cues of this stage
+              var cueList = _.split(cStageDatum.cue, '/');
+
+              var cueStageDatum;
+              _.forEach(cueList, function (cueStage) {
+                cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
+                canvas
+                  .append('line')
+                  .attr("x1", function () { return LEFT_X + cStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                  .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                  .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                  .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                  .attr("id", function () {
+                    return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
+                    ) : ('line_' + cStageDatum.stage)
+                  })
+                  .attr('stroke', 'white')
+                  .attr('opacity', 0)
+                  .attr('stroke-width', '2px')
+              });
             }
           });
 
+          canvas
+            .selectAll('rect')
+            .data(data)
+            .enter()
+            .append('rect')
+            .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET })
+            .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
+            .attr('width', RECT_WIDTH)
+            .attr('height', RECT_HEIGHT)
+            .attr('id', function (d) { return 'rect_' + d.stage })
+            .attr('fill', 'white')
+            .attr('stroke-width', '2px')
+            .attr('opacity', 0)
 
-          // COLLECT CUSTOM PATH
-          // DRAW 
-          drawArrow(canvas, data);
-          drawStage(canvas, data);
-
-          function drawArrow(canvas, data) {
-            _.forEach(data, function (cStageDatum) {
-              if (cStageDatum && cStageDatum.cue) {
-                // get all the cues of this stage
-                var cueList = _.split(cStageDatum.cue, '/');
-
-                var cueStageDatum;
-                _.forEach(cueList, function (cueStage) {
-                  cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
-                  canvas
-                    .append('line')
-                    .attr("x1", function () { return LEFT_X + cStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
-                    .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
-                    .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
-                    .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
-                    .style("stroke-dasharray", ("6, 6"))
-                    .attr('stroke', function () { return getLineColor(cStageDatum); })
-                    .attr('stroke-width', '2px')
-                    .attr("id", function () {
-                      return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
-                      ) : ('line_' + cStageDatum.stage)
-                    })
-                    .attr('opacity', function () { return getLineOpacity(cStageDatum.state, cueStageDatum.state) })
-                });
-              }
-            });
-          }
-
-          function drawStage(canvas, data) {
-            canvas
-              .selectAll('rect')
-              .data(data)
-              .enter()
-              .append('rect')
-              .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET })
-              .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
-              .attr('width', RECT_WIDTH)
-              .attr('height', RECT_HEIGHT)
-              .attr('fill', function (d) { return getRectFillColor(d.state); })
-              .attr('stroke', function (d) { return getLineColor(d.state) })
-              .attr('stroke-width', '2px')
-              .attr('opacity', function (d) { return getStageOpacity(d.state); })
-              .attr('id', function (d) { return 'rect_' + d.stage })
-            canvas
-              .selectAll('text')
-              .data(data)
-              .enter()
-              .append('text')
-              .text(function (d) { return d.stage; })
-              .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2 })
-              .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + 25 })
-              .attr('text-anchor', 'middle')
-              .attr('font-size', '20px')
-              .attr('fill', function (d) { return getTextColor(d.state) })
-              .attr('id', function (d) { return d.stage })
-              .attr('opacity', function (d) { return getStageOpacity(d.state); })
-          }
-
-
-        });
+          canvas
+            .selectAll('text')
+            .data(data)
+            .enter()
+            .append('text')
+            .text('')
+            .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2 })
+            .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + 25 })
+            .attr('id', function (d) { return d.stage })
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '20px')
+            .attr('opacity', 0)
+        }
       })
 
-      // used as unit for time delay
-      var INTERVAL = 1000;
+
       function updateMapStage(stage, delay) {
         var sname = stage.stage;
         var state;
@@ -308,6 +306,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
             .transition()
             .delay(delay * INTERVAL)
             .duration(INTERVAL)
+            .text(function () { return sname })
             .attr('fill', function () { return getTextColor(state) })
             .attr('opacity', function () { return getStageOpacity(state) })
         })
@@ -315,32 +314,33 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
 
 
       // Update lines
-      function updateMapLine(p, c, fss, pcstages) {
-        var pstage = p.stage;
+      function updateMapLine(p, c, fss, pcstages, delay) {
         var cstage = c.stage;
-        var ps = p.state;
         var cs = c.state;
-        var fs, fstage;
+        var ps, pstage, fs, fstage;
 
         d3Service.d3().then(function (d3) {
-          if (fss) {
+          if (fss.length > 0) {
             _.forEach(fss, function (f) {
               fstage = f.stage;
               fs = f.state;
 
               // update lines linking pstage and cstage -> turn solid and change color
-              d3.select('#' + pstage + '_' + cstage)
-                .transition()
-                .delay(INTERVAL)
-                .duration(INTERVAL)
-                .style("stroke-dasharray", ("0, 0"))
-                .attr('opacity', function () { return getLineOpacity(ps, cs) })
-                .attr('stroke', function () { return getLineColor(ps) })
-
+              if (p) {
+                pstage = p.stage;
+                ps = p.state;
+                d3.select('#' + pstage + '_' + cstage)
+                  .transition()
+                  .delay(INTERVAL * delay)
+                  .duration(INTERVAL)
+                  .style("stroke-dasharray", ("0, 0"))
+                  .attr('opacity', function () { return getLineOpacity(ps, cs) })
+                  .attr('stroke', function () { return getLineColor(ps) })
+              }
               // update lines linking cstage and fstage -> black dotted-line
               d3.select('#' + cstage + '_' + fstage)
                 .transition()
-                .delay(INTERVAL * 2)
+                .delay(INTERVAL * (delay + 1))  // depends on to show in what order
                 .duration(INTERVAL)
                 .style("stroke-dasharray", ("6, 6"))
                 .attr('opacity', function () { return getLineOpacity(cs, fs) })
@@ -350,21 +350,24 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
           else {  // if there is no fs i.e. reach the summit - need test? 
             d3.select('#line_' + ps)
               .transition()
-              .delay(INTERVAL)
+              .delay(INTERVAL * delay)
               .duration(INTERVAL)
               .attr('opacity', function () { return getLineOpacity(ps, cs) })
               .attr('stroke', function () { return getLineColor(ps) })
           }
 
+
           // past cues stage 
-          _.forEach(pcstages, function (pcstage) {
-            // the line linking pstage and missed stage -> disappear
-            d3.select('#' + pstage + '_' + pcstage)
-              .transition()
-              .delay(INTERVAL * 1)
-              .duration(INTERVAL)
-              .attr('opacity', function () { return getLineOpacity(ps, pcstage) })
-          })
+          if (pcstages) {
+            _.forEach(pcstages, function (pcstage) {
+              // the line linking pstage and missed stage -> disappear
+              d3.select('#' + pstage + '_' + pcstage)
+                .transition()
+                .delay(INTERVAL * 1)
+                .duration(INTERVAL)
+                .attr('opacity', function () { return getLineOpacity(ps, pcstage) })
+            })
+          }
         });
       }
 
@@ -392,10 +395,10 @@ map.directive('d3Map', ['d3Service', '$http', '$window', function (d3Service, $h
         } else if (state === 'rev_fail') {
           return 'red';
         }
-        else if (state === 'active') {
-          return 'white';
-        } else {
+        else if (state === 'revealed' || state === 'missed') {
           return 'black';
+        } else {
+          return 'white';
         }
       }
 

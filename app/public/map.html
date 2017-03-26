@@ -1,5 +1,9 @@
 <div>
-  <h1>You entered {{message}}</h1>
-    {{pstage}} {{cstage}} {{fstage}}
+  {{pstage}} {{cstage}} {{fstage}}
+  <div ng-show="!performing">
     <d3-map></d3-map>
+  </div>
+  <div ng-show="performing">
+    <img ng-src="{{visual_img}}" alt="visual img">
+  </div>
 </div>
