@@ -5,6 +5,7 @@ var map = angular.module('myApp.map', ['ngRoute']);
 // used as unit for time delay
 var INTERVAL = 1000
 var MAP_WIDTH, MAP_HEIGHT;
+var timeunit = 1;
 
 map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
   $routeProvider.when('/', {
@@ -72,6 +73,8 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
       MAP_HEIGHT = $window.innerHeight;
       $window.setInterval(function () { console.log("tick") }, 1000);
 
+      //scope.showMap = showMap;
+
       $http.get('/maps/').success(function (data) {
         var iniData = data;
         console.log("GOT MAP: " + JSON.stringify(iniData));
@@ -101,20 +104,17 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
           pathStageContainer.push(orderedSpePath);
         });
 
-        // DISPLAY SETTINGS
-        var RECT_WIDTH = MAP_WIDTH / (NUM_COLUMN * 2);
-        var RECT_HEIGHT = MAP_HEIGHT / (NUM_ROW * 4);
-
         //scope.imgWidth = MAP_WIDTH;
         console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
 
+        // DISPLAY SETTINGS
+        var RECT_WIDTH = MAP_WIDTH / (NUM_COLUMN * 2);
+        var RECT_HEIGHT = MAP_HEIGHT / (NUM_ROW * 2);
+
         var INI_X, RECT_X, INI_Y, RECT_Y, TEXT_X, TEXT_Y, X_OFFSET, Y_OFFSET, LEFT_X;
-
         INI_Y = RECT_Y = MAP_HEIGHT * 0.1;
-
         X_OFFSET = MAP_WIDTH / NUM_COLUMN;
         Y_OFFSET = MAP_HEIGHT * 0.8 / NUM_ROW;
-
         LEFT_X = MAP_WIDTH / (NUM_COLUMN * 2) - RECT_WIDTH / 2;
 
         d3Service.d3().then(function (d3) {
@@ -180,7 +180,6 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
           // cs - current stage, the triggered one
           // fs - future stage, the stages cued next
           var customPath = [];
-          var timer = 1;  // inital - control delay
           var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
 
           scope.$watch('cstage', function (ns, os) {
@@ -194,14 +193,14 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
               // active new path
               cs = _.find(data, { 'stage': scope.cstage });
               cs.state = 'active';
-              updateMapStage(cs, timer + 1);
+              updateMapStage(cs, timeunit + 1);
 
               // turn the previous active stage into past -  succ / fail
               if (scope.pstage) {
                 ps = _.find(data, { 'stage': scope.pstage })
                 ps.state = "rev_succ";
                 customPath.push(scope.pstage)
-                updateMapStage(ps, timer);
+                updateMapStage(ps, timeunit);
 
                 // ps cue stage
                 psCues = ps.cue.split('/');
@@ -212,7 +211,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
                 _.forEach(revealeds, function (rs) {
                   if (_.isObject(rs))
                     rs.state = 'missed';
-                  updateMapStage(rs, timer + 2);
+                  updateMapStage(rs, timeunit + 2);
                 });
               }
 
@@ -222,16 +221,16 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
                 fs = _.find(data, { 'stage': c })
                 fs.state = 'revealed';
                 flist.push(fs);
-                updateMapStage(fs, timer + 4);
+                updateMapStage(fs, timeunit + 4);
               });
 
-              updateMapLine(ps, cs, flist, psCuesWithoutCs, timer + 1);
+              updateMapLine(ps, cs, flist, psCuesWithoutCs, timeunit + 1);
               startPerformMode(cs);
             }
 
             function exitPerformMode(stageDatum) {
-              if (timer === 1) {
-                timer = 4;
+              if (timeunit === 1) {
+                timeunit = 4;
               }
               d3Service.d3().then(function (d3) {
                 console.log('fade out animation')
@@ -246,7 +245,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
 
             function startPerformMode(stageDatum) {
               var sname = stageDatum.stage;
-              $timeout(function () { scope.performing = true; console.log('performMode on') }, INTERVAL * (timer + 7.5));
+              $timeout(function () { scope.performing = true; console.log('performMode on') }, INTERVAL * (timeunit + 7.5));
 
               $timeout(function () {
                 d3Service.d3().then(function (d3) {
@@ -286,7 +285,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
                     .duration(2500)
                     .style('opacity', 1)
                 });
-              }, INTERVAL * (timer + 6))
+              }, INTERVAL * (timeunit + 6))
             }
           });
         });
@@ -341,6 +340,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
             .style('width', function () {
               return RECT_WIDTH < minWidth ? minWidth : RECT_WIDTH
             })
+          //  .style('class', 'rect')
             .attr('height', RECT_HEIGHT)
             .style('min-width', RECT_HEIGHT * 5)
             .attr('id', function (d) { return 'rect_' + d.stage })
@@ -360,8 +360,34 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
             .attr('text-anchor', 'middle')
             .attr('font-size', function () { return RECT_HEIGHT / 2 })
             .attr('opacity', 0)
+
+
+          // console.log(d3.select('rect'))
+          // d3.select('.rect')
+          //   .style('fill', 'black')
+
         }
+
+
       })
+
+
+
+      // function showMap() {
+      //   console.log('show map');
+
+      //   scope.performing = false;
+      //   d3Service.d3().then(function (d3) {
+      //     // console.log(d3.selectAll('rect'))
+      //     console.log(d3.select('rect'))
+      //     d3.selectAll('rect')
+      //       .style('fill', 'black')
+      //     // .each(function (d) { 
+      //     //   console.log(d3.select(this).attr('fill','black'));
+      //     //   })
+
+      //   });
+      // }
 
       function updateMapStage(stage, delay) {
         var sname = stage.stage;

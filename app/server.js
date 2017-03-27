@@ -51,7 +51,7 @@ app.get('/maps/', function (req, res) {
     }
   });
 
-  fs.readFile(DATA_DIR + '/test.csv', function (err, data) {
+  fs.readFile(DATA_DIR + '/climb.csv', function (err, data) {
     if (err) throw err;
     processData(data, res);
   });
