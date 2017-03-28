@@ -312,9 +312,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', fun
             d3.select('#begin').attr('opacity', 1).attr('fill', 'black')
         },
         startPerformMode: function (stageDatum) {  // cs
-            console.log(secbase);
+            console.log(delaybase);
             var sname = stageDatum.stage;
-            var delay = INTERVAL * (secbase + 6);
+            var delay = INTERVAL * (delaybase + 6);
 
             $timeout(function () {
                 d3Service.d3().then(function (d3) {

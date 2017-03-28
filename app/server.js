@@ -24,10 +24,15 @@ io.on('connection', function (socket) {
     io.to('visualRoom').emit('vTimer', data);
   })
 
+  socket.on('disconnect', function () {
+    socket.disconnect();
+  })
   // socket.on('vStart', function () {
   //   io.to('visualRoom').emit('vStart', data);
   // })
 });
+
+
 
 app.get('/', function (req, res) {
   console.log('get /');

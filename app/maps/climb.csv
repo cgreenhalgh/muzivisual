@@ -14,14 +14,14 @@ path,b3path,b4,https://i.imgsafe.org/7bc8b7c700.jpg
 path,b2path,b3,https://i.imgsafe.org/7bc8b7c700.jpg
 2b,b2,b2path/c1,1
 path,b1path,b2/c1,https://i.imgsafe.org/7bc8b7c700.jpg
-Stones,b1,b1path/c1,https://i.imgsafe.org/7bc878a818.jpg
+The Stones,b1,b1path/c1,https://i.imgsafe.org/7bc878a818.jpg
 5c,c5,end/b5,1
 4c,c4,c5,1
 path,c3path,c4,https://i.imgsafe.org/7bc8b7c700.jpg
 3c,c3,c3path,1
 path,c2path,c3,https://i.imgsafe.org/7bc8b7c700.jpg
-2c,c2,c2path,1
+2c,c2,c2path,https://i.imgsafe.org/7bc87a747e.jpg
 path,c1path,c2,https://i.imgsafe.org/7bc8b7c700.jpg
-Cave,c1,c1path,1
-Basecamp,begin,a1/b1/c1,https://i.imgsafe.org/7bc8ae4261.jpg
+Echo,c1,c1path,https://i.imgsafe.org/aca13a281a.jpg
+Base camp,begin,a1/b1/c1,https://i.imgsafe.org/7bc8ae4261.jpg
 5b,b5,end/c5,1
