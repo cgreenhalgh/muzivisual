@@ -55,6 +55,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', function (d
         if (scope.cstage) {
           // active new path
           cs = _.find(scope.mapData, { 'stage': scope.cstage });
+          scope.csname = cs.name;
           cs.state = 'active';
           scope.updateMapStage(cs, secbase + 1);
 
@@ -156,7 +157,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
   function initMap(canvas, data) {
     _.forEach(data, function (cStageDatum) {
-      console.log(cStageDatum);
       if (cStageDatum.stage !== 'end') {
         // get all the cues of this stage
         var cueList = _.split(cStageDatum.cue, '/');
