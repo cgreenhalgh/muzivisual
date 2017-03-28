@@ -127,7 +127,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', fun
         });
     }
 
-    var updateMapStage = function updateMapStage(stage, delay) {
+    function updateMapStage(stage, delay) {
         var sname = stage.stage;
         var state;
         if (_.indexOf(sname) === 'path') {
@@ -158,7 +158,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', fun
     }
 
     return {
-        updateMapStage,
+        updateChangedStages: function (stages) {
+            _.forEach(stages, function (stage) {
+                updateMapStage(stage.stage, stage.delay)
+            })
+        },
         updateMapLine,
         dataProcess: function (d) {
             // process data - add postion on the map and ordered
@@ -302,6 +306,10 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', fun
                 .attr('font-size', function () { return RECT_HEIGHT / 2 })
                 .attr('fill', 'black')
                 .attr('opacity', 0)
+
+            // initialize begin stage
+            d3.select('#rect_begin').attr('opacity', 1).attr('fill', 'white')
+            d3.select('#begin').attr('opacity', 1).attr('fill', 'black')
         },
         startPerformMode: function (stageDatum) {  // cs
             console.log(secbase);

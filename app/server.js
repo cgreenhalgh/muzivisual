@@ -18,10 +18,15 @@ io.adapter(redis({ host: '127.0.0.1', port: 6379 }));
 
 io.on('connection', function (socket) {
   socket.join('visualRoom');
+
   console.log('A client connected.');
-  socket.on('visualMsg', function (data) {
-    io.to('visualRoom').emit('visualMsg', data);
+  socket.on('vTimer', function (data) {
+    io.to('visualRoom').emit('vTimer', data);
   })
+
+  // socket.on('vStart', function () {
+  //   io.to('visualRoom').emit('vStart', data);
+  // })
 });
 
 app.get('/', function (req, res) {
