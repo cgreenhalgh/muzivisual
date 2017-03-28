@@ -139,25 +139,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     $scope.cstage = stages[1];
   });
 
-  /////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   // room: room name (default "default")
   // pin: room pin/ password(default "")
   // name: control input name (required)
@@ -182,7 +163,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 }])
 
 map.controller('previewCtrl', ['$scope', 'd3Service', function ($scope, d3Service) {
-  console.log('Map status')
+  console.log('Preview')
+  console.log($scope.mapData);
   d3Service.d3().then(function (d3) {
     d3.selectAll('line').attr('opacity', '1').attr('stroke', 'black')
     d3.selectAll('rect').attr('opacity', '1')
