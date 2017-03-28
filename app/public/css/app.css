@@ -5,6 +5,15 @@ html {
   font-family: 'Pangolin', cursive;
 }
 
+/*not allow user select*/
+body{
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 .menu {
   list-style: none;
   border-bottom: 0.1em solid black;
@@ -39,20 +48,7 @@ table {
 }
 
 
-
- @-webkit-keyframes fadeIn {
-            0% {opacity: 0;}
-            100% {opacity: 1;}
-}
-         
-@keyframes fadeIn {
-  0% {opacity: 0;}
-  100% {opacity: 1;}
-}
-
-
 #visualImg{
-    position: absolute;
     margin: 0px;
     padding: 0px;
     /*width: 100%;*/

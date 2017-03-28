@@ -1,7 +1,7 @@
 'use strict';
 
-describe('myApp.version module', function() {
-  beforeEach(module('myApp.version'));
+describe('MuziVisual.version module', function() {
+  beforeEach(module('MuziVisual.version'));
 
   describe('app-version directive', function() {
     it('should print current version', function() {

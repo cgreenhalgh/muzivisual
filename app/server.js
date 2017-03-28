@@ -29,6 +29,11 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
 });
 
+// app.get('/map', function (req, res) {
+//   console.log('get /map')
+//   res.sendFile(__dirname + '/public/map.html')
+// })
+
 function returnPublicFile(req, res) {
   var url = require('url').parse(req.url);
   console.log('get ' + req.url + ' -> ' + url.pathname);
@@ -68,9 +73,10 @@ function processData(data, res) {
     // split content based on comma
     stageRow = rows[i].split(',');
     var stageData = {
-      "stage": stageRow[0],
-      "cue": stageRow[1],
-      "img": stageRow[2],
+      "name": stageRow[0],
+      "stage": stageRow[1],
+      "cue": stageRow[2],
+      "img": stageRow[3],
       "state": "hidden"
     }
     resp.push(stageData);

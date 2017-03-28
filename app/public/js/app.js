@@ -1,17 +1,19 @@
 'use strict';
 
 // Declare app level module which depends on views, and components
-var visual = angular.module('myApp', [
+var visual = angular.module('MuziVisual', [
   'ngRoute',
-  'myApp.map',
-  'myApp.view2',
-  'myApp.version',
-  'myApp.socket'
+  'MuziVisual.map',
+  'MuziVisual.version',
+  'MuziVisual.socket'
 ]);
 
 visual.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {
   $locationProvider.hashPrefix('!');
-  $routeProvider.otherwise({ redirectTo: '/' });
+  $routeProvider.
+    otherwise({
+      redirectTo: '/'
+    });
 }]);
 
 // lodash injector
@@ -49,6 +51,31 @@ visual.factory('d3Service', ['$document', '$q', '$rootScope',
     }
   }
 ])
+
+// visual.factory('visualMapBuilder', ['$rootScope', function ($rootScope) {
+
+//   // connect to visual channel 
+//   return {
+//     on: function (eventName, callback) {
+//       socket.on(eventName, function () {
+//         var args = arguments;
+//         $rootScope.$apply(function () {
+//           callback.apply(socket, args);
+//         });
+//       });
+//     },
+//     emit: function (eventname, data, callback) {
+//       socket.emit(eventname, data, function () {
+//         var args = arguments;
+//         $rootScope.$apply(function () {
+//           if (callback) {
+//             callback.apply(socket, args);
+//           }
+//         });
+//       })
+//     }
+//   };
+// }]);
 
 
 
