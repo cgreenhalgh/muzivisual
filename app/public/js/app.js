@@ -5,7 +5,8 @@ var visual = angular.module('MuziVisual', [
   'ngRoute',
   'MuziVisual.map',
   'MuziVisual.version',
-  'MuziVisual.socket'
+  'MuziVisual.socket',
+  'MuziVisual.visualmapbuilder'
 ]);
 
 visual.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {
@@ -52,30 +53,6 @@ visual.factory('d3Service', ['$document', '$q', '$rootScope',
   }
 ])
 
-// visual.factory('visualMapBuilder', ['$rootScope', function ($rootScope) {
-
-//   // connect to visual channel 
-//   return {
-//     on: function (eventName, callback) {
-//       socket.on(eventName, function () {
-//         var args = arguments;
-//         $rootScope.$apply(function () {
-//           callback.apply(socket, args);
-//         });
-//       });
-//     },
-//     emit: function (eventname, data, callback) {
-//       socket.emit(eventname, data, function () {
-//         var args = arguments;
-//         $rootScope.$apply(function () {
-//           if (callback) {
-//             callback.apply(socket, args);
-//           }
-//         });
-//       })
-//     }
-//   };
-// }]);
 
 
 
