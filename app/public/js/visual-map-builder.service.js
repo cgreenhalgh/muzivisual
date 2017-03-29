@@ -60,7 +60,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         if ((pstate === 'rev_succ' && cstate === 'active') || (pstate === 'rev_fail' && cstate === 'active') || (pstate === 'active' && cstate === 'revealed')) {
             return 1;
         } else {
-            return 0; // should be 0
+            return 0; // 
         }
     }
 
@@ -74,62 +74,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         LEFT_X = MAP_WIDTH / (NUM_COLUMN * 2) - RECT_WIDTH / 2;
     }
 
-    var updateMapLine = function updateMapLine(p, c, fss, pcstages, delay) {
-        var cstage = c.stage;
-        var cs = c.state;
-        var ps, pstage, fs, fstage;
-
-        d3Service.d3().then(function (d3) {
-            if (fss.length > 0) {
-                _.forEach(fss, function (f) {
-                    fstage = f.stage;
-                    fs = f.state;
-
-                    // update lines linking pstage and cstage -> turn solid and change color
-                    if (p) {
-                        pstage = p.stage;
-                        ps = p.state;
-                        d3.select('#' + pstage + '_' + cstage)
-                            .transition()
-                            .delay(INTERVAL * delay)
-                            .duration(INTERVAL)
-                            .style("stroke-dasharray", ("0, 0"))
-                            .attr('opacity', function () { return getLineOpacity(ps, cs) })
-                            .attr('stroke', function () { return getLineColor(ps) })
-                    }
-                    // update lines linking cstage and fstage -> black dotted-line
-                    d3.select('#' + cstage + '_' + fstage)
-                        .transition()
-                        .delay(INTERVAL * (delay + 2))  // depends on to show in what order
-                        .duration(INTERVAL - 200)
-                        .style("stroke-dasharray", ("6, 6"))
-                        .attr('opacity', function () { return getLineOpacity(cs, fs) })
-                        .attr('stroke', function () { return getLineColor(cs) })
-                })
-            }
-            else {  // if there is no fs i.e. reach the summit - need test? 
-                d3.select('#line_' + ps)
-                    .transition()
-                    .delay(INTERVAL * delay)
-                    .duration(INTERVAL)
-                    .attr('opacity', function () { return getLineOpacity(ps, cs) })
-                    .attr('stroke', function () { return getLineColor(ps) })
-            }
-
-
-            // past cues stage links
-            if (pcstages) {
-                _.forEach(pcstages, function (pcstage) {
-                    // the line linking pstage and missed stage -> disappear
-                    d3.select('#' + pstage + '_' + pcstage)
-                        .transition()
-                        .delay(INTERVAL * (delay + 1))
-                        .duration(INTERVAL)
-                        .attr('opacity', function () { return getLineOpacity(ps, pcstage) })
-                })
-            }
-        });
-    }
 
     function updateMapStage(stage, delay) {
         var sname = stage.stage;
@@ -237,79 +181,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         return data;
     }
 
-    var initMap = function initMap(canvas, data) {
-        _.forEach(data, function (cStageDatum) {
-            if (cStageDatum.stage !== 'end') {
-                // get all the cues of this stage
-                var cueList = _.split(cStageDatum.cue, '/');
-                var cueStageDatum;
-                _.forEach(cueList, function (cueStage) {
-                    cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
-                    canvas
-                        .append('line')
-                        .attr("x1", function () { return LEFT_X + cStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
-                        .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
-                        .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
-                        .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
-                        .attr("id", function () {
-                            return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
-                            ) : ('line_' + cStageDatum.stage)
-                        })
-                        .attr('fill', 'black')
-                        .attr('opacity', 0)
-                        .attr('stroke-width', '2px')
-                });
-            }
-        });
-
-        var center;
-        var minWidth = RECT_HEIGHT * 3;
-        canvas
-            .selectAll('rect')
-            .data(data)
-            .enter()
-            .append('rect')
-            .attr('x', function (d) { // make sure the rect always big enough to wrap the stage names
-                if (RECT_WIDTH >= minWidth)
-                    return LEFT_X + d.x * X_OFFSET
-                else {
-                    center = LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2;
-                    return (center - minWidth / 2); // new LEFT
-                }
-            })
-            .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
-            .style('width', function () {
-                return RECT_WIDTH < minWidth ? minWidth : RECT_WIDTH
-            })
-            //  .style('class', 'rect')
-            .attr('height', RECT_HEIGHT)
-            .style('min-width', RECT_HEIGHT * 5)
-            .attr('id', function (d) { return 'rect_' + d.stage })
-            .attr('stroke-width', '2px')
-            .attr('stroke', 'black')
-            .attr('fill', function (d) {
-                return getRectFillColor(d)
-            })
-            .attr('opacity', 0)
-
-        canvas
-            .selectAll('text')
-            .data(data)
-            .enter()
-            .append('text')
-            .text(function (d) { return d.name })
-            .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2 })
-            .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + RECT_HEIGHT / 1.5 })
-            .attr('id', function (d) { return d.stage })
-            .attr('text-anchor', 'middle')
-            .attr('font-size', function () { return RECT_HEIGHT / 2 })
-            .attr('fill', 'black')
-            .attr('opacity', 0)
-
-        // initialize begin stage
-        d3.select('#rect_begin').attr('opacity', 1).attr('fill', 'white')
-        d3.select('#begin').attr('opacity', 1).attr('fill', 'black')
-    }
 
     return {
         updateChangedStages: function (stages) {
@@ -317,9 +188,213 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 updateMapStage(stage.stage, stage.delay)
             })
         },
-        updateMapLine,
-        initMap,
-        getStop:function(){
+        updateMapLine: function updateMapLine(p, c, fss, pcstages, delay) {
+            var cstage = c.stage;
+            var cs = c.state;
+            var ps, pstage, fs, fstage;
+
+            d3Service.d3().then(function (d3) {
+                if (fss.length > 0) {
+                    _.forEach(fss, function (f) {
+                        fstage = f.stage;
+                        fs = f.state;
+
+                        // update lines linking pstage and cstage -> turn solid and change color
+                        if (p) {
+                            pstage = p.stage;
+                            ps = p.state;
+                            d3.select('#' + pstage + '_' + cstage)
+                                .transition()
+                                .delay(INTERVAL * delay)
+                                .duration(INTERVAL)
+                                .style("stroke-dasharray", ("0, 0"))
+                                .attr('opacity', function () { return getLineOpacity(ps, cs) })
+                                .attr('stroke', function () { return getLineColor(ps) })
+                        }
+                        // update lines linking cstage and fstage -> black dotted-line
+                        d3.select('#' + cstage + '_' + fstage)
+                            .transition()
+                            .delay(INTERVAL * (delay + 2))  // depends on to show in what order
+                            .duration(INTERVAL - 200)
+                            .style("stroke-dasharray", ("6, 6"))
+                            .attr('opacity', function () { return getLineOpacity(cs, fs) })
+                            .attr('stroke', function () { return getLineColor(cs) })
+                    })
+                }
+                else {  // if there is no fs i.e. reach the summit - need test? 
+                    d3.select('#line_' + ps)
+                        .transition()
+                        .delay(INTERVAL * delay)
+                        .duration(INTERVAL)
+                        .attr('opacity', function () { return getLineOpacity(ps, cs) })
+                        .attr('stroke', function () { return getLineColor(ps) })
+                }
+
+
+                // past cues stage links
+                if (pcstages) {
+                    _.forEach(pcstages, function (pcstage) {
+                        // the line linking pstage and missed stage -> disappear
+                        d3.select('#' + pstage + '_' + pcstage)
+                            .transition()
+                            .delay(INTERVAL * (delay + 1))
+                            .duration(INTERVAL)
+                            .attr('opacity', function () { return getLineOpacity(ps, pcstage) })
+                    })
+                }
+            });
+        },
+        drawMap: function (canvas, data) {
+            console.log('draw map');
+            _.forEach(data, function (cStageDatum) {
+                if (cStageDatum.stage !== 'end') {
+                    // get all the cues of this stage
+                    var cueList = _.split(cStageDatum.cue, '/');
+                    var cueStageDatum;
+                    _.forEach(cueList, function (cueStage) {
+                        cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
+                        canvas
+                            .append('line')
+                            .attr("x1", function () { return LEFT_X + cStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                            .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                            .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                            .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                            .attr("id", function () {
+                                return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
+                                ) : ('line_' + cStageDatum.stage)
+                            })
+                            .attr('fill', function () { return getLineColor(cStageDatum.state) })
+                            .attr('opacity', function () {
+                                return getLineOpacity(cStageDatum
+                                    .state, cueStageDatum.state)
+                            })
+                            .attr('stroke-width', '2px')
+                    });
+                }
+            });
+
+            var center;
+            var minWidth = RECT_HEIGHT * 3;
+            canvas
+                .selectAll('rect')
+                .data(data)
+                .enter()
+                .append('rect')
+                .attr('x', function (d) { // make sure the rect always big enough to wrap the stage names
+                    if (RECT_WIDTH >= minWidth)
+                        return LEFT_X + d.x * X_OFFSET
+                    else {
+                        center = LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2;
+                        return (center - minWidth / 2); // new LEFT
+                    }
+                })
+                .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
+                .style('width', function () {
+                    return RECT_WIDTH < minWidth ? minWidth : RECT_WIDTH
+                })
+                //  .style('class', 'rect')
+                .attr('height', RECT_HEIGHT)
+                .style('min-width', RECT_HEIGHT * 5)
+                .attr('id', function (d) { return 'rect_' + d.stage })
+                .attr('stroke-width', '2px')
+                .attr('stroke', function (d) {
+                    return getLineColor(d.state);
+                })
+                .attr('fill', function (d) {
+                    return getRectFillColor(d);
+                })
+                .attr('opacity', function (d) { return getStageOpacity(d.state) })
+
+            canvas
+                .selectAll('text')
+                .data(data)
+                .enter()
+                .append('text')
+                .text(function (d) { return d.name })
+                .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2 })
+                .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + RECT_HEIGHT / 1.5 })
+                .attr('id', function (d) { return d.stage })
+                .attr('text-anchor', 'middle')
+                .attr('font-size', function () { return RECT_HEIGHT / 2 })
+                .attr('fill', function (d) { return getTextColor(d.state) })
+                .attr('opacity', function (d) { return getStageOpacity(d.state) })
+
+        },
+        initMap: function (canvas, data) {
+            _.forEach(data, function (cStageDatum) {
+                if (cStageDatum.stage !== 'end') {
+                    // get all the cues of this stage
+                    var cueList = _.split(cStageDatum.cue, '/');
+                    var cueStageDatum;
+                    _.forEach(cueList, function (cueStage) {
+                        cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
+                        canvas
+                            .append('line')
+                            .attr("x1", function () { return LEFT_X + cStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                            .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                            .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                            .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                            .attr("id", function () {
+                                return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
+                                ) : ('line_' + cStageDatum.stage)
+                            })
+                            .attr('fill', 'black')
+                            .attr('opacity', 0)
+                            .attr('stroke-width', '2px')
+                    });
+                }
+            });
+
+            var center;
+            var minWidth = RECT_HEIGHT * 3;
+            canvas
+                .selectAll('rect')
+                .data(data)
+                .enter()
+                .append('rect')
+                .attr('x', function (d) { // make sure the rect always big enough to wrap the stage names
+                    if (RECT_WIDTH >= minWidth)
+                        return LEFT_X + d.x * X_OFFSET
+                    else {
+                        center = LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2;
+                        return (center - minWidth / 2); // new LEFT
+                    }
+                })
+                .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
+                .style('width', function () {
+                    return RECT_WIDTH < minWidth ? minWidth : RECT_WIDTH
+                })
+                //  .style('class', 'rect')
+                .attr('height', RECT_HEIGHT)
+                .style('min-width', RECT_HEIGHT * 5)
+                .attr('id', function (d) { return 'rect_' + d.stage })
+                .attr('stroke-width', '2px')
+                .attr('stroke', 'black')
+                .attr('fill', function (d) {
+                    return getRectFillColor(d)
+                })
+                .attr('opacity', 0)
+
+            canvas
+                .selectAll('text')
+                .data(data)
+                .enter()
+                .append('text')
+                .text(function (d) { return d.name })
+                .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2 })
+                .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + RECT_HEIGHT / 1.5 })
+                .attr('id', function (d) { return d.stage })
+                .attr('text-anchor', 'middle')
+                .attr('font-size', function () { return RECT_HEIGHT / 2 })
+                .attr('fill', 'black')
+                .attr('opacity', 0)
+
+            // initialize begin stage
+            d3.select('#rect_begin').attr('opacity', 1).attr('fill', 'white')
+            d3.select('#begin').attr('opacity', 1).attr('fill', 'black')
+        }
+        ,
+        getStop: function () {
             return stop_flag;
         },
         setStop: function () {

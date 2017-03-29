@@ -3,7 +3,7 @@
 
 var map = angular.module('MuziVisual.map', ['ngRoute', 'MuziVisual.visualmapbuilder']);
 // used as unit for time delay
-var INTERVAL = 1000;
+var INTERVAL = 100;
 var MAP_WIDTH, MAP_HEIGHT;
 var ANI_DURATION = 8;
 var delaybase = 1;
@@ -49,12 +49,19 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
       scope.mapData = null;
       scope.performing = false;
       scope.mapRecord = null;
+
+      scope.back = function () {
+        $location.url('/');
+      }
+
     }
   }
 }])
 
 map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location) {
 
+  $scope.cstage = ''
+  $scope.pstage = ''
   // when data is updated
   // ps - previous stage, the passed one
   // cs - current stage, the triggered one
@@ -85,16 +92,19 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   }
 
   $scope.openCusMap = function () {
-    $location.url('/cus-map');
-    $scope.mapRecord = $scope.mapData;
-    clearInterval($scope.timerId);
-    visualMapBuilder.setMapRecord($scope.mapData);
+    $scope.stop();
+    d3Service.d3().then(function (d3) {
+      d3.select('#map-container').remove();
+      $location.url('/cus-map');
+    })
+
   }
 
   $scope.mapData = visualMapBuilder.getMapData();
   if (!$scope.mapData) {
     visualMapBuilder.mapConfig().then(function (data) {
       console.log("LOAD MAP: " + JSON.stringify(data));
+      visualMapBuilder.setMapData(data);
       $scope.mapData = data;
       initMap();
     });
@@ -107,7 +117,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       d3.select('#visualImg').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
-      visualMapBuilder.initMap(canvas, $scope.mapData);
+      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
     });
     if (!$scope.cstage) {
       $scope.cstage = 'begin'; // reveal basecamp
@@ -236,14 +246,12 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
   console.log('Open Preview')
 
   $scope.preview = 1;
-  $scope.back = function () {
-    $location.url('/');
-  }
 
   $scope.mapData = visualMapBuilder.getMapData();
   if (!$scope.mapData) {
     visualMapBuilder.mapConfig().then(function (data) {
       console.log("LOAD MAP: " + JSON.stringify(data));
+      visualMapBuilder.setMapData(data);
       $scope.mapData = data;
       initMap();
     })
@@ -256,7 +264,7 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
       d3.select('#visualImg').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
-      visualMapBuilder.initMap(canvas, $scope.mapData);
+      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
 
       d3.selectAll('line').attr('opacity', '1').attr('stroke', 'black')
       d3.selectAll('rect').attr('opacity', '1')
@@ -294,8 +302,20 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
   });
 }]);
 
-map.controller('cusMapCtrl', ['$scope', 'visualMapBuilder', function ($scope, visualMapBuilder) {
+map.controller('cusMapCtrl', ['$scope', 'visualMapBuilder', 'd3Service', function ($scope, visualMapBuilder, d3Service) {
   $scope.cusMap = 1;
   console.log('cusMap');
-  console.log(visualMapBuilder.getMapRecord())
+  console.log(visualMapBuilder.getMapRecord());
+
+  var cusMapData = visualMapBuilder.getMapRecord();
+
+  if (cusMapData) {
+    d3Service.d3().then(function (d3) {
+      d3.selectAll
+      var canvas = d3.select('#map-container');
+      visualMapBuilder.drawMap(canvas, cusMapData);
+    })
+  } else {
+    console.log('no journey yet');
+  }
 }])
