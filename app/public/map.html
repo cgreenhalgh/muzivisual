@@ -1,5 +1,7 @@
 <div>
-  <button ng-show="!performing" ng-click="stop()">STOP</button>
+  <button ng-show="!performing && stop" ng-click="stop()">Stop</button>
+  <button ng-show='!performing && openCusMap' ng-click='openCusMap()'>My Journey</button>
+  <button ng-show='preview' ng-click='back()'>Back</button>
   <!--<button ng-show="!performing" ng-click="startMapTransition()">START</button>-->
   <div id="map" ng-show="!performing">
     <d3-map></d3-map>

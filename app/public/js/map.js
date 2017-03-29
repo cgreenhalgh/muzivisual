@@ -18,6 +18,9 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
   }).when('/preview', {
     templateUrl: '/map.html',
     controller: 'previewCtrl'
+  }).when('/cus-map', {
+    templateUrl: '/map.html',
+    controller: 'cusMapCtrl'
   }).
     otherwise({
       redirectTo: '/'
@@ -29,27 +32,28 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
   // });
 }])
 
-map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'visualMapBuilder', 'socket', function (d3Service, $http, $window, $timeout, visualMapBuilder, socket) {
+map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '$location', 'visualMapBuilder', function (d3Service, $http, $window, $timeout, socket, $location, visualMapBuilder) {
   return {
     restrict: 'EA',
     scope: false,
-    compile: function (scope, element, attr) {
+    link: function (scope, element, attr) {
       MAP_WIDTH = $window.innerWidth;
       MAP_HEIGHT = $window.innerHeight;
 
       console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
       angular.element(document).find('d3-map').append('<svg width=' + MAP_WIDTH + ' height=' + MAP_HEIGHT + ' id=map-container></svg>')
 
-      scope.pstage = '';
-      scope.cstage = '';
+      scope.pstage = null;
+      scope.cstage = null;
 
       scope.mapData = null;
-      scope.performing = 0;
+      scope.performing = false;
+      scope.mapRecord = null;
     }
   }
 }])
 
-map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder) {
+map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location) {
 
   // when data is updated
   // ps - previous stage, the passed one
@@ -59,26 +63,57 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
   var countDown = ANI_DURATION;
   var changedStages = [];
+  var stop;
 
-  $http.get('/maps/').success(function (data) {
-    if (!$scope.mapData) {
-      $scope.mapData = visualMapBuilder.dataProcess(data);
-    }
-    // process data - add postion on the map and ordered
-    console.log("GOT MAP: " + JSON.stringify($scope.mapData));
-    // ad certain condition - i.e. called by muzi ..?
+  $scope.stop = function () {
+    console.log('stop')
+    $scope.mapRecord = $scope.mapData;
+    clearInterval($scope.timerId);
+    visualMapBuilder.setMapRecord($scope.mapData);
 
+    d3Service.d3().then(function (d3) {
+      d3.selectAll('rect').transition().duration(0);
+      d3.selectAll('img').transition().duration(0);
+      d3.selectAll('line').transition().duration(0);
+      d3.selectAll('text').transition().duration(0);
+      d3.select('#visualImg').transition().duration(0);
+      d3.select('#' + $scope.cstage).transition().duration(0);
+      d3.select('#rect_' + $scope.cstage).transition().duration(0);
+      socket.emit('vTimer', 'stop');
+      visualMapBuilder.setStop();
+    })
+  }
+
+  $scope.openCusMap = function () {
+    $location.url('/cus-map');
+    $scope.mapRecord = $scope.mapData;
+    clearInterval($scope.timerId);
+    visualMapBuilder.setMapRecord($scope.mapData);
+  }
+
+  $scope.mapData = visualMapBuilder.getMapData();
+  if (!$scope.mapData) {
+    visualMapBuilder.mapConfig().then(function (data) {
+      console.log("LOAD MAP: " + JSON.stringify(data));
+      $scope.mapData = data;
+      initMap();
+    });
+  } else {
+    initMap();
+  }
+
+  function initMap() {
     d3Service.d3().then(function (d3) {
       d3.select('#visualImg').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
       visualMapBuilder.initMap(canvas, $scope.mapData);
-
-      if (!$scope.cstage) {
-        $scope.cstage = 'begin'; // reveal basecamp
-      }
     });
-  })
+    if (!$scope.cstage) {
+      $scope.cstage = 'begin'; // reveal basecamp
+    }
+  }
+
 
   // format stage->stage
   socket.on('vStageChange', function (data) {
@@ -103,7 +138,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
       visualMapBuilder.exitPerformMode($scope.pstage).then(function (f) {
         $scope.performing = f;
-        $socket.emit('vTimer', 'exiting...');
+        socket.emit('vTimer', 'exiting...');
         console.log('start timer')
         setTimeout(function () {
           $scope.timerId = setInterval(function () {
@@ -156,15 +191,16 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       visualMapBuilder.updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase + 1);
 
       visualMapBuilder.startPerformMode(cs).then(function (t) {
-        $scope.performing = t;
-        clearInterval($scope.timerId);
-        socket.emit('vTimer', 'performing...');
-        countDown = ANI_DURATION;
-        console.log('performMode on');
+        if (!visualMapBuilder.getStop()) {
+          $scope.performing = t;
+          clearInterval($scope.timerId);
+          socket.emit('vTimer', 'performing...');
+          countDown = ANI_DURATION;
+          console.log('performMode on');
+        }
       })
     }
   });
-
 
   function recordStageChange(stage, delay) {
     changedStages.push({
@@ -172,7 +208,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       'delay': delay
     })
   }
-
 
   // room: room name (default "default")
   // pin: room pin/ password(default "")
@@ -197,28 +232,38 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   //   })
 }])
 
-map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', function ($scope, d3Service, visualMapBuilder, $http) {
-  console.log('Preview')
-  console.log($scope.mapData);
+map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', function ($scope, d3Service, visualMapBuilder, $http, $location) {
+  console.log('Open Preview')
 
-  $http.get('/maps/').success(function (data) {
-    $scope.mapData = visualMapBuilder.dataProcess(data);  // process data - add postion on the map and ordered
-    console.log("GOT MAP: " + JSON.stringify($scope.mapData));
-    // ad certain condition - i.e. called by muzi ..?
+  $scope.preview = 1;
+  $scope.back = function () {
+    $location.url('/');
+  }
 
+  $scope.mapData = visualMapBuilder.getMapData();
+  if (!$scope.mapData) {
+    visualMapBuilder.mapConfig().then(function (data) {
+      console.log("LOAD MAP: " + JSON.stringify(data));
+      $scope.mapData = data;
+      initMap();
+    })
+  } else {
+    initMap();
+  }
+
+  function initMap() {
     d3Service.d3().then(function (d3) {
       d3.select('#visualImg').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
       visualMapBuilder.initMap(canvas, $scope.mapData);
-      //basecamp =
 
       d3.selectAll('line').attr('opacity', '1').attr('stroke', 'black')
       d3.selectAll('rect').attr('opacity', '1')
       d3.selectAll('text').attr('opacity', '1')
       d3.select('#rect_begin').attr('fill', 'white')
     });
-  })
+  }
 }])
 
 map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function ($scope, $location, socket, $window) {
@@ -248,3 +293,9 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
     }, 4000)
   });
 }]);
+
+map.controller('cusMapCtrl', ['$scope', 'visualMapBuilder', function ($scope, visualMapBuilder) {
+  $scope.cusMap = 1;
+  console.log('cusMap');
+  console.log(visualMapBuilder.getMapRecord())
+}])

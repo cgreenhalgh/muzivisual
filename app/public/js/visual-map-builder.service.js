@@ -1,12 +1,16 @@
 var visualMapBuilder = angular.module('MuziVisual.visualmapbuilder', []);
 
-visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', function (d3Service, $timeout, $q) {
+visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', function (d3Service, $timeout, $q, $http) {
     console.log('visualMapBuilder');
     var NUM_COLUMN, NUM_ROW, RECT_WIDTH, RECT_HEIGHT;
     var INI_X, RECT_X, INI_Y, RECT_Y, TEXT_X, TEXT_Y, X_OFFSET, Y_OFFSET, LEFT_X;
     // DISPLAY config
     RECT_WIDTH = MAP_WIDTH / (NUM_COLUMN * 2);
     RECT_HEIGHT = MAP_HEIGHT / (NUM_ROW * 2);
+
+    var mapRecord;
+    var mapData;
+    var stop_flag;
 
     function getRectFillColor(stage) { // check if its a path or a stage 
         if (stage.stage.indexOf('path') > 0) {
@@ -60,7 +64,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', fun
         }
     }
 
-    function mapConfig() {
+    function layoutConfig() {
         RECT_WIDTH = MAP_WIDTH / (NUM_COLUMN * 2);
         RECT_HEIGHT = MAP_HEIGHT / (NUM_ROW * 2);
 
@@ -157,6 +161,156 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', fun
         })
     }
 
+    function dataProcess(d) {
+        // process data - add postion on the map and ordered
+        // EXTRACT INFO FROM DATA 
+        // get normal stages (except bc and summit)
+        var stages = _.remove(d, function (n) {
+            if (n.stage === 'end' || n.stage === 'begin')
+                return false;
+            return true;
+        })
+
+        // collect path names to help sort stages i.e. a, b, c...
+        var pathCode = _.orderBy(_.uniq(_.map(stages, function (o) { return _.head(o.stage); })));
+        NUM_COLUMN = pathCode.length; // column of the map
+        NUM_ROW = 0;
+
+        // sort normal stages by path and stage number in desc order
+        // sample: [[a2,a1],[b2,b1],[c2,c1]]
+        var pathStageContainer = [];
+        _.forEach(pathCode, function (obj) {
+            var spePath = _.filter(stages, function (o) { return _.head(o.stage) == obj; });
+            var orderedSpePath = _.orderBy(spePath, ['stage'], ['desc']);
+            var pathHeight = orderedSpePath.length + 2;
+            // get the maximum stages in one path as the NUM_ROW
+            pathHeight > NUM_ROW ? NUM_ROW = pathHeight : 0;
+            pathStageContainer.push(orderedSpePath);
+        });
+
+        var data = []; // data contains data with x, y and are ordered
+        var length = 0;
+        var pathData;
+        var i = 0;
+        var j = 0;
+
+        // DATA PROCESS 
+        // data are processed seperately: summit + normal stages + basecamp
+        var summitData = _.find(d, { 'stage': 'end' });
+        console.log(summitData)
+        console.log(d);
+        // if the summit exists, draw summit
+        if (summitData.img) {
+            summitData.x = (NUM_COLUMN - 1) / 2;
+            summitData.y = 0;
+            summitData = _.castArray(summitData);
+            data = summitData;
+        }
+
+        _.forEach(pathStageContainer, function (pathData) {
+            _.forEach(pathData, function (o) {
+                if (_.isObject(o)) {
+                    o.x = i;
+                    o.y = j + 1;
+                    j++;
+                }
+            });
+            j = 0;
+            i++;
+            data = _.concat(data, pathData);
+        });
+
+        var bcData = _.find(d, { 'stage': 'begin' });
+        // change state for the basecamp and its subsequent stage
+        bcData.state = "active";
+        var cueList = _.split(bcData.cue, '/');
+        _.forEach(cueList, function (cue) {
+            var stage = _.find(data, { stage: cue });
+            stage.state = "revealed";
+        });
+
+        bcData.x = (NUM_COLUMN - 1) / 2;
+        bcData.y = NUM_ROW - 1;
+        bcData = _.castArray(bcData);
+        data = _.concat(data, bcData);
+
+        return data;
+    }
+
+    var initMap = function initMap(canvas, data) {
+        _.forEach(data, function (cStageDatum) {
+            if (cStageDatum.stage !== 'end') {
+                // get all the cues of this stage
+                var cueList = _.split(cStageDatum.cue, '/');
+                var cueStageDatum;
+                _.forEach(cueList, function (cueStage) {
+                    cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
+                    canvas
+                        .append('line')
+                        .attr("x1", function () { return LEFT_X + cStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                        .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                        .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
+                        .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
+                        .attr("id", function () {
+                            return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
+                            ) : ('line_' + cStageDatum.stage)
+                        })
+                        .attr('fill', 'black')
+                        .attr('opacity', 0)
+                        .attr('stroke-width', '2px')
+                });
+            }
+        });
+
+        var center;
+        var minWidth = RECT_HEIGHT * 3;
+        canvas
+            .selectAll('rect')
+            .data(data)
+            .enter()
+            .append('rect')
+            .attr('x', function (d) { // make sure the rect always big enough to wrap the stage names
+                if (RECT_WIDTH >= minWidth)
+                    return LEFT_X + d.x * X_OFFSET
+                else {
+                    center = LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2;
+                    return (center - minWidth / 2); // new LEFT
+                }
+            })
+            .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
+            .style('width', function () {
+                return RECT_WIDTH < minWidth ? minWidth : RECT_WIDTH
+            })
+            //  .style('class', 'rect')
+            .attr('height', RECT_HEIGHT)
+            .style('min-width', RECT_HEIGHT * 5)
+            .attr('id', function (d) { return 'rect_' + d.stage })
+            .attr('stroke-width', '2px')
+            .attr('stroke', 'black')
+            .attr('fill', function (d) {
+                return getRectFillColor(d)
+            })
+            .attr('opacity', 0)
+
+        canvas
+            .selectAll('text')
+            .data(data)
+            .enter()
+            .append('text')
+            .text(function (d) { return d.name })
+            .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2 })
+            .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + RECT_HEIGHT / 1.5 })
+            .attr('id', function (d) { return d.stage })
+            .attr('text-anchor', 'middle')
+            .attr('font-size', function () { return RECT_HEIGHT / 2 })
+            .attr('fill', 'black')
+            .attr('opacity', 0)
+
+        // initialize begin stage
+        d3.select('#rect_begin').attr('opacity', 1).attr('fill', 'white')
+        d3.select('#begin').attr('opacity', 1).attr('fill', 'black')
+    }
+
     return {
         updateChangedStages: function (stages) {
             _.forEach(stages, function (stage) {
@@ -164,202 +318,64 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', fun
             })
         },
         updateMapLine,
-        dataProcess: function (d) {
-            // process data - add postion on the map and ordered
-            // EXTRACT INFO FROM DATA 
-            // get normal stages (except bc and summit)
-            var stages = _.remove(d, function (n) {
-                if (n.stage === 'end' || n.stage === 'begin')
-                    return false;
-                return true;
-            })
-
-            // collect path names to help sort stages i.e. a, b, c...
-            var pathCode = _.orderBy(_.uniq(_.map(stages, function (o) { return _.head(o.stage); })));
-            NUM_COLUMN = pathCode.length; // column of the map
-            NUM_ROW = 0;
-
-            // sort normal stages by path and stage number in desc order
-            // sample: [[a2,a1],[b2,b1],[c2,c1]]
-            var pathStageContainer = [];
-            _.forEach(pathCode, function (obj) {
-                var spePath = _.filter(stages, function (o) { return _.head(o.stage) == obj; });
-                var orderedSpePath = _.orderBy(spePath, ['stage'], ['desc']);
-                var pathHeight = orderedSpePath.length + 2;
-                // get the maximum stages in one path as the NUM_ROW
-                pathHeight > NUM_ROW ? NUM_ROW = pathHeight : 0;
-                pathStageContainer.push(orderedSpePath);
-            });
-
-            var data = []; // data contains data with x, y and are ordered
-            var length = 0;
-            var pathData;
-            var i = 0;
-            var j = 0;
-
-            // DATA PROCESS 
-            // data are processed seperately: summit + normal stages + basecamp
-            var summitData = _.find(d, { 'stage': 'end' });
-            // if the summit exists, draw summit
-            if (summitData.img) {
-                summitData.x = (NUM_COLUMN - 1) / 2;
-                summitData.y = 0;
-                summitData = _.castArray(summitData);
-                data = summitData;
-            }
-
-            _.forEach(pathStageContainer, function (pathData) {
-                _.forEach(pathData, function (o) {
-                    if (_.isObject(o)) {
-                        o.x = i;
-                        o.y = j + 1;
-                        j++;
-                    }
-                });
-                j = 0;
-                i++;
-                data = _.concat(data, pathData);
-            });
-
-            var bcData = _.find(d, { 'stage': 'begin' });
-            // change state for the basecamp and its subsequent stage
-            bcData.state = "active";
-            var cueList = _.split(bcData.cue, '/');
-            _.forEach(cueList, function (cue) {
-                var stage = _.find(data, { stage: cue });
-                stage.state = "revealed";
-            });
-
-            bcData.x = (NUM_COLUMN - 1) / 2;
-            bcData.y = NUM_ROW - 1;
-            bcData = _.castArray(bcData);
-            data = _.concat(data, bcData);
-
-            mapConfig();
-            return data;
+        initMap,
+        getStop:function(){
+            return stop_flag;
         },
-        initMap: function initMap(canvas, data) {
-            _.forEach(data, function (cStageDatum) {
-                if (cStageDatum.stage !== 'end') {
-                    // get all the cues of this stage
-                    var cueList = _.split(cStageDatum.cue, '/');
-                    var cueStageDatum;
-                    _.forEach(cueList, function (cueStage) {
-                        cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
-                        canvas
-                            .append('line')
-                            .attr("x1", function () { return LEFT_X + cStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
-                            .attr("y1", function () { return INI_Y + cStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
-                            .attr("x2", function () { return LEFT_X + cueStageDatum.x * X_OFFSET + RECT_WIDTH / 2 })
-                            .attr("y2", function () { return INI_Y + cueStageDatum.y * Y_OFFSET + RECT_HEIGHT / 2 })
-                            .attr("id", function () {
-                                return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
-                                ) : ('line_' + cStageDatum.stage)
-                            })
-                            .attr('fill', 'black')
-                            .attr('opacity', 0)
-                            .attr('stroke-width', '2px')
-                    });
-                }
-            });
-
-            var center;
-            var minWidth = RECT_HEIGHT * 3;
-            canvas
-                .selectAll('rect')
-                .data(data)
-                .enter()
-                .append('rect')
-                .attr('x', function (d) { // make sure the rect always big enough to wrap the stage names
-                    if (RECT_WIDTH >= minWidth)
-                        return LEFT_X + d.x * X_OFFSET
-                    else {
-                        center = LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2;
-                        return (center - minWidth / 2); // new LEFT
-                    }
-                })
-                .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET })
-                .style('width', function () {
-                    return RECT_WIDTH < minWidth ? minWidth : RECT_WIDTH
-                })
-                //  .style('class', 'rect')
-                .attr('height', RECT_HEIGHT)
-                .style('min-width', RECT_HEIGHT * 5)
-                .attr('id', function (d) { return 'rect_' + d.stage })
-                .attr('stroke-width', '2px')
-                .attr('stroke', 'black')
-                .attr('fill', function (d) {
-                    return getRectFillColor(d)
-                })
-                .attr('opacity', 0)
-
-            canvas
-                .selectAll('text')
-                .data(data)
-                .enter()
-                .append('text')
-                .text(function (d) { return d.name })
-                .attr('x', function (d) { return LEFT_X + d.x * X_OFFSET + RECT_WIDTH / 2 })
-                .attr('y', function (d) { return INI_Y + d.y * Y_OFFSET + RECT_HEIGHT / 1.5 })
-                .attr('id', function (d) { return d.stage })
-                .attr('text-anchor', 'middle')
-                .attr('font-size', function () { return RECT_HEIGHT / 2 })
-                .attr('fill', 'black')
-                .attr('opacity', 0)
-
-            // initialize begin stage
-            d3.select('#rect_begin').attr('opacity', 1).attr('fill', 'white')
-            d3.select('#begin').attr('opacity', 1).attr('fill', 'black')
+        setStop: function () {
+            stop_flag = true;
         },
         startPerformMode: function (stageDatum) {  // cs
-            console.log(delaybase);
             var sname = stageDatum.stage;
             var delay = INTERVAL * (delaybase + 6);
 
             $timeout(function () {
-                d3Service.d3().then(function (d3) {
-                    d3.select('#' + sname)
-                        .transition()
-                        .duration(200)
-                        .attr('fill', 'black')
-                        .transition()
-                        .duration(200)
-                        .attr('fill', 'white')
-                        .transition()
-                        .duration(200)
-                        .attr('fill', 'black')
-                        .transition()
-                        .duration(200)
-                        .attr('fill', 'white')
+                if (!stop_flag) {
+                    d3Service.d3().then(function (d3) {
+                        d3.select('#' + sname)
+                            .transition()
+                            .duration(200)
+                            .attr('fill', 'black')
+                            .transition()
+                            .duration(200)
+                            .attr('fill', 'white')
+                            .transition()
+                            .duration(200)
+                            .attr('fill', 'black')
+                            .transition()
+                            .duration(200)
+                            .attr('fill', 'white')
 
-                    d3.select('#rect_' + sname)
-                        .transition()
-                        .duration(200)
-                        .attr('fill', 'white')
-                        .transition()
-                        .duration(200)
-                        .attr('fill', 'black')
-                        .transition()
-                        .duration(200)
-                        .attr('fill', 'white')
-                        .transition()
-                        .duration(200)
-                        .attr('fill', 'black')
+                        d3.select('#rect_' + sname)
+                            .transition()
+                            .duration(200)
+                            .attr('fill', 'white')
+                            .transition()
+                            .duration(200)
+                            .attr('fill', 'black')
+                            .transition()
+                            .duration(200)
+                            .attr('fill', 'white')
+                            .transition()
+                            .duration(200)
+                            .attr('fill', 'black')
 
-                    d3.select('#visualImg')
-                        .attr('src', stageDatum.img)
-                        .style('opacity', 0)
-                        .transition()
-                        .delay(INTERVAL * 1.5)
-                        .duration(2500)
-                        .style('opacity', 1)
-                });
+                        d3.select('#visualImg')
+                            .attr('src', stageDatum.img)
+                            .style('opacity', 0)
+                            .transition()
+                            .delay(INTERVAL * 1.5)
+                            .duration(2500)
+                            .style('opacity', 1)
+                    });
+                }
             }, delay)
 
             return $q(function (resolve, reject) {
-                setTimeout(function () {
-                    resolve(true)
-                }, delay + 1500);  // 
+                if (!stop_flag)
+                    setTimeout(function () {
+                        resolve(true)
+                    }, delay + 1500);  // 
             })
         },
         exitPerformMode: function (stageDatum) {
@@ -379,5 +395,34 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', fun
                 }, INTERVAL * 1.5)
             })
         },
+        getMapRecord: function () {
+            return mapRecord;
+        },
+        setMapRecord: function (d) {
+            mapRecord = d;
+        },
+        mapConfig: function (d) {
+            return $q(function (resolve, reject) {
+                $http.get('/maps').then(function (rawdata) {
+                    //console.log(rawdata);
+                    mapData = dataProcess(rawdata.data);
+                    console.log(rawdata);
+                    layoutConfig();
+                    resolve(mapData);
+                }), function (err) {
+                    reject(err);
+                }
+            })
+        },
+        getMapData: function () {
+            return mapData;
+        },
+        setMapData: function (d) {
+            mapData = d;
+        }
+        // ,
+        // redrawWholeMap: function (data) {
+
+        // }
     }
 }]);
