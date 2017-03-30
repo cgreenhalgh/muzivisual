@@ -1,4 +1,7 @@
 <div>
+  <div ng-show="!performing" style='position:absolute;z-index:0;left:0;top:0;width:100%;height:100%;z-index: -1;'>
+    <img src='https://i.imgsafe.org/bccf58fee0.jpg' style='width:100%;height:100%' alt='Map' />
+  </div>
   <button ng-show="!performing && stop" ng-click="stop()">Stop</button>
   <button ng-show='!performing && openCusMap' ng-click='openCusMap()'>My Journey</button>
   <button ng-show='preview || cusMap' ng-click='back()'>Back</button>

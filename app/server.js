@@ -5,6 +5,9 @@ var fs = require('fs');
 var redis = require('socket.io-redis');
 var _ = require('lodash');
 
+var BK_WIDTH = 1025;
+var BK_HEIGHT = 1334;
+
 //CORS
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:3000');
@@ -31,8 +34,6 @@ io.on('connection', function (socket) {
   //   io.to('visualRoom').emit('vStart', data);
   // })
 });
-
-
 
 app.get('/', function (req, res) {
   console.log('get /');
@@ -79,14 +80,46 @@ function processData(data, res) {
   var resp = [];
 
   var stageRow;
-  for (var i = 1; i < rows.length; i++) {
+  var x = '';
+  var y = '';
+  var score = [];
+
+  var length = rows.length;
+  var stageData
+
+  var index = 6;
+  var scoreExist;
+  var i;
+  for (i = 1; i < rows.length; i++) {
     // split content based on comma
     stageRow = rows[i].split(',');
-    var stageData = {
+
+    // for Climb!
+    // if map has its own point location setting
+    if (stageRow[4] && stageRow[5]) {
+      x = (parseInt(stageRow[4]) / BK_WIDTH).toFixed(3);
+      y = (parseInt(stageRow[5]) / BK_HEIGHT).toFixed(3);
+    }
+
+    while (stageRow[index]) {
+      scoreExist = stageRow[index];
+      if (scoreExist) {
+        score.push(scoreExist);
+      }
+      index++;
+    }
+
+    index = 6;
+    scoreExist = '';
+
+    stageData = {
       "name": stageRow[0],
       "stage": stageRow[1],
       "cue": stageRow[2],
       "img": stageRow[3],
+      "x": x,
+      "y": y,
+      "score": score,
       "state": "hidden"
     }
     resp.push(stageData);

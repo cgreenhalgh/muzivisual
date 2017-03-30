@@ -66,8 +66,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   // ps - previous stage, the passed one
   // cs - current stage, the triggered one
   // fs - future stage, the stages cued next
-  var customPath = [];
-  var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
   var countDown = ANI_DURATION;
   var changedStages = [];
   var stop;
@@ -79,13 +77,13 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     visualMapBuilder.setMapRecord($scope.mapData);
 
     d3Service.d3().then(function (d3) {
-      d3.selectAll('rect').transition().duration(0);
+      d3.selectAll('circle').transition().duration(0);
       d3.selectAll('img').transition().duration(0);
       d3.selectAll('line').transition().duration(0);
-      d3.selectAll('text').transition().duration(0);
+      //d3.selectAll('text').transition().duration(0);
       d3.select('#visualImg').transition().duration(0);
-      d3.select('#' + $scope.cstage).transition().duration(0);
-      d3.select('#rect_' + $scope.cstage).transition().duration(0);
+      //d3.select('#' + $scope.cstage).transition().duration(0);
+      d3.select('#circle_' + $scope.cstage).transition().duration(0);
       socket.emit('vTimer', 'stop');
       visualMapBuilder.setStop();
     })
@@ -161,46 +159,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     }
 
     if ($scope.cstage) {
-      // active new path
-      cs = _.find($scope.mapData, { 'stage': $scope.cstage });
-      $scope.csname = cs.name;
-      cs.state = 'active';
-      recordStageChange(cs, delaybase + 1);
-
-      // turn the previous active stage into past -  succ / fail
-      if ($scope.pstage) {
-        ps = _.find($scope.mapData, { 'stage': $scope.pstage })
-        ps.state = "rev_succ";
-        customPath.push($scope.pstage)
-        recordStageChange(ps, delaybase);
-
-        // ps cue stage
-        psCues = ps.cue.split('/');
-        psCuesWithoutCs = _.filter(psCues, function (s) { return s !== cs.stage });
-
-        // get missed stages
-        revealeds = _.filter($scope.mapData, { 'state': 'revealed' })
-        _.forEach(revealeds, function (rs) {
-          if (_.isObject(rs))
-            rs.state = 'missed';
-          recordStageChange(rs, delaybase + 2);
-        });
-      }
-
-      // reveal new stages
-      fss = _.split(cs.cue, '/');
-      _.forEach(fss, function (s) {
-        fs = _.find($scope.mapData, { 'stage': s })
-        fs.state = 'revealed';
-        flist.push(fs);
-        recordStageChange(fs, delaybase + 4);
-      });
-
-      // update map
-      visualMapBuilder.updateChangedStages(changedStages);
-      visualMapBuilder.updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase + 1);
-
-      visualMapBuilder.startPerformMode(cs).then(function (t) {
+      visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
+      visualMapBuilder.startPerformMode($scope.cstage).then(function (t) {
         if (!visualMapBuilder.getStop()) {
           $scope.performing = t;
           clearInterval($scope.timerId);
@@ -210,6 +170,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         }
       })
     }
+
   });
 
   function recordStageChange(stage, delay) {
@@ -266,10 +227,10 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
       var canvas = d3.select('#map-container');
       visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
 
-      d3.selectAll('line').attr('opacity', '1').attr('stroke', 'black')
-      d3.selectAll('rect').attr('opacity', '1')
-      d3.selectAll('text').attr('opacity', '1')
-      d3.select('#rect_begin').attr('fill', 'white')
+      d3.selectAll('line').attr('opacity', '1').attr('stroke', 'white')
+      d3.selectAll('circle').attr('opacity', '1')
+      // d3.selectAll('text').attr('opacity', '1')
+      d3.select('#circle_begin').attr('fill', 'white')
     });
   }
 }])

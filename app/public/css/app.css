@@ -13,6 +13,8 @@ body{
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  /*background-image: url("https://i.imgsafe.org/bccf58fee0.jpg");*/
+  /*background-color: #cccccc;*/
 }
 .menu {
   list-style: none;

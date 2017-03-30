@@ -78,7 +78,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     function updateMapStage(stage, delay) {
         var sname = stage.stage;
         var state;
-        if (_.indexOf(sname) === 'path') {
+        if (_.includes(sname, 'path')) {
             state = 'path';  // speical 
         } else {
             state = stage.state;
@@ -495,9 +495,5 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         setMapData: function (d) {
             mapData = d;
         }
-        // ,
-        // redrawWholeMap: function (data) {
-
-        // }
     }
 }]);
