@@ -2,15 +2,14 @@ var visualMapBuilder = angular.module('MuziVisual.visualmapbuilder', []);
 
 visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', function (d3Service, $timeout, $q, $http) {
     console.log('visualMapBuilder');
-    var NUM_COLUMN, NUM_ROW, RECT_WIDTH, RECT_HEIGHT;
-
     var R = 15;
     var mapRecord;
     var mapData;
     var stop_flag;
+    var journeyRecord = [];
 
-    function getRectFillColor(d) { // check if its a path or a stage 
-         if (d.state === 'rev_succ') {
+    function getCircleFillColor(d) { // check if its a path or a stage 
+        if (d.state === 'rev_succ') {
             return 'orange'
         }
         else if (d.state === 'rev_fail') {
@@ -72,7 +71,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .transition()
                 .delay(delay * INTERVAL)
                 .duration(INTERVAL)
-                .attr('fill', function () { return getRectFillColor(data) })
+                .attr('fill', function () { return getCircleFillColor(data) })
                 .attr('r', function () { return getCircleRadius(data) })
                 .attr('opacity', function () { return getStageOpacity(state) })
         })
@@ -179,34 +178,33 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             }
             updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase + 1);
         },
-        drawMap: function (canvas, data) {
+        drawMap: function (canvas) {
+            var data = journeyRecord;
             console.log('draw map');
-            _.forEach(data, function (cStageDatum) {
-                if (cStageDatum.stage !== 'end') {
-                    // get all the cues of this stage
-                    var cueList = _.split(cStageDatum.cue, '/');
-                    var cueStageDatum;
-                    _.forEach(cueList, function (cueStage) {
-                        cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
-                        canvas
-                            .append('line')
-                            .attr("x1", cStageDatum.x * MAP_WIDTH)
-                            .attr("y1", cStageDatum.y * MAP_HEIGHT)
-                            .attr("x2", cueStageDatum.x * MAP_WIDTH)
-                            .attr("y2", cueStageDatum.y * MAP_HEIGHT)
-                            .attr("id", function () {
-                                return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
-                                ) : ('line_' + cStageDatum.stage)
-                            })
-                            .attr('fill', function () { return getLineColor(cStageDatum.state) })
-                            .attr('opacity', function () {
-                                return getLineOpacity(cStageDatum
-                                    .state, cueStageDatum.state)
-                            })
-                            .attr('stroke-width', '2px')
-                    });
+
+            var cStageDatum;
+            var cueStageDatum;
+            var snum = data.length;
+            if (snum > 1) {
+                for (var i = 0; i < snum - 1; i++) {
+                    console.log(data[i].stage);
+                    cStageDatum = data[i];
+                    cueStageDatum = data[i + 1];
+                    canvas
+                        .append('line')
+                        .attr("x1", cStageDatum.x * MAP_WIDTH)
+                        .attr("y1", cStageDatum.y * MAP_HEIGHT)
+                        .attr("x2", cueStageDatum.x * MAP_WIDTH)
+                        .attr("y2", cueStageDatum.y * MAP_HEIGHT)
+                        .attr("id", function () {
+                            return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
+                            ) : ('line_' + cStageDatum.stage)
+                        })
+                        .attr('stroke', 'orange')
+                        .attr('opacity', 1)
+                        .attr('stroke-width', '2px')
                 }
-            });
+            }
 
             canvas
                 .selectAll('circle')
@@ -219,16 +217,21 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('cy', function (d) {
                     return d.y * MAP_HEIGHT;
                 })
+                .attr('id', function (d) {
+                    return 'circle_' + d.stage;
+                })
                 .attr('r', R)
-                .attr('id', function (d) { return 'circle_' + d.stage })
+                .attr('ng-click', function (d) { 
+                    var len = d.score.length;
+                    if(len){
+                        return d.score[0];
+                    }
+                    return '#';
+                })
                 .attr('opacity', 0)
-                .attr('stroke', function (d) {
-                    return getLineColor(d.state);
-                })
-                .attr('fill', function (d) {
-                    return getRectFillColor(d);
-                })
-                .attr('opacity', function (d) { return getStageOpacity(d.state) })
+                .attr('stroke', 'black')
+                .attr('fill', 'orange')
+                .attr('opacity', 1)
         },
         initMap: function (canvas, data) {
             _.forEach(data, function (cStageDatum) {
@@ -270,7 +273,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('r', function (d) { return getCircleRadius(d) })
                 .attr('id', function (d) { return 'circle_' + d.stage })
                 .attr('fill', function (d) {
-                    return getRectFillColor(d)
+                    return getCircleFillColor(d)
                 })
                 .attr('stroke', 'black')
                 .attr('stroke-width', '2px')
@@ -325,9 +328,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     }, delay + 1500);  // 
             })
         },
-        exitPerformMode: function (stageDatum) {
+        exitPerformMode: function (stage) {
             d3Service.d3().then(function (d3) {
                 console.log('fade out animation')
+                var record = _.find(mapData, { 'stage': stage });
+                journeyRecord.push(record);
                 $timeout(function () { return false; console.log('performMode end') }, INTERVAL * 1.5);  // should be the same with following duration
                 d3.select('#visualImg')
                     .style('opacity', 1)
@@ -335,6 +340,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     .duration(1500)
                     .style('opacity', 0)
             });
+
+
+            console.log('new status saved' + stage);
 
             return $q(function (resolve, reject) {
                 setTimeout(function () {
@@ -345,8 +353,8 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         getMapRecord: function () {
             return mapRecord;
         },
-        setMapRecord: function (d) {
-            mapRecord = d;
+        recordMap: function () {
+            mapRecord = mapData;
         },
         mapConfig: function (d) {
             return $q(function (resolve, reject) {
@@ -363,6 +371,17 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         setMapData: function (d) {
             mapData = d;
+        },
+        getVisual: function (cstage) {
+            var datum = _.find(mapData, { 'stage': cstage })
+            console.log(datum)
+            var score = datum.score;
+            var img = datum.img;
+            score.push(img);
+            return score;
+        },
+        getJourney: function () {
+            return journeyRecord;
         }
     }
 }]);

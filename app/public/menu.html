@@ -1,18 +1,22 @@
-<ul class="menu">
-    <li><a href="#!preview">Preview</a></li>
-    <li><a href="#!map">Start</a></li>
-    <li><a href="#!cus-map">Your Map</a></li>
-</ul>
-<button ng-click='start()'>Start</button>
-<h1>CLIMB!</h1>
+<div>
+    <a href="#!preview">Preview</a>
+    <!--<ul class="menu">
+        <li><a href="#!preview">Preview</a></li>
+        <li><a href="#!map">Start</a></li>
+        <li><a href="#!cus-map">Your Map</a></li>
+    </ul>-->
+    <div class='bg-img-container' ng-show="!performing">
+        <img class='bk-img' src='https://i.imgsafe.org/be3f5a91ad.png' alt='Map' width='100%' />
+    </div>
 
-<h3>Introduction Introduction Introduction Introduction Introduction Introduction Introduction Introduction Introduction Introduction
-    Introduction Introduction Introduction Introduction Introduction Introduction Introduction Introduction</h3>
+    <!--<button ng-click='start()'>Start</button>-->
+    <div id="introduction">
+        <h1>CLIMB!</h1>
 
-<h3 ng-show='ready'>Performce start in: {{counter}}s</h3>
-<style>
-    h1,
-    h3 {
-        text-align: center;
-    }
-</style>
+        <h3>Introduction Introduction Introduction Introduction</h3>
+
+    </div>
+    <div id='start'>
+        <h3 ng-show='ready'>Performance starts in: {{counter}}s</h3>
+    </div>
+</div>

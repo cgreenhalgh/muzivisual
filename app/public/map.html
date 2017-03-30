@@ -1,15 +1,21 @@
 <div>
-  <div ng-show="!performing" style='position:absolute;z-index:0;left:0;top:0;width:100%;height:100%;z-index: -1;'>
-    <img src='https://i.imgsafe.org/bccf58fee0.jpg' style='width:100%;height:100%' alt='Map' />
+  <div class='bg-img-container' ng-show="!performing">
+    <img class='bk-img' src='https://i.imgsafe.org/bccf58fee0.jpg' alt='Map' width='100%' height='100%' />
   </div>
+
   <button ng-show="!performing && stop" ng-click="stop()">Stop</button>
-  <button ng-show='!performing && openCusMap' ng-click='openCusMap()'>My Journey</button>
+  <!--<a ng-show='!performing && openCusMap' href='/cus-map'>My Journey</a>-->
+  <a href="#!preview" ng-show='cusMap'>Preview</a>
   <button ng-show='preview || cusMap' ng-click='back()'>Back</button>
   <!--<button ng-show="!performing" ng-click="startMapTransition()">START</button>-->
   <div id="map" ng-show="!performing">
     <d3-map></d3-map>
   </div>
-  <div ng-show="performing">
+  <div ng-show="performing" ng-click='flip()'>
     <img id="visualImg" src="#" alt="visual image">
     <!--<h3>now: {{csname}} </h3>-->
+  </div>
+
+  <div ng-show="message">
+    <span id="map-message">{{message}}</span>
   </div>

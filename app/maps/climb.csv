@@ -1,27 +1,27 @@
 stage_name,stage,cue,img,map_x,map_y,scores,
 Base camp,begin,a1/b1/c1,https://i.imgsafe.org/c4a041f0c6.png,473,1161,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-Angry Deer,a1,a1path/b2,https://i.imgsafe.org/7bc8b0b98c.jpg,247,1078,,
-path,a1path,a2,https://i.imgsafe.org/be2f4e7984.png,171,947,,
-2a,a2,a2path/b1path,1,105,819,,
-path,a2path,a3,https://i.imgsafe.org/be2f4e7984.png,100,707,,
-3a,a3,a3path,1,107,602,,
-path,a3path,a4,https://i.imgsafe.org/be2f4e7984.png,160,492,,
-4a,a4,a5/b3,1,211,387,,
-5a,a5,end/b4,1,271,281,,
-The Stones,b1,b1path/c1,https://i.imgsafe.org/be2f584f19.png,394,1017,,
-path,b1path,b2/c1,https://i.imgsafe.org/be2f4e7984.png,460,939,,
-2b,b2,b2path/c1,1,527,866,,
-path,b2path,b3,https://i.imgsafe.org/7bc8b7c700.jpg,544,780,,
-3b,b3,b3path,1,563,680,,
-path,b3path,b4,https://i.imgsafe.org/be2f4e7984.png,551,558,,
-4b,b4,b5,1,539,432,,
-5b,b5,end/c5,1,406,317,,
-Echo,c1,c1path,https://i.imgsafe.org/be2f46afe0.png,724,1078,,
-path,c1path,c2,https://i.imgsafe.org/be2f4e7984.png,795,961,,
-2c,c2,c2path,https://i.imgsafe.org/be3757070a.png,876,850,,
-path,c2path,c3,https://i.imgsafe.org/be2f4e7984.png,851,731,,
-3c,c3,c3path,1,832,626,,
-path,c3path,c4,https://i.imgsafe.org/be2f4e7984.png,782,506,,
-4c,c4,c5,1,724,411,,
-5c,c5,end/b5,1,527,317,,
-Summit,end,,1,382,93,,
+Angry Deer,a1,a1path/b2,https://i.imgsafe.org/7bc8b0b98c.jpg,247,1078,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,a1path,a2,https://i.imgsafe.org/be2f4e7984.png,171,947,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+2a,a2,a2path/b1path,1,105,819,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,a2path,a3,https://i.imgsafe.org/be2f4e7984.png,100,707,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+3a,a3,a3path,1,107,602,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,a3path,a4,https://i.imgsafe.org/be2f4e7984.png,160,492,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+4a,a4,a5/b3,1,211,387,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+5a,a5,end/b4,1,271,281,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+The Stones,b1,b1path/c1,https://i.imgsafe.org/be2f584f19.png,394,1017,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,b1path,b2/c1,https://i.imgsafe.org/be2f4e7984.png,460,939,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+2b,b2,b2path/c1,1,527,866,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,b2path,b3,https://i.imgsafe.org/7bc8b7c700.jpg,544,780,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+3b,b3,b3path,1,563,680,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,b3path,b4,https://i.imgsafe.org/be2f4e7984.png,551,558,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+4b,b4,b5,1,539,432,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+5b,b5,end/c5,1,406,317,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+Echo,c1,c1path,https://i.imgsafe.org/be2f46afe0.png,724,1078,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,c1path,c2,https://i.imgsafe.org/be2f4e7984.png,795,961,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+2c,c2,c2path,https://i.imgsafe.org/be3757070a.png,876,850,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,c2path,c3,https://i.imgsafe.org/be2f4e7984.png,851,731,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+3c,c3,c3path,1,832,626,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+path,c3path,c4,https://i.imgsafe.org/be2f4e7984.png,782,506,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+4c,c4,c5,1,724,411,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+5c,c5,end/b5,1,527,317,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+Summit,end,,1,382,93,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg

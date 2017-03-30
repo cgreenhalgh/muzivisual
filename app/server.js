@@ -5,8 +5,8 @@ var fs = require('fs');
 var redis = require('socket.io-redis');
 var _ = require('lodash');
 
-var BK_WIDTH = 1025;
-var BK_HEIGHT = 1334;
+var BG_WIDTH = 1025;
+var BG_HEIGHT = 1334;
 
 //CORS
 app.use(function (req, res, next) {
@@ -87,30 +87,25 @@ function processData(data, res) {
   var length = rows.length;
   var stageData
 
-  var index = 6;
-  var scoreExist;
-  var i;
-  for (i = 1; i < rows.length; i++) {
+
+  for (var i = 1; i < rows.length; i++) {
     // split content based on comma
     stageRow = rows[i].split(',');
 
     // for Climb!
     // if map has its own point location setting
     if (stageRow[4] && stageRow[5]) {
-      x = (parseInt(stageRow[4]) / BK_WIDTH).toFixed(3);
-      y = (parseInt(stageRow[5]) / BK_HEIGHT).toFixed(3);
+      x = (parseInt(stageRow[4]) / BG_WIDTH).toFixed(3);
+      y = (parseInt(stageRow[5]) / BG_HEIGHT).toFixed(3);
     }
+
+    var index = 6;
+    var score = [];
 
     while (stageRow[index]) {
-      scoreExist = stageRow[index];
-      if (scoreExist) {
-        score.push(scoreExist);
-      }
+      score.push(stageRow[index]);
       index++;
     }
-
-    index = 6;
-    scoreExist = '';
 
     stageData = {
       "name": stageRow[0],

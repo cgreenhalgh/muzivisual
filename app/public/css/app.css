@@ -3,6 +3,7 @@
 
 html {
   font-family: 'Pangolin', cursive;
+  color: white;
 }
 
 /*not allow user select*/
@@ -44,11 +45,32 @@ table, th, td {
    border: 1px solid black;
    padding:5px;
 }
+
 table {
    border-collapse: collapse;
    margin:10px;
 }
 
+.bg-img{
+  width:100%;
+  height: 100%;
+}
+
+.bg-img-container{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  z-index: -1;
+}
+
+h1,
+h3 {
+  padding:0px;
+  margin:0px;
+  text-align: center;
+}
 
 #visualImg{
     margin: 0px;
@@ -56,4 +78,39 @@ table {
     /*width: 100%;*/
     -webkit-animation-name: fadeIn;
     animation-name: fadeIn;
+}
+
+#introduction{
+  margin-top: 8%;
+  padding: 10%;
+}
+
+#start{
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding-bottom: 40%;
+  text-align: center;
+}
+
+/*#map-message{
+  border: white solid 2px;
+  position: absolute;
+  z-index: 10;
+  background-color: whitesmoke;
+  color:black;
+  text-align: center;
+  vertical-align: center;
+}*/
+
+
+#map-message{
+  /*border: white solid 2px; */
+  position: absolute;
+  /*z-index: 10;*/
+  color:whitesmoke;
+  width: 100%;
+  margin-top: -100%;
+  text-align: center;
+
 }

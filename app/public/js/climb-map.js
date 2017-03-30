@@ -62,19 +62,52 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
   $scope.cstage = ''
   $scope.pstage = ''
+  var visualIdx = 0;
+  var visuals = '';
+  var visualNum = 0;
+
+  $scope.flip = function () {
+    if (visualIdx === visualNum) {
+      visualIdx = 0;
+    }
+    if (!visuals) {
+      visuals = visualMapBuilder.getVisual($scope.cstage);
+      console.log('get visual' + visuals);
+      visualNum = visuals.length;
+    }
+
+    if (visualNum > 1) {
+      d3Service.d3().then(function () {
+        console.log('flip visual');
+
+        d3.select('#visualImg')
+          .transition()
+          .duration(1000)
+          .style('opacity', 0)
+
+        setTimeout(function () {
+          d3.select('#visualImg')
+            .attr('src', visuals[visualIdx])
+            .style('opacity', 0)
+            .transition()
+            .duration(1000)
+            .style('opacity', 1)
+          visualIdx++;
+        }, 1000)
+      })
+    }
+  }
   // when data is updated
   // ps - previous stage, the passed one
   // cs - current stage, the triggered one
   // fs - future stage, the stages cued next
   var countDown = ANI_DURATION;
-  var changedStages = [];
   var stop;
 
   $scope.stop = function () {
     console.log('stop')
-    $scope.mapRecord = $scope.mapData;
+    visualMapBuilder.recordMap();
     clearInterval($scope.timerId);
-    visualMapBuilder.setMapRecord($scope.mapData);
 
     d3Service.d3().then(function (d3) {
       d3.selectAll('circle').transition().duration(0);
@@ -91,11 +124,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
   $scope.openCusMap = function () {
     $scope.stop();
+    visualMapBuilder.recordMap();
     d3Service.d3().then(function (d3) {
       d3.select('#map-container').remove();
       $location.url('/cus-map');
     })
-
   }
 
   $scope.mapData = visualMapBuilder.getMapData();
@@ -114,6 +147,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     d3Service.d3().then(function (d3) {
       d3.select('#visualImg').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
+      d3.select('#bg-img').style('width', '100%')
+        .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
       visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
     });
@@ -121,7 +156,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       $scope.cstage = 'begin'; // reveal basecamp
     }
   }
-
 
   // format stage->stage
   socket.on('vStageChange', function (data) {
@@ -131,6 +165,25 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     $scope.cstage = stages[1];
   });
 
+  socket.on('vStop', function (data) {
+    visualMapBuilder.recordMap();
+    socket.emit('vTimer', '');
+    if ($scope.performing) {
+      visualMapBuilder.exitPerformMode($scope.pstage)
+
+    } else {
+      clearInterval($scope.timerId);
+      console.log('visual stopped by Muzicode');
+      $scope.message = 'quitting...'
+      socket.emit('vTimer', '');
+    }
+
+    setTimeout(function () {
+      $location.url('/cus-map');
+      $scope.$apply();
+    }, 1000)
+  })
+
   // start a timer
   $scope.timerId = $window.setInterval(function () {
     console.log(countDown);
@@ -139,6 +192,10 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   }, 1000);
 
   $scope.$watch('cstage', function (ns, os) {
+    visualIdx = 0;
+    visuals = '';
+    visualNum = 0;
+
     if ($scope.performing) {
       if (delaybase === 1) {
         delaybase = 4;
@@ -153,6 +210,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
             socket.emit('vTimer', countDown);
             countDown--;
           }, 1000)
+          $scope.$apply();
         }, 1000)
       });
       console.log('stage change: ' + os + '-> ' + ns);
@@ -170,7 +228,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         }
       })
     }
-
   });
 
   function recordStageChange(stage, delay) {
@@ -206,8 +263,9 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', function ($scope, d3Service, visualMapBuilder, $http, $location) {
   console.log('Open Preview')
 
+  $scope.cstage = ''
+  $scope.pstage = ''
   $scope.preview = 1;
-
   $scope.mapData = visualMapBuilder.getMapData();
   if (!$scope.mapData) {
     visualMapBuilder.mapConfig().then(function (data) {
@@ -244,9 +302,10 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
   // counter for audiance
   socket.on('vStart', function (data) {
     $scope.ready = true;
-    $scope.counter = 3;
 
+    $scope.counter = 3;
     var timerId = $window.setInterval(function () {
+      socket.emit('vTimer', $scope.counter);
       console.log($scope.counter)
       $scope.counter--;
       $scope.$apply();
@@ -255,7 +314,6 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
     setTimeout(function () {
       clearInterval(timerId);
       socket.emit('vTimer', 'animation start');
-
       $location.url('/map');
       console.log(data);
       $scope.$apply();
@@ -264,9 +322,10 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
 }]);
 
 map.controller('cusMapCtrl', ['$scope', 'visualMapBuilder', 'd3Service', function ($scope, visualMapBuilder, d3Service) {
+  $scope.cstage = ''
+  $scope.pstage = ''
   $scope.cusMap = 1;
   console.log('cusMap');
-  console.log(visualMapBuilder.getMapRecord());
 
   var cusMapData = visualMapBuilder.getMapRecord();
 
@@ -274,9 +333,14 @@ map.controller('cusMapCtrl', ['$scope', 'visualMapBuilder', 'd3Service', functio
     d3Service.d3().then(function (d3) {
       d3.selectAll
       var canvas = d3.select('#map-container');
-      visualMapBuilder.drawMap(canvas, cusMapData);
+      visualMapBuilder.drawMap(canvas);
     })
+    $scope.message = 'Following are the stages that you have visited today! Click and download your music scores!'
   } else {
-    console.log('no journey yet');
+    $scope.message = 'NO RECORD YET'
+  }
+
+  $scope.openScore=  function (link){
+    $location.url(toString(link));
   }
 }])
