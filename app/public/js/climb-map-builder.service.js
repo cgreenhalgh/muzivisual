@@ -77,7 +77,26 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         })
     }
 
+    function updateMapLineAllMode(p, c, delay) {
+        console.log('updateLineAllMOde')
+        var pstage = p.stage;
+        var cstage = c.stage;
+        var ps = p.state;
+        var cs = c.state;
+
+        d3Service.d3().then(function () {
+            d3.select('#' + pstage + '_' + cstage)
+                .transition()
+                //.delay(INTERVAL * delay)
+                //.duration(INTERVAL)
+                .style("stroke-dasharray", ("0, 0"))
+                .attr('opacity', 1)
+                .attr('stroke', 'orange')
+        })
+    }
+
     function updateMapLine(p, c, fss, pcstages, delay) {
+        console.log(p.stage, c.stage)
         var cstage = c.stage;
         var cs = c.state;
         var ps, pstage, fs, fstage;
@@ -135,6 +154,52 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     return {
+        updateMapAllMode: function (cstage, pstage, flag) {
+            var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
+
+            if (flag === 1) {
+                cs = _.find(mapData, { 'stage': cstage });
+                updateMapStage(cstage, 'active', delaybase)
+            } else {
+                cs = _.find(mapData, { 'stage': cstage });
+                var cname = cs.name;
+                updateMapStage(cstage, 'rev_succ', delaybase)
+
+                // turn the previous active stage into past -  succ / fail
+                if (pstage) {
+                    ps = _.find(mapData, { 'stage': pstage });
+                    //updateMapStage(pstage, 'act', delaybase)
+
+                    // ps cue stage
+                    psCues = ps.cue.split('/');
+                    psCuesWithoutCs = _.filter(psCues, function (s) { return s !== cstage });
+
+                    // get missed stages
+                    revealeds = _.filter(mapData, { 'state': 'revealed' })
+                    if (revealeds.length > 0) {
+                        _.forEach(revealeds, function (rs) {
+                            updateMapStage(rs.stage, 'missed', delaybase)
+                        });
+                    }
+                }
+
+                // reveal new stages
+                // if (cs.cue) {
+                //     fss = _.split(cs.cue, '/');
+                //     _.forEach(fss, function (s) {
+                //         fs = _.find(mapData, { 'stage': s })
+                //         flist.push(fs);
+                //         // if (cname === 'begin') {
+                //         //     updateMapStage(fs.stage, 'revealed', delaybase + 2)
+                //         // }
+                //         // else {
+                //         updateMapStage(fs.stage, 'revealed', delaybase + 2)
+                //         //}
+                //     });
+                // }
+                updateMapLineAllMode(cs, ps, delaybase+3);
+            }
+        },
         updateMap: function (cstage, pstage) {
             console.log(cstage, pstage);
             var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
@@ -221,9 +286,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     return 'circle_' + d.stage;
                 })
                 .attr('r', R)
-                .attr('ng-click', function (d) { 
+                .attr('ng-click', function (d) {
                     var len = d.score.length;
-                    if(len){
+                    if (len) {
                         return d.score[0];
                     }
                     return '#';
@@ -232,6 +297,55 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('stroke', 'black')
                 .attr('fill', 'orange')
                 .attr('opacity', 1)
+        },
+        initMapAllMode: function (canvas, data) {
+            _.forEach(data, function (cStageDatum) {
+                if (cStageDatum.stage !== 'end') {
+                    // get all the cues of this stage
+                    var cueList = _.split(cStageDatum.cue, '/');
+                    var cueStageDatum;
+                    _.forEach(cueList, function (cueStage) {
+                        cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
+                        canvas
+                            .append('line')
+                            .attr("x1", cStageDatum.x * MAP_WIDTH)
+                            .attr("y1", cStageDatum.y * MAP_HEIGHT)
+                            .attr("x2", cueStageDatum.x * MAP_WIDTH)
+                            .attr("y2", cueStageDatum.y * MAP_HEIGHT)
+                            .attr("id", function () {
+                                return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
+                                ) : ('line_' + cStageDatum.stage)
+                            })
+                            .style("stroke-dasharray", ("6, 6"))
+                            .attr('stroke', 'white')
+                            .attr('opacity', 1)
+                            .attr('stroke-width', '2px')
+                    });
+                }
+            });
+
+            canvas
+                .selectAll('circle')
+                .data(data)
+                .enter()
+                .append('circle')
+                .attr('cx', function (d) {
+                    return d.x * MAP_WIDTH;
+                })
+                .attr('cy', function (d) {
+                    return d.y * MAP_HEIGHT;
+                })
+                .attr('r', function (d) { return 5 })
+                .attr('id', function (d) { return 'circle_' + d.stage })
+                .attr('fill', function (d) {
+                    return getCircleFillColor(d)
+                })
+                .attr('stroke', 'black')
+                .attr('stroke-width', '2px')
+                .attr('opacity', 1)
+
+            // initialize begin stage
+            d3.select('#circle_begin').attr('opacity', 1).attr('fill', 'white').attr('r', R);
         },
         initMap: function (canvas, data) {
             _.forEach(data, function (cStageDatum) {
@@ -291,7 +405,13 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         startPerformMode: function (sname) {  // cs
             var stageDatum = _.find(mapData, { 'stage': sname })
-            var delay = INTERVAL * (delaybase + 6);
+
+            //allmode
+            if (ALL_MODE) {
+                var delay = INTERVAL * (delaybase + 3);
+            } else {
+                var delay = INTERVAL * (delaybase + 6);
+            }
 
             $timeout(function () {
                 if (!stop_flag) {
