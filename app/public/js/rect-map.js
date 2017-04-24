@@ -280,7 +280,7 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
     $location.url('/map');
   }
 
-  // counter for audiance
+  // counter for audience
   socket.on('vStart', function (data) {
     $scope.ready = true;
     $scope.counter = 3;

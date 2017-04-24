@@ -2,15 +2,16 @@
 'use strict'
 
 
-
 var map = angular.module('MuziVisual.map', ['ngRoute', 'MuziVisual.visualmapbuilder']);
 // used as unit for time delay
 var INTERVAL = 1000;
 var MAP_WIDTH, MAP_HEIGHT;
 var delaybase = 1;
 
-var ALL_MODE = true;
-var ANI_DURATION = 5; // 8/5 allmode ;
+// change these two parameter to switch reveal mode
+// post-reveal (false+8)  pre-review(true+5)
+var PRE_REVEAL_MODE = false;
+var ANI_DURATION = 8; // 8/5 PreMode ;
 
 
 map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
@@ -122,6 +123,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       d3.select('#visualImg').transition().duration(0);
       //d3.select('#' + $scope.cstage).transition().duration(0);
       d3.select('#circle_' + $scope.cstage).transition().duration(0);
+
       socket.emit('vTimer', 'stop');
       visualMapBuilder.setStop();
     })
@@ -156,10 +158,10 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
 
-      if (!ALL_MODE) {
+      if (!PRE_REVEAL_MODE) {
         visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
       } else {
-        visualMapBuilder.initMapAllMode(canvas, visualMapBuilder.getMapData());
+        visualMapBuilder.initMapPreMode(canvas, visualMapBuilder.getMapData());
       }
     });
     if (!$scope.cstage) {
@@ -180,12 +182,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     socket.emit('vTimer', '');
     if ($scope.performing) {
       visualMapBuilder.exitPerformMode($scope.pstage)
-
     } else {
       clearInterval($scope.timerId);
       console.log('visual stopped by Muzicode');
       $scope.message = 'quitting...'
-      socket.emit('vTimer', '');
+        socket.emit('vTimer', '');
     }
 
     setTimeout(function () {
@@ -198,7 +199,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.timerId = $window.setInterval(function () {
     console.log(countDown);
     socket.emit('vTimer', countDown);
+
+   
+    if(countDown>=0){
     countDown--;
+    }
   }, 1000);
 
   $scope.$watch('cstage', function (ns, os) {
@@ -208,8 +213,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
     if ($scope.performing) {
       if (delaybase === 1) {
-        // allmode
-        if (ALL_MODE) {
+        // PreMode
+        if (PRE_REVEAL_MODE) {
           delaybase = 0;
         } else {
           delaybase = 4;
@@ -220,14 +225,16 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         $scope.performing = f;
         socket.emit('vTimer', 'exiting...');
 
-        if (ALL_MODE) {
-          visualMapBuilder.updateMapAllMode($scope.pstage, $scope.cstage, 2);
+        if (PRE_REVEAL_MODE) {
+          visualMapBuilder.updateMapPreMode($scope.pstage, $scope.cstage, 2);
         }
         console.log('start timer')
         setTimeout(function () {
           $scope.timerId = setInterval(function () {
             socket.emit('vTimer', countDown);
+            if(countDown>=0){
             countDown--;
+            }
           }, 1000)
           $scope.$apply();
         }, 1000)
@@ -236,8 +243,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     }
 
     if ($scope.cstage) {
-      if (ALL_MODE) {
-        visualMapBuilder.updateMapAllMode($scope.cstage, $scope.pstage, 1);
+      if (PRE_REVEAL_MODE) {
+        visualMapBuilder.updateMapPreMode($scope.cstage, $scope.pstage, 1);
       }
       else {
         visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
@@ -307,10 +314,10 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
       d3.select('#visualImg').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
-      if (!ALL_MODE) {
+      if (!PRE_REVEAL_MODE) {
         visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
       } else {
-        visualMapBuilder.initMapAllMode(canvas, visualMapBuilder.getMapData());
+        visualMapBuilder.initMapPreMode(canvas, visualMapBuilder.getMapData());
       }
 
 
@@ -328,15 +335,17 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
     $location.url('/map');
   }
 
-  // counter for audiance
+  // counter for audience
   socket.on('vStart', function (data) {
     $scope.ready = true;
 
     $scope.counter = 3;
     var timerId = $window.setInterval(function () {
-      socket.emit('vTimer', $scope.counter);
+      //socket.emit('vTimer', $scope.counter);
       console.log($scope.counter)
-      $scope.counter--;
+      if($scope.counter>=0){
+        $scope.counter--;
+      }
       $scope.$apply();
     }, 1000)
 

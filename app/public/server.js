@@ -84,7 +84,7 @@ function processData(data, res) {
   var stageRow;
   var x = '';
   var y = '';
-  var score = [];
+  var VisualContents = [];
 
   var length = rows.length;
   var stageData
@@ -102,10 +102,10 @@ function processData(data, res) {
     }
 
     var index = 6;
-    var score = [];
+    var VisualContents = [];
 
     while (stageRow[index]) {
-      score.push(stageRow[index]);
+      VisualContents.push(stageRow[index]);
       index++;
     }
 
@@ -116,7 +116,7 @@ function processData(data, res) {
       "img": stageRow[3],
       "x": x,
       "y": y,
-      "score": score,
+      "VisualContents": VisualContents,
       "state": "hidden"
     }
     resp.push(stageData);

@@ -1,4 +1,4 @@
-stage_name,stage,cue,img,map_x,map_y,scores,
+stage_name,stage,cue,img,map_x,map_y,visual contents,
 Base camp,begin,a1/b1/c1,https://i.imgsafe.org/c4a041f0c6.png,473,1161,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
 Angry Deer,a1,a1path/b2,https://i.imgsafe.org/7bc8b0b98c.jpg,247,1078,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
 path,a1path,a2,https://i.imgsafe.org/be2f4e7984.png,171,947,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg

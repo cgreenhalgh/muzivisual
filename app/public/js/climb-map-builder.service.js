@@ -1,8 +1,8 @@
+var R = 15;  
 var visualMapBuilder = angular.module('MuziVisual.visualmapbuilder', []);
 
 visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', function (d3Service, $timeout, $q, $http) {
-    console.log('visualMapBuilder');
-    var R = 15;
+    console.log('visualMapBuilder'); 
     var mapRecord;
     var mapData;
     var stop_flag;
@@ -77,8 +77,8 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         })
     }
 
-    function updateMapLineAllMode(p, c, delay) {
-        console.log('updateLineAllMOde')
+    function updateMapLinePreMode(p, c, delay) {
+        console.log('updateLinePreMode')
         var pstage = p.stage;
         var cstage = c.stage;
         var ps = p.state;
@@ -154,7 +154,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     return {
-        updateMapAllMode: function (cstage, pstage, flag) {
+        updateMapPreMode: function (cstage, pstage, flag) {
             var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
 
             if (flag === 1) {
@@ -182,22 +182,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         });
                     }
                 }
-
-                // reveal new stages
-                // if (cs.cue) {
-                //     fss = _.split(cs.cue, '/');
-                //     _.forEach(fss, function (s) {
-                //         fs = _.find(mapData, { 'stage': s })
-                //         flist.push(fs);
-                //         // if (cname === 'begin') {
-                //         //     updateMapStage(fs.stage, 'revealed', delaybase + 2)
-                //         // }
-                //         // else {
-                //         updateMapStage(fs.stage, 'revealed', delaybase + 2)
-                //         //}
-                //     });
-                // }
-                updateMapLineAllMode(cs, ps, delaybase+3);
+                updateMapLinePreMode(cs, ps, delaybase+3);
             }
         },
         updateMap: function (cstage, pstage) {
@@ -298,7 +283,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('fill', 'orange')
                 .attr('opacity', 1)
         },
-        initMapAllMode: function (canvas, data) {
+        initMapPreMode: function (canvas, data) {
             _.forEach(data, function (cStageDatum) {
                 if (cStageDatum.stage !== 'end') {
                     // get all the cues of this stage
@@ -406,8 +391,8 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         startPerformMode: function (sname) {  // cs
             var stageDatum = _.find(mapData, { 'stage': sname })
 
-            //allmode
-            if (ALL_MODE) {
+            //PreMode
+            if (PRE_REVEAL_MODE) {
                 var delay = INTERVAL * (delaybase + 3);
             } else {
                 var delay = INTERVAL * (delaybase + 6);
