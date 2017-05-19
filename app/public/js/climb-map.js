@@ -178,6 +178,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   });
 
   socket.on('vStop', function (data) {
+    console.log('stop');
     visualMapBuilder.recordMap();
     socket.emit('vTimer', '');
     if ($scope.performing) {
@@ -341,9 +342,9 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
 
     $scope.counter = 3;
     var timerId = $window.setInterval(function () {
-      //socket.emit('vTimer', $scope.counter);
+      socket.emit('vTimer', $scope.counter);
       console.log($scope.counter)
-      if($scope.counter>=0){
+      if($scope.counter>0){
         $scope.counter--;
       }
       $scope.$apply();

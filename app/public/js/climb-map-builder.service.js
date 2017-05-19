@@ -272,9 +272,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 })
                 .attr('r', R)
                 .attr('ng-click', function (d) {
-                    var len = d.score.length;
+                    var len = d.visual.length;
                     if (len) {
-                        return d.score[0];
+                        return d.visual[0];
                     }
                     return '#';
                 })
@@ -480,10 +480,10 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         getVisual: function (cstage) {
             var datum = _.find(mapData, { 'stage': cstage })
             console.log(datum)
-            var score = datum.score;
+            var visual = datum.visual;
             var img = datum.img;
-            score.push(img);
-            return score;
+            visual.push(img);
+            return visual;
         },
         getJourney: function () {
             return journeyRecord;

@@ -32,9 +32,9 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     socket.disconnect();
   })
-  // socket.on('vStart', function () {
-  //   io.to('visualRoom').emit('vStart', data);
-  // })
+  socket.on('vStart', function (data) {
+    io.to('visualRoom').emit('vStart', data);
+  })
 });
 
 app.get('/', function (req, res) {
@@ -75,7 +75,6 @@ app.get('/maps/', function (req, res) {
   });
 });
 
-
 function processData(data, res) {
   // split content based on new line
   var rows = _.split(data, /\r\n|\n/);
@@ -84,7 +83,7 @@ function processData(data, res) {
   var stageRow;
   var x = '';
   var y = '';
-  var score = [];
+  var visual = [];
 
   var length = rows.length;
   var stageData
@@ -102,10 +101,10 @@ function processData(data, res) {
     }
 
     var index = 6;
-    var score = [];
+    var visual = [];
 
     while (stageRow[index]) {
-      score.push(stageRow[index]);
+      visual.push(stageRow[index]);
       index++;
     }
 
@@ -116,7 +115,7 @@ function processData(data, res) {
       "img": stageRow[3],
       "x": x,
       "y": y,
-      "score": score,
+      "visual": visual,
       "state": "hidden"
     }
     resp.push(stageData);

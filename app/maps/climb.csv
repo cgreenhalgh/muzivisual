@@ -1,27 +1,27 @@
-stage_name,stage,cue,img,map_x,map_y,visual contents,
-Base camp,begin,a1/b1/c1,https://i.imgsafe.org/c4a041f0c6.png,473,1161,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-Angry Deer,a1,a1path/b2,https://i.imgsafe.org/7bc8b0b98c.jpg,247,1078,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,a1path,a2,https://i.imgsafe.org/be2f4e7984.png,171,947,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-2a,a2,a2path/b1path,1,105,819,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,a2path,a3,https://i.imgsafe.org/be2f4e7984.png,100,707,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-3a,a3,a3path,1,107,602,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,a3path,a4,https://i.imgsafe.org/be2f4e7984.png,160,492,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-4a,a4,a5/b3,1,211,387,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-5a,a5,end/b4,1,271,281,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-The Stones,b1,b1path/c1,https://i.imgsafe.org/be2f584f19.png,394,1017,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,b1path,b2/c1,https://i.imgsafe.org/be2f4e7984.png,460,939,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-2b,b2,b2path/c1,1,527,866,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,b2path,b3,https://i.imgsafe.org/7bc8b7c700.jpg,544,780,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-3b,b3,b3path,1,563,680,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,b3path,b4,https://i.imgsafe.org/be2f4e7984.png,551,558,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-4b,b4,b5,1,539,432,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-5b,b5,end/c5,1,406,317,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-Echo,c1,c1path,https://i.imgsafe.org/be2f46afe0.png,724,1078,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,c1path,c2,https://i.imgsafe.org/be2f4e7984.png,795,961,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-2c,c2,c2path,https://i.imgsafe.org/be3757070a.png,876,850,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,c2path,c3,https://i.imgsafe.org/be2f4e7984.png,851,731,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-3c,c3,c3path,1,832,626,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-path,c3path,c4,https://i.imgsafe.org/be2f4e7984.png,782,506,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-4c,c4,c5,1,724,411,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-5c,c5,end/b5,1,527,317,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
-Summit,end,,1,382,93,https://i.imgsafe.org/c4a73d6421.jpg,https://i.imgsafe.org/c4c4c3930a.jpg
+stage_name,stage,cue,img,map_x,map_y,visual contents
+Base camp,begin,a1/b1/c1,https://s27.postimg.org/w71xjxiwz/basecamp.png,473,1161,https://s25.postimg.org/6hjwfq52n/basecamp.png
+Angry Deer,a1,a1path/b2,https://i.imgsafe.org/7bc8b0b98c.jpg,247,1078,https://i.imgsafe.org/c4a73d6421.jpg
+path,a1path,a2,https://s27.postimg.org/iz2jqzldv/path.png,171,947,https://i.imgsafe.org/c4a73d6421.jpg
+2a,a2,a2path/b1path,1,105,819,https://i.imgsafe.org/c4a73d6421.jpg
+path,a2path,a3,https://s27.postimg.org/iz2jqzldv/path.png,100,707,https://i.imgsafe.org/c4a73d6421.jpg
+3a,a3,a3path,1,107,602,https://i.imgsafe.org/c4a73d6421.jpg
+path,a3path,a4,https://s27.postimg.org/iz2jqzldv/path.png,160,492,https://i.imgsafe.org/c4a73d6421.jpg
+4a,a4,a5/b3,1,211,387,https://i.imgsafe.org/c4a73d6421.jpg
+5a,a5,end/b4,1,271,281,https://i.imgsafe.org/c4a73d6421.jpg
+The Stones,b1,b1path/c1,https://s27.postimg.org/mhejndm9v/stones.png,394,1017,https://s25.postimg.org/4gtcuw8xb/path.png
+path,b1path,b2/c1,https://s27.postimg.org/iz2jqzldv/path.png,460,939,https://i.imgsafe.org/c4a73d6421.jpg
+2b,b2,b2path/c1,1,527,866,https://i.imgsafe.org/c4a73d6421.jpg
+path,b2path,b3,https://s27.postimg.org/iz2jqzldv/path.png,544,780,https://i.imgsafe.org/c4a73d6421.jpg
+3b,b3,b3path,1,563,680,https://i.imgsafe.org/c4a73d6421.jpg
+path,b3path,b4,https://s27.postimg.org/iz2jqzldv/path.png,551,558,https://i.imgsafe.org/c4a73d6421.jpg
+4b,b4,b5,1,539,432,https://i.imgsafe.org/c4a73d6421.jpg
+5b,b5,end/c5,1,406,317,https://i.imgsafe.org/c4a73d6421.jpg
+Echo,c1,c1path,https://s27.postimg.org/y92ey6gw3/echo.png,724,1078,https://s25.postimg.org/6k3s2k8q7/echo.png
+path,c1path,c2,https://s27.postimg.org/iz2jqzldv/path.png,795,961,https://s25.postimg.org/4gtcuw8xb/path.png
+2c,c2,c2path,https://s27.postimg.org/nar5fzsar/cow.png,876,850,https://s25.postimg.org/6zf1vkunj/cow.png
+path,c2path,c3,https://s27.postimg.org/iz2jqzldv/path.png,851,731,https://s25.postimg.org/4gtcuw8xb/path.png
+3c,c3,c3path,1,832,626,https://i.imgsafe.org/c4a73d6421.jpg
+path,c3path,c4,https://s27.postimg.org/iz2jqzldv/path.png,782,506,https://s25.postimg.org/4gtcuw8xb/path.png
+4c,c4,c5,1,724,411,https://i.imgsafe.org/c4a73d6421.jpg
+5c,c5,end/b5,1,527,317,https://i.imgsafe.org/c4a73d6421.jpg
+Summit,end,,1,382,93,https://i.imgsafe.org/c4a73d6421.jpg

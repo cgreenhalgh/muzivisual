@@ -6,6 +6,11 @@ html {
   color: white;
 }
 
+a{
+  color: black
+}
+
+
 /*not allow user select*/
 body{
   -webkit-touch-callout: none;
