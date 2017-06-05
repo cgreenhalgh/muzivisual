@@ -17,7 +17,13 @@ app.use(function (req, res, next) {
   next();
 });
 
-io.adapter(redis({ host: '127.0.0.1', port: 6379 }));
+var redis_host = process.env.REDIS_HOST || '127.0.0.1';
+var redis_config = { host: redis_host, port: 6379 };
+if (process.env.REDIS_PASSWORD) {
+	redis_config.auth_pass = process.env.REDIS_PASSWORD;
+}
+console.log('using redis config '+JSON.stringify(redis_config));
+io.adapter(redis(redis_config));
 
 io.on('connection', function (socket) {
   socket.join('visualRoom');
