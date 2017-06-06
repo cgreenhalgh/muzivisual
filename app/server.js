@@ -88,11 +88,13 @@ function processData(data, res) {
   var y = '';
   var visual = [];
 
-  var length = rows.length;
+  var rlength = rows.length;
+
+  console.log('Rlength is : ', rlength);
   var stageData;
 
 
-  for (var i = 1; i < rows.length; i++) {
+  for (var i = 1; i < rlength; i++) {
     // split content based on comma
     stageRow = rows[i].split(',');
 
@@ -101,13 +103,15 @@ function processData(data, res) {
       "stage":stageRow[1],
       "cue":stageRow[2],
       "x":stageRow[3],
-      "y":stageRow[4]
+      "y":stageRow[4],
+      "path":stageRow[5]
     }
 
     resp.push(stageData);
   }
   res.set('Content-Type', 'application/json').send(JSON.stringify(resp));
   console.log('map data sent.');
+  console.log(resp)
 }
 
 var port = process.env.PORT || 8000;

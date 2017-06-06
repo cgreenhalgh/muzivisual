@@ -1,4 +1,4 @@
-var R = 15;  
+var R = 10;  
 var visualMapBuilder = angular.module('MuziVisual.visualmapbuilder', []);
 
 visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', function (d3Service, $timeout, $q, $http) {
@@ -9,11 +9,19 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     var journeyRecord = [];
 
     function getCircleFillColor(d) { // check if its a path or a stage 
+
+        console.log('dpath:',d.path)
         if (d.state === 'rev_succ') {
             return 'orange'
         }
-        else if (d.state === 'rev_fail') {
-            return 'red'
+        else if(d.path === '1'){
+            return '#C8F0D2' //green
+        }
+        else if(d.path === '2'){
+            return '#F6E5A9' //yellow
+        }
+        else if(d.path === '0'){
+            return '#C3C2F4' //purple
         }
         else {
             return 'white';
@@ -42,10 +50,10 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function getCircleRadius(d) {
-        if (_.includes(d.stage, 'path')) {
-            return 10;
+        if (_.head(d.stage)==='p') {
+            return 6;
         } else if (d.state === 'active') {
-            return 20;
+            return 15;
         } else {
             return R;
         }
@@ -340,6 +348,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     var cueStageDatum;
                     _.forEach(cueList, function (cueStage) {
                         cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
+
                         canvas
                             .append('line')
                             .attr("x1", cStageDatum.x * MAP_WIDTH)
