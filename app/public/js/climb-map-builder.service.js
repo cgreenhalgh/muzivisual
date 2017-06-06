@@ -334,7 +334,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         initMap: function (canvas, data) {
             _.forEach(data, function (cStageDatum) {
-                if (cStageDatum.stage !== 'end') {
+                if (cStageDatum.stage !== 'summit') {
                     // get all the cues of this stage
                     var cueList = _.split(cStageDatum.cue, '/');
                     var cueStageDatum;

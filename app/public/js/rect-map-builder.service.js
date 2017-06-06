@@ -132,6 +132,8 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             pathStageContainer.push(orderedSpePath);
         });
 
+        console.log(pathStageContainer);
+
         var data = []; // data contains data with x, y and are ordered
         var length = 0;
         var pathData;

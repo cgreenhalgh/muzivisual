@@ -28,7 +28,7 @@ MuziVisual: localhost:8000
 Framework: Node.js + Express.js + Angualr.js + socket.io
 
 #socket.io - communication
-Roomname: visualRoom
+Roomname: mobileapp
 Muzicodes: on : vStageChange - notify the stage change
 				vStart - notify the performance starts
 				vTimer - synchronized timer

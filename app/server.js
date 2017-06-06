@@ -5,9 +5,6 @@ var fs = require('fs');
 var redis = require('socket.io-redis');
 var _ = require('lodash');
 
-var BG_WIDTH = 1025;
-var BG_HEIGHT = 1334;
-
 //CORS
 app.use(function (req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', 'http://127.0.0.1:3000');
@@ -20,20 +17,20 @@ app.use(function (req, res, next) {
 io.adapter(redis({ host: '127.0.0.1', port: 6379 }));
 
 io.on('connection', function (socket) {
-  socket.join('visualRoom');
+  socket.join('mobileapp');
 
   console.log('A client connected.');
   socket.on('vTimer', function (data) {
     console.log(data);
     if(data<=0){return;}
-    io.to('visualRoom').emit('vTimer', data);
+    io.to('mobileapp').emit('vTimer', data);
   })
 
   socket.on('disconnect', function () {
     socket.disconnect();
   })
   socket.on('vStart', function (data) {
-    io.to('visualRoom').emit('vStart', data);
+    io.to('mobileapp').emit('vStart', data);
   })
 });
 
@@ -69,7 +66,7 @@ app.get('/maps/', function (req, res) {
     }
   });
 
-  fs.readFile(DATA_DIR + '/climb.csv', function (err, data) {
+  fs.readFile(DATA_DIR + '/Climb!June8.csv', function (err, data) {
     if (err) throw err;
     processData(data, res);
   });
@@ -86,38 +83,21 @@ function processData(data, res) {
   var visual = [];
 
   var length = rows.length;
-  var stageData
+  var stageData;
 
 
   for (var i = 1; i < rows.length; i++) {
     // split content based on comma
     stageRow = rows[i].split(',');
 
-    // for Climb!
-    // if map has its own point location setting
-    if (stageRow[4] && stageRow[5]) {
-      x = (parseInt(stageRow[4]) / BG_WIDTH).toFixed(3);
-      y = (parseInt(stageRow[5]) / BG_HEIGHT).toFixed(3);
-    }
-
-    var index = 6;
-    var visual = [];
-
-    while (stageRow[index]) {
-      visual.push(stageRow[index]);
-      index++;
-    }
-
     stageData = {
       "name": stageRow[0],
-      "stage": stageRow[1],
-      "cue": stageRow[2],
-      "img": stageRow[3],
-      "x": x,
-      "y": y,
-      "visual": visual,
-      "state": "hidden"
+      "stage":stageRow[1],
+      "cue":stageRow[2],
+      "x":stageRow[3],
+      "y":stageRow[4]
     }
+
     resp.push(stageData);
   }
   res.set('Content-Type', 'application/json').send(JSON.stringify(resp));
