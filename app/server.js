@@ -26,11 +26,11 @@ io.on('connection', function (socket) {
   socket.join('mobileapp');
 
   console.log('A client connected.');
-  socket.on('vTimer', function (data) {
-    console.log(data);
-    if (data <= 0) { return; }
-    io.to('mobileapp').emit('vTimer', data);
-  })
+  // socket.on('vTimer', function (data) {
+  //   console.log(data);
+  //   if (data <= 0) { return; }
+  //   io.to('mobileapp').emit('vTimer', data);
+  // })
 
   socket.on('disconnect', function () {
     socket.disconnect();
@@ -46,10 +46,6 @@ app.get('/', function (req, res) {
   res.sendFile(__dirname + '/public/index.html');
 });
 
-// app.get('/map', function (req, res) {
-//   console.log('get /map')
-//   res.sendFile(__dirname + '/public/map.html')
-// })
 
 function returnPublicFile(req, res) {
   var url = require('url').parse(req.url);
@@ -105,7 +101,7 @@ function processNarrativeData(data, res) {
   var stageChange = '';
 
   for (var i = 1; i < rlength; i++) {
-    row = rows[i].split(',');
+    row = rows[i].split('/');
 
     stageChange = row[0] + '->' + row[1];
 

@@ -128,7 +128,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                             .attr('stroke', function () { return getLineColor(ps) })
                     }
 
-                    console.log("lines: ", '#' + pstage + '_' + cstage)
+                    console.log("lines: ", '#line_' + pstage + '_' + cstage)
                     // update lines linking cstage and fstage -> black dotted-line
                     d3.select('#line_' + cstage + '_' + fstage)
                         .transition()
@@ -139,7 +139,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         .attr('stroke', function () { return getLineColor(cs) })
                 })
 
-                console.log("lines: ", '#' + cstage + '_' + fstage)
+                console.log("lines: ", '#line_' + cstage + '_' + fstage)
             }
             else {  // if there is no fs i.e. reach the summit - need test? 
                 d3.select('#line_' + ps)
@@ -204,12 +204,12 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             // active new path
             cs = _.find(mapData, { 'stage': cstage });
             var cname = cs.name;
-            updateMapStage(cstage, 'active', delaybase + 1)
+            updateMapStage(cstage, 'active', delaybase)
 
             // turn the previous active stage into past -  succ / fail
             if (pstage) {
                 ps = _.find(mapData, { 'stage': pstage });
-                updateMapStage(pstage, 'rev_succ', delaybase)
+                updateMapStage(pstage, 'rev_succ', 0)
 
                 // ps cue stage
                 psCues = ps.cue.split('/');
@@ -219,7 +219,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 revealeds = _.filter(mapData, { 'state': 'revealed' })
                 if (revealeds.length > 0) {
                     _.forEach(revealeds, function (rs) {
-                        updateMapStage(rs.stage, 'missed', delaybase + 2)
+                        updateMapStage(rs.stage, 'missed', delaybase + 1)
                     });
                 }
             }
@@ -231,14 +231,14 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     fs = _.find(mapData, { 'stage': s })
                     flist.push(fs);
                     if (cname === 'basecamp') {
-                        updateMapStage(fs.stage, 'revealed', delaybase + 2)
+                        updateMapStage(fs.stage, 'revealed', delaybase + 1)
                     }
                     else {
                         updateMapStage(fs.stage, 'revealed', delaybase + 4)
                     }
                 });
             }
-            updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase + 1);
+            updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase);
         },
         drawMap: function (canvas) {
             var data = journeyRecord;
@@ -291,7 +291,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     return '#';
                 })
                 .attr('opacity', 0)
-                .attr('stroke', 'black')
+                .attr('stroke', 'orange')
                 .attr('fill', 'orange')
                 .attr('opacity', 1)
         },
@@ -406,7 +406,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
 
             //PreMode
             if (PRE_REVEAL_MODE) {
-                var delay = INTERVAL * (delaybase + 3);
+                var delay = INTERVAL * (delaybase + 2);
             } else {
                 var delay = INTERVAL * (delaybase + 6);
             }

@@ -18,7 +18,7 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
   $routeProvider.when('/', {
     templateUrl: 'menu.html',
     controller: 'menuCtrl'
-  }).when('/map', {
+  }).when('/performance/:performanceid', {
     templateUrl: '/map.html',
     controller: 'mapCtrl'
   }).when('/preview', {
@@ -151,7 +151,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   socket.on('vStageChange', function (data) {
     console.log("visual-front receive: " + data);
     var da = data.split(':');
-    var performanceid = da[0];
+
     var stageChange = da[1];
 
     var stages = stageChange.split('->');
@@ -237,7 +237,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         if (PRE_REVEAL_MODE) {
           delaybase = 0;
         } else {
-          delaybase = 4;
+          delaybase = 2;
         }
       }
 
@@ -259,7 +259,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         //   $scope.$apply();
         // }, 1000)
       });
-      console.log('stage change: ' + os + '-> ' + ns);
+      console.log('stage change: ' + os + '->' + ns);
     }
 
     if ($scope.cstage) {
@@ -378,15 +378,13 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
 }])
 
 map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function ($scope, $location, socket, $window) {
-  $scope.ready = false;
-  $scope.start = function () {
-    $location.url('/map');
-  }
-  
   socket.on('vStart', function (data) {
     //$scope.ready = true;
-    $location.url('/map');
-    console.log(data);
+
+    var performanceid = data.split(':')[0];
+    console.log('PerformanceID: ', performanceid);
+
+    $location.path('/performance/' + performanceid);
   });
 }]);
 
@@ -404,7 +402,7 @@ map.controller('cusMapCtrl', ['$scope', 'visualMapBuilder', 'd3Service', functio
       var canvas = d3.select('#map-container');
       visualMapBuilder.drawMap(canvas);
     })
-    $scope.message = 'Following are the stages that you have visited today! Click and download your music scores!'
+    // $scope.message = 'Following are the stages that you have visited today! Click and download your music scores!'
   } else {
     $scope.message = 'NO RECORD YET'
   }
