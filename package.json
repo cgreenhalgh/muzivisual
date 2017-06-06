@@ -14,8 +14,7 @@
     "karma-firefox-launcher": "^0.1.7",
     "karma-jasmine": "^0.3.8",
     "karma-junit-reporter": "^0.4.1",
-    "protractor": "^4.0.9",
-    "lodash": "^4.17.4"
+    "protractor": "^4.0.9"
   },
   "scripts": {
     "postinstall": "bower install",
@@ -37,6 +36,8 @@
     "express": "^4.14.1",
     "fs": "0.0.1-security",
     "redis": "^2.7.1",
-    "socket.io-redis": "^4.0.0"
+    "socket.io-redis": "^4.0.0",
+    "socket.io": "1.7.x",
+    "lodash": "^4.17.4"
   }
 }
