@@ -1,21 +1,30 @@
 <div>
-  <div class='bg-img-container' ng-show="!performing">
-    <img class='bk-img' src='https://s25.postimg.org/a6snr8g1b/Climb_Map_background.jpg' alt='Map' width='100%' height='100%' />
+  <div class='bg-img-container' >
+    <img class='bk-img' src='https://s25.postimg.org/a6snr8g1b/Climb_Map_background.jpg' alt='Map' width='100%' height='100%'
+    />
   </div>
 
-  <button ng-show="!performing && stop" ng-click="stop()">Stop</button>
   <!--<a ng-show='!performing && openCusMap' href='/cus-map'>My Journey</a>-->
   <!--<a href="#!preview" ng-show='cusMap'>Preview</a>-->
   <button ng-show='preview || cusMap' ng-click='back()'>Back</button>
   <!--<button ng-show="!performing" ng-click="startMapTransition()">START</button>-->
-  <div id="map" ng-show="!performing">
+  <div id="map">
     <d3-map></d3-map>
   </div>
+
+  <div id="fragment" style="position:absolute;margin-top:-200px;text-align:center; width:100%; color:white;">
+    <p>
+      <h2 id="title">{{title}}</h2>
+    </p>
+    <p id="narrative">{{narrative}}</p>
+    <!--<p>{{narrativeData}}</p>-->
+  </div>
+
+  <!--
   <div ng-show="performing" ng-click='flip()'>
     <img id="visualImg" src="#" alt="visual image">
-    <!--<h3>now: {{csname}} </h3>-->
   </div>
 
   <div ng-show="message">
     <span id="map-message">{{message}}</span>
-  </div>
+  </div>-->

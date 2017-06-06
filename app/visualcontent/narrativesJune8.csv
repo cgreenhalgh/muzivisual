@@ -1,0 +1,27 @@
+from,to,narrative
+,basecamp,Avatar prepares for their climb at Basecamp.
+basecamp,1a,Avatar chooses to climb the first path. An angry deer confronts Avatar.
+basecamp,1b,Avatar chooses to climb the second path. Take care! Stones are falling down the path.
+1a,p1a,Avatar escapes the deer and heads along the first path.
+p1a,2a,The path is flooded. Avatar must wade through the water.
+2a,p1b,Avatar emerges from the water and continues up the path.
+p1b,3a,Avatar discovers a beautiful stone that shimmers in the light.
+3a,p1c,Avatar drops the stone and continues along the path.
+P1c,4a,Avatar encounters a sleeping bear and tries to walk past without waking it.
+4a,5a,Avatar is nearly past the bear when they hear rocks rolling down the mountain.
+5a,summit,Avatar dodges the rocks to emerge at the summit.
+1b,p2a,Avatar dances through the stones to continue along the second path.
+p2a,2b,Avatar discovers a tree lying across the path.
+2b,p2b,Avatar clambers over the tree and heads up the path.
+p2b,3b,The path winds into a ghostly forest.
+3b,p2c,Avatar emerges into the uplands and continues along the second path.
+p2c,4b,Avatar has a hallucination where they meet their former lover.
+4b,5b,Birds attack Avatar! The hallucination is broken.
+5b,summit,Avatar runs from the birds to emerge at the summit.
+1a,2b,"Avatar escapes the deer by veering onto the second path, but discovers a tree lying across it."
+2b,1a,"Avatar canÍt cross the tree, so must climb down to the first path where they encounter an angry deer."
+1b,1a,Avatar narrowly dodges the stones by diving onto the first path to be confronted by an angry deer.
+2a,1b,Avatar canÍt cross this tree. They jump to the first path only to see stones falling towards them. 
+4a,3b,Oh no! Avatar wakes the bear. They run to the second path to be swallowed by a ghostly forest.
+5a,4b,Avatar is hit by a stone! They tumble over to the second path and hallucinate about meeting their former lover.
+5b,5a,"Avatar takes the first path to escape the birds, but now hears rocks falling down the mountain."

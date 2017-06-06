@@ -72,37 +72,10 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   var visuals = '';
   var visualNum = 0;
 
-  $scope.flip = function () {
-    if (visualIdx === visualNum) {
-      visualIdx = 0;
-    }
-    if (!visuals) {
-      visuals = visualMapBuilder.getVisual($scope.cstage);
-      console.log('get visual' + visuals);
-      visualNum = visuals.length;
-    }
+  visualMapBuilder.narrativeConfig().then(function (data) {
+    $scope.narrativeData = data;
+  })
 
-    if (visualNum > 1) {
-      d3Service.d3().then(function () {
-        console.log('flip visual');
-
-        d3.select('#visualImg')
-          .transition()
-          .duration(1000)
-          .style('opacity', 0)
-
-        setTimeout(function () {
-          d3.select('#visualImg')
-            .attr('src', visuals[visualIdx])
-            .style('opacity', 0)
-            .transition()
-            .duration(1000)
-            .style('opacity', 1)
-          visualIdx++;
-        }, 1000)
-      })
-    }
-  }
   // when data is updated
   // ps - previous stage, the passed one
   // cs - current stage, the triggered one
@@ -113,7 +86,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.stop = function () {
     console.log('stop')
     visualMapBuilder.recordMap();
-    clearInterval($scope.timerId);
+    //clearInterval($scope.timerId);
 
     d3Service.d3().then(function (d3) {
       d3.selectAll('circle').transition().duration(0);
@@ -124,7 +97,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       //d3.select('#' + $scope.cstage).transition().duration(0);
       d3.select('#circle_' + $scope.cstage).transition().duration(0);
 
-      socket.emit('vTimer', 'stop');
+      //socket.emit('vTimer', 'stop');
       visualMapBuilder.setStop();
     })
   }
@@ -137,6 +110,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       $location.url('/cus-map');
     })
   }
+
+  visualMapBuilder.narrativeConfig().then(function (data) {
+    console.log('load narrative: ' + JSON.stringify(data));
+    $scope.narrativeData = data;
+  })
 
   $scope.mapData = visualMapBuilder.getMapData();
   if (!$scope.mapData) {
@@ -165,29 +143,80 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       }
     });
     if (!$scope.cstage) {
-      $scope.cstage = 'begin'; // reveal basecamp
+      $scope.cstage = 'basecamp'; // reveal basecamp
     }
   }
 
   // format stage->stage
   socket.on('vStageChange', function (data) {
     console.log("visual-front receive: " + data);
-    var stages = data.split('->')
+    var da = data.split(':');
+    var performanceid = da[0];
+    var stageChange = da[1];
+
+    var stages = stageChange.split('->');
     $scope.pstage = stages[0];
     $scope.cstage = stages[1];
+
+    d3Service.d3().then(function (d3) {
+      d3.select('#title')
+        .transition()
+        .duration(INTERVAL)
+        .style('opacity', '0')
+
+      d3.select('#narrative')
+        .transition()
+        .duration(INTERVAL)
+        .style('opacity', '0')
+    });
+
+
+    // $scope.flip = function () {
+    //   if (visualIdx === visualNum) {
+    //     visualIdx = 0;
+    //   }
+    //   if (!visuals) {
+    //     visuals = visualMapBuilder.getVisual($scope.cstage);
+    //     console.log('get visual' + visuals);
+    //     visualNum = visuals.length;
+    //   }
+
+    //   if (visualNum > 1) {
+    //     d3Service.d3().then(function () {
+    //       console.log('flip visual');
+
+    //       d3.select('#visualImg')
+    //         .transition()
+    //         .duration(1000)
+    //         .style('opacity', 0)
+
+    //       setTimeout(function () {
+    //         d3.select('#visualImg')
+    //           .attr('src', visuals[visualIdx])
+    //           .style('opacity', 0)
+    //           .transition()
+    //           .duration(1000)
+    //           .style('opacity', 1)
+    //         visualIdx++;
+    //       }, 1000)
+    //     })
+    //   }
+    // }
+
+
   });
 
   socket.on('vStop', function (data) {
     console.log('stop');
     visualMapBuilder.recordMap();
-    socket.emit('vTimer', '');
+    //socket.emit('vTimer', '');
     if ($scope.performing) {
       visualMapBuilder.exitPerformMode($scope.pstage)
     } else {
-      clearInterval($scope.timerId);
+      //clearInterval($scope.timerId);
       console.log('visual stopped by Muzicode');
       $scope.message = 'quitting...'
-        socket.emit('vTimer', '');
+      //socket.emit('vTimer', '');
     }
 
     setTimeout(function () {
@@ -196,16 +225,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     }, 1000)
   })
 
-  // start a timer
-  $scope.timerId = $window.setInterval(function () {
-    console.log(countDown);
-    socket.emit('vTimer', countDown);
-
-   
-    if(countDown>=0){
-    countDown--;
-    }
-  }, 1000);
 
   $scope.$watch('cstage', function (ns, os) {
     visualIdx = 0;
@@ -224,21 +243,21 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
       visualMapBuilder.exitPerformMode($scope.pstage).then(function (f) {
         $scope.performing = f;
-        socket.emit('vTimer', 'exiting...');
+        //socket.emit('vTimer', 'exiting...');
 
         if (PRE_REVEAL_MODE) {
           visualMapBuilder.updateMapPreMode($scope.pstage, $scope.cstage, 2);
         }
-        console.log('start timer')
-        setTimeout(function () {
-          $scope.timerId = setInterval(function () {
-            socket.emit('vTimer', countDown);
-            if(countDown>=0){
-            countDown--;
-            }
-          }, 1000)
-          $scope.$apply();
-        }, 1000)
+        //console.log('start timer')
+        // setTimeout(function () {
+        //   $scope.timerId = setInterval(function () {
+        //     socket.emit('vTimer', countDown);
+        //     if(countDown>=0){
+        //     countDown--;
+        //     }
+        //   }, 1000)
+        //   $scope.$apply();
+        // }, 1000)
       });
       console.log('stage change: ' + os + '-> ' + ns);
     }
@@ -253,10 +272,37 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       visualMapBuilder.startPerformMode($scope.cstage).then(function (t) {
         if (!visualMapBuilder.getStop()) {
           $scope.performing = t;
-          clearInterval($scope.timerId);
-          socket.emit('vTimer', 'performing...');
+
           countDown = ANI_DURATION;
           console.log('performMode on');
+
+          var stageChange = '';
+
+          if ($scope.pstage) {
+            stageChange = $scope.pstage + '->' + $scope.cstage;
+          } else {
+            stageChange = '->' + $scope.cstage;
+          }
+
+          var narrativeData = _.find($scope.narrativeData, { "stageChange": stageChange });
+
+          console.log(stageChange, narrativeData)
+
+          var stageData = _.find($scope.mapData, { 'stage': narrativeData.to });
+          $scope.title = stageData.name;
+          $scope.narrative = narrativeData.narrative;
+
+          d3Service.d3().then(function (d3) {
+            d3.select('#title')
+              .transition()
+              .duration(INTERVAL)
+              .style('opacity', '1')
+
+            d3.select('#narrative')
+              .transition()
+              .duration(INTERVAL)
+              .style('opacity', '1')
+          });
         }
       })
     }
@@ -299,6 +345,7 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
   $scope.pstage = ''
   $scope.preview = 1;
   $scope.mapData = visualMapBuilder.getMapData();
+
   if (!$scope.mapData) {
     visualMapBuilder.mapConfig().then(function (data) {
       console.log("LOAD MAP: " + JSON.stringify(data));
@@ -321,13 +368,13 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
         visualMapBuilder.initMapPreMode(canvas, visualMapBuilder.getMapData());
       }
 
-
       d3.selectAll('line').attr('opacity', '1').attr('stroke', 'white')
       d3.selectAll('circle').attr('opacity', '1')
       // d3.selectAll('text').attr('opacity', '1')
       d3.select('#circle_begin').attr('fill', 'white')
     });
   }
+
 }])
 
 map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function ($scope, $location, socket, $window) {
@@ -335,28 +382,11 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
   $scope.start = function () {
     $location.url('/map');
   }
-
-  // counter for audience
+  
   socket.on('vStart', function (data) {
-    $scope.ready = true;
-
-    $scope.counter = 3;
-    var timerId = $window.setInterval(function () {
-      socket.emit('vTimer', $scope.counter);
-      console.log($scope.counter)
-      if($scope.counter>0){
-        $scope.counter--;
-      }
-      $scope.$apply();
-    }, 1000)
-
-    setTimeout(function () {
-      clearInterval(timerId);
-      socket.emit('vTimer', 'animation start');
-      $location.url('/map');
-      console.log(data);
-      $scope.$apply();
-    }, 4000)
+    //$scope.ready = true;
+    $location.url('/map');
+    console.log(data);
   });
 }]);
 
