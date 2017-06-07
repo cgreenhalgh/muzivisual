@@ -14,6 +14,7 @@ var PRE_REVEAL_MODE = false;
 var ANI_DURATION = 8; // 8/5 PreMode ;
 
 
+
 map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
   $routeProvider.when('/', {
     templateUrl: 'menu.html',
@@ -72,49 +73,26 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   var visuals = '';
   var visualNum = 0;
 
-  visualMapBuilder.narrativeConfig().then(function (data) {
-    $scope.narrativeData = data;
-  })
+  console.log('mapctrl')
 
-  // when data is updated
-  // ps - previous stage, the passed one
-  // cs - current stage, the triggered one
-  // fs - future stage, the stages cued next
-  var countDown = ANI_DURATION;
-  var stop;
-
-  $scope.stop = function () {
-    console.log('stop')
-    visualMapBuilder.recordMap();
-    //clearInterval($scope.timerId);
-
-    d3Service.d3().then(function (d3) {
-      d3.selectAll('circle').transition().duration(0);
-      d3.selectAll('img').transition().duration(0);
-      d3.selectAll('line').transition().duration(0);
-      //d3.selectAll('text').transition().duration(0);
-      d3.select('#visualImg').transition().duration(0);
-      //d3.select('#' + $scope.cstage).transition().duration(0);
-      d3.select('#circle_' + $scope.cstage).transition().duration(0);
-
-      //socket.emit('vTimer', 'stop');
-      visualMapBuilder.setStop();
-    })
+  var params = $location.search();
+  console.log('params', params);
+  var performanceid = params['p'] === undefined ? '' : params['p'];
+  if (performanceid) {
+    console.log('client for performance ' + performanceid);
+    socket.emit('client', performanceid);
+  } else {
+    console.log('no performance id!');
+    alert('Sorry, this URL is wrong! (there is no performance specified)');
   }
 
-  $scope.openCusMap = function () {
-    $scope.stop();
-    visualMapBuilder.recordMap();
-    d3Service.d3().then(function (d3) {
-      d3.select('#map-container').remove();
-      $location.url('/cus-map');
+  $scope.narrativeData = visualMapBuilder.getNarrativeData();
+  if (!$scope.narrativeData) {
+    visualMapBuilder.narrativeConfig().then(function (data) {
+      console.log('load narrative: ' + JSON.stringify(data));
+      $scope.narrativeData = data;
     })
   }
-
-  visualMapBuilder.narrativeConfig().then(function (data) {
-    console.log('load narrative: ' + JSON.stringify(data));
-    $scope.narrativeData = data;
-  })
 
   $scope.mapData = visualMapBuilder.getMapData();
   if (!$scope.mapData) {
@@ -123,12 +101,48 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       visualMapBuilder.setMapData(data);
       $scope.mapData = data;
       initMap();
+      $scope.cstage = 'basecamp';
     });
-  } else {
-    initMap();
   }
 
+  // when data is updated
+  // ps - previous stage, the passed one
+  // cs - current stage, the triggered one
+  // fs - future stage, the stages cued next
+  // var countDown = ANI_DURATION;
+  // var stop;
+
+  // $scope.stop = function () {
+  //   console.log('stop')
+  //   visualMapBuilder.recordMap();
+  //   //clearInterval($scope.timerId);
+
+  //   d3Service.d3().then(function (d3) {
+  //     d3.selectAll('circle').transition().duration(0);
+  //     d3.selectAll('img').transition().duration(0);
+  //     d3.selectAll('line').transition().duration(0);
+  //     //d3.selectAll('text').transition().duration(0);
+  //     d3.select('#visualImg').transition().duration(0);
+  //     //d3.select('#' + $scope.cstage).transition().duration(0);
+  //     d3.select('#circle_' + $scope.cstage).transition().duration(0);
+
+  //     //socket.emit('vTimer', 'stop');
+  //     visualMapBuilder.setStop();
+  //   })
+  // }
+
+  // $scope.openCusMap = function () {
+  //   $scope.stop();
+  //   visualMapBuilder.recordMap();
+  //   d3Service.d3().then(function (d3) {
+  //     d3.select('#map-container').remove();
+  //     $location.url('/cus-map');
+  //   })
+  // }
+
+
   function initMap() {
+    console.log("initmap")
     d3Service.d3().then(function (d3) {
       d3.select('#visualImg').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
@@ -270,10 +284,28 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
       }
       visualMapBuilder.startPerformMode($scope.cstage).then(function (t) {
+
+        $scope.narrativeData = visualMapBuilder.getNarrativeData();
+        if (!$scope.narrativeData) {
+          visualMapBuilder.narrativeConfig().then(function (data) {
+            console.log('load narrative: ' + JSON.stringify(data));
+            $scope.narrativeData = data;
+          })
+        }
+
+        $scope.mapData = visualMapBuilder.getMapData();
+        if (!$scope.mapData) {
+          visualMapBuilder.mapConfig().then(function (data) {
+            console.log("LOAD MAP: " + JSON.stringify(data));
+            visualMapBuilder.setMapData(data);
+            $scope.mapData = data;
+          });
+        }
+
+
         if (!visualMapBuilder.getStop()) {
           $scope.performing = t;
 
-          countDown = ANI_DURATION;
           console.log('performMode on');
 
           var stageChange = '';
@@ -286,11 +318,12 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
           var narrativeData = _.find($scope.narrativeData, { "stageChange": stageChange });
 
-          console.log(stageChange, narrativeData)
+          console.log(stageChange, narrativeData, $scope.mapData)
 
-          var stageData = _.find($scope.mapData, { 'stage': narrativeData.to });
+          var stageData = _.find($scope.mapData, { 'stage': $scope.cstage });
           $scope.title = stageData.name;
-          $scope.narrative = narrativeData.narrative;
+
+          $scope.narrative = narrativeData?  narrativeData.narrative : '';
 
           d3Service.d3().then(function (d3) {
             d3.select('#title')
@@ -373,19 +406,31 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
       // d3.selectAll('text').attr('opacity', '1')
       d3.select('#circle_begin').attr('fill', 'white')
     });
-  }
+  }ot
 
 }])
 
 map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function ($scope, $location, socket, $window) {
+
+  console.log('menuctrl')
   socket.on('vStart', function (data) {
-    //$scope.ready = true;
-
-    var performanceid = data.split(':')[0];
+    console.log('vStart: get data ', data);
+    var da = data.split(':')
+    var performanceid = da[0];
     console.log('PerformanceID: ', performanceid);
-
     $location.path('/performance/' + performanceid);
   });
+
+  var params = $location.search();
+  console.log('params', params);
+  var performanceid = params['p'] === undefined ? '' : params['p'];
+  if (performanceid) {
+    console.log('client for performance ' + performanceid);
+    socket.emit('client', performanceid);
+  } else {
+    console.log('no performance id!');
+    alert('Sorry, this URL is wrong! (there is no performance specified)');
+  }
 }]);
 
 map.controller('cusMapCtrl', ['$scope', 'visualMapBuilder', 'd3Service', function ($scope, visualMapBuilder, d3Service) {

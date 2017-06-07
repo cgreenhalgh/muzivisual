@@ -2,8 +2,10 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var fs = require('fs');
-var redis = require('socket.io-redis');
+var redisAdapter = require('socket.io-redis');
 var _ = require('lodash');
+var socketClient = require('socket.io-client');
+var redis = require("redis");
 
 //CORS
 app.use(function (req, res, next) {
@@ -20,10 +22,14 @@ if (process.env.REDIS_PASSWORD) {
   redis_config.auth_pass = process.env.REDIS_PASSWORD;
 }
 console.log('using redis config ' + JSON.stringify(redis_config));
-io.adapter(redis(redis_config));
+io.adapter(redisAdapter(redis_config));
+
+var redisClient = redis.createClient(redis_config);
 
 io.on('connection', function (socket) {
-  socket.join('mobileapp');
+
+  //  socket.join('mobileapp');
+
 
   console.log('A client connected.');
   // socket.on('vTimer', function (data) {
@@ -35,10 +41,34 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     socket.disconnect();
   })
-  socket.on('vStart', function (data) {
-    console.log('GET MESSAGE FROM MUZICODES:', data);
-    io.to('mobileapp').emit('vStart', data);
-  })
+
+  socket.on('serverSocket', function () {
+    console.log('new server socket connected');
+    socket.join('mobileapp');
+  });
+
+  var flag = 0;
+  socket.on('client', function (perf) {
+    if (flag === 0) {
+      console.log('new client for performance ' + perf);
+      var key = 'performance:' + perf;
+      socket.join(key);
+      redisClient.lrange(key, 0, -1, function (err, msgs) {
+        if (err) {
+          console.log('error getting saved messages for performance ' + perf, err);
+          return;
+        }
+        for (var i in msgs) {
+          var msg = msgs[i];
+          console.log('got saved message: ' + msg);
+          var data = JSON.parse(msg);
+          socket.emit(data.name, data.data);
+        }
+      });
+      flag = 1;
+    }
+  });
+
 });
 
 app.get('/', function (req, res) {
@@ -116,7 +146,7 @@ function processNarrativeData(data, res) {
 
   res.set('Content-Type', 'application/json').send(JSON.stringify(resp));
   console.log('narrative data sent.');
-  console.log(resp);
+  //console.log(resp);
 }
 
 function processData(data, res) {
@@ -151,10 +181,47 @@ function processData(data, res) {
   }
   res.set('Content-Type', 'application/json').send(JSON.stringify(resp));
   console.log('map data sent.');
-  console.log(resp)
+  //console.log(resp)
 }
 
 var port = process.env.PORT || 8000;
 http.listen(port, function () {
-  console.log('Visual listening on port ' + port + '!')
+  console.log('Visual listening on port ' + port + '!');
+
+  var serverSocket = socketClient('http://localhost:8000');
+  serverSocket.emit('serverSocket');
+
+  serverSocket.on('vStart', function (data) {
+    console.log('GET MESSAGE FROM MUZICODES:', data);
+    //io.to('mobileapp').emit('vStart', data);
+    // perfid:stage
+    var parts = data.split(':');
+    var perf = parts[0];
+    var stage = parts[1];
+    console.log('start performance ' + perf + ' at stage ' + stage);
+    var key = 'performance:' + perf;
+    redisClient.del(key, function () {
+      console.log('cleared performance ' + perf);
+      redisClient.rpush(key, JSON.stringify({ name: 'vStart', data: data, time: (new Date()).getTime() }));
+    });
+    io.to(key).emit('vStart', data);
+    console.log('send vStart')
+  });
+  // other messages
+  serverSocket.on('vStageChange', function (data) {
+    var parts = data.split(':');
+    var perf = parts[0];
+    var rest = parts.slice(1).join(':');
+    console.log('stage change in performance ' + perf + ': ' + rest);
+    var key = 'performance:' + perf;
+    redisClient.rpush(key, JSON.stringify({ name: 'vStageChange', data: data, time: (new Date()).getTime() }));
+    io.to(key).emit('vStageChange', data);
+  });
+  serverSocket.on('vStop', function (data) {
+    var perf = data;
+    console.log('stop performance ' + perf);
+    var key = 'performance:' + perf;
+    redisClient.rpush(key, JSON.stringify({ name: 'vStop', time: (new Date()).getTime() }));
+    io.to(key).emit('vStop', data);
+  });
 })

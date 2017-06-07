@@ -283,13 +283,13 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     return 'circle_' + d.stage;
                 })
                 .attr('r', R)
-                .attr('ng-click', function (d) {
-                    var len = d.visual.length;
-                    if (len) {
-                        return d.visual[0];
-                    }
-                    return '#';
-                })
+                // .attr('ng-click', function (d) {
+                //     var len = d.visual.length;
+                //     if (len) {
+                //         return d.visual[0];
+                //     }
+                //     return '#';
+                // })
                 .attr('opacity', 0)
                 .attr('stroke', 'orange')
                 .attr('fill', 'orange')
