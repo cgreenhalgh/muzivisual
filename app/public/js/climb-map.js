@@ -64,9 +64,10 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
 }])
 
 map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location) {
-
-  $scope.cstage = ''
-  $scope.pstage = ''
+  $scope.cstage = '';
+  $scope.pstage = '';
+  $scope.narrative = '';
+  $scope.title = '';
   var visualIdx = 0;
   var visuals = '';
   var visualNum = 0;
@@ -148,11 +149,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
 
-      if (!PRE_REVEAL_MODE) {
-        visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
-      } else {
-        visualMapBuilder.initMapPreMode(canvas, visualMapBuilder.getMapData());
-      }
+      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
     });
     if (!$scope.cstage) {
       $scope.cstage = 'basecamp'; // reveal basecamp
@@ -183,18 +180,42 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     });
 
     socket.on('vStop', function () {
-      console.log('stop');
-      $scope.narrative = 'Hope you enjoy!'
-      $scope.title = 'Thanks';
+      visualMapBuilder.setStop();
 
-    //  visualMapBuilder.recordMap();
-    //  visualMapBuilder.exitPerformMode($scope.pstage)
+      var stop_flag = visualMapBuilder.getStop()
+      console.log('stop flag: ', stop_flag)
 
+      if (stop_flag) {
+        d3Service.d3().then(function (d3) {
+          d3.select('#circle_summit')
+            .transition(INTERVAL)
+            .attr('fill', 'orange')
 
-      // setTimeout(function () {
-      //   $location.url('/post-performance');
-      //   $scope.$apply();
-      // }, 1000)
+          d3.select('#title')
+            .transition()
+            .duration(INTERVAL)
+            .style('opacity', '0')
+            .text('Thanks')
+
+          d3.select('#narrative')
+            .transition()
+            .duration(INTERVAL)
+            .style('opacity', '0')
+            .text('Hope you enjoy!')
+        });
+
+        d3Service.d3().then(function (d3) {
+          d3.select('#title')
+            .transition()
+            .duration(INTERVAL)
+            .style('opacity', '1')
+
+          d3.select('#narrative')
+            .transition()
+            .duration(INTERVAL)
+            .style('opacity', '1')
+        });
+      }
     })
 
 

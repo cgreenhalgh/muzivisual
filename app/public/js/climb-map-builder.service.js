@@ -10,6 +10,10 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     var journeyRecord = [];
 
     function getCircleFillColor(d) { // check if its a path or a stage 
+        if (stop_flag) {
+            return;
+        }
+
         if (d.state === 'rev_succ') {
             return 'orange'
         }
@@ -67,13 +71,26 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function updateMapStage(stage, toState, delay) {
-        console.log('update map stage')
+        if (stop_flag) {
+            return;
+        }
         _.find(mapData, { 'stage': stage }).state = toState;
 
         var data = _.find(mapData, { 'stage': stage });
         var sname = data.name;
         var state = data.state;
 
+        if (sname === 'Summit') {
+            d3Service.d3().then(function (d3) {
+                d3.select('#circle_' + stage)
+                    .transition()
+                    .delay((delay - 4) * INTERVAL)
+                    .duration(INTERVAL)
+                    .attr('fill', function () { return getCircleFillColor(data) })
+                    .attr('r', function () { return getCircleRadius(data) })
+                    .attr('opacity', function () { return getStageOpacity(state) })
+            })
+        }
         d3Service.d3().then(function (d3) {
             d3.select('#circle_' + stage)
                 .transition()
@@ -198,6 +215,10 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             }
         },
         updateMap: function (cstage, pstage) {
+            if (stop_flag) {
+                return;
+            }
+
             console.log(cstage, pstage);
             var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
 
@@ -345,6 +366,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             d3.select('#circle_begin').attr('opacity', 1).attr('fill', 'white').attr('r', R);
         },
         initMap: function (canvas, data) {
+            if (stop_flag) {
+                return;
+            }
             _.forEach(data, function (cStageDatum) {
                 if (cStageDatum.stage !== 'summit') {
                     // get all the cues of this stage
@@ -402,6 +426,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             stop_flag = true;
         },
         startPerformMode: function (sname) {  // cs
+            if (stop_flag) {
+                return;
+            }
             var stageDatum = _.find(mapData, { 'stage': sname })
 
             //PreMode
@@ -429,23 +456,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                                     return getCircleFillColor(stageDatum)
                                 }
                             })
-                        // .transition()
-                        // .duration(200)
-                        // .attr('fill', 'white')
-                        // .transition()
-                        // .duration(200)
-                        // .attr('fill', 'red')
-                        // .transition()
-                        // .duration(200)
-                        // .attr('fill', 'white')
-
-                        // d3.select('#visualImg')
-                        //     .attr('src', stageDatum.img)
-                        //     .style('opacity', 0)
-                        //     .transition()
-                        //     .delay(INTERVAL * 1.5)
-                        //     .duration(2500)
-                        //     .style('opacity', 1)
                     });
                 }
             }, delay)
@@ -462,12 +472,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 //console.log('fade out animation')
                 var record = _.find(mapData, { 'stage': stage });
                 journeyRecord.push(record);
-                // $timeout(function () { return false; console.log('performMode end') }, INTERVAL * 0.5);  // should be the same with following duration
-                // d3.select('#visualImg')
-                //     .style('opacity', 1)
-                //     .transition()
-                //     .duration(1500)
-                //     .style('opacity', 0)
             });
 
 
