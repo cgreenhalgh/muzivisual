@@ -84,6 +84,8 @@ function returnPublicFile(req, res) {
 };
 
 app.get('/*.html', returnPublicFile);
+app.get('/*.png', returnPublicFile);
+app.get('/*.jpg', returnPublicFile);
 app.get('/css/*.css', returnPublicFile);
 app.get('/js/*', returnPublicFile);
 app.get('/vendor/*', returnPublicFile);
