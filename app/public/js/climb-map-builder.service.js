@@ -139,7 +139,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('opacity', function () { return getLineOpacity(ps, cs) })
                 .attr('stroke', function () { return getLineColor(ps) })
 
-            console.log("lines: ", '#line_' + pstage + '_' + cstage)
+            // console.log("lines: ", '#line_' + pstage + '_' + cstage)
 
             if (fss.length > 0) {
                 _.forEach(fss, function (f) {
@@ -156,7 +156,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         .attr('stroke', function () { return getLineColor(cs) })
                 })
 
-                console.log("lines: ", '#line_' + cstage + '_' + fstage)
+                // console.log("lines: ", '#line_' + cstage + '_' + fstage)
             }
             else {  // if there is no fs i.e. reach the summit - need test? 
                 d3.select('#line_' + ps)
@@ -425,11 +425,18 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         setStop: function () {
             stop_flag = true;
         },
-        startPerformMode: function (sname) {  // cs
+        startPerformMode: function (sname, pname) {  // cs
             if (stop_flag) {
                 return;
             }
             var stageDatum = _.find(mapData, { 'stage': sname })
+
+            if (pname === null)
+                pname = ''
+            var stageChange = pname + '->' + sname;
+            journeyRecord.push(stageChange);
+
+            console.log('Journey Record: ' + journeyRecord);
 
             //PreMode
             if (PRE_REVEAL_MODE) {
@@ -468,11 +475,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             })
         },
         exitPerformMode: function (stage) {
-            d3Service.d3().then(function (d3) {
-                //console.log('fade out animation')
-                var record = _.find(mapData, { 'stage': stage });
-                journeyRecord.push(record);
-            });
+            // d3Service.d3().then(function (d3) {
+            //     //console.log('fade out animation')
+            //     var record = _.find(mapData, { 'stage': stage });
+            //     journeyRecord.push(record);
+            // });
 
 
             console.log('new status saved' + stage);
@@ -527,7 +534,19 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             return visual;
         },
         getJourney: function () {
-            return journeyRecord;
+            var journey = [];
+            var narrative = '';
+            var name = '';
+
+            _.forEach(journeyRecord, function (stageChange) {
+                narrative = _.find(narrativeData, { 'stageChange': stageChange })
+
+                name = _.find(mapData, { 'stage': narrative.to }).name;
+                narrative.stageName = name;
+
+                journey.push(narrative);
+            })
+            return journey;
         }
     }
 }]);

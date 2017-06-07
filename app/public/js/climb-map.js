@@ -17,7 +17,7 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
   $routeProvider.when('/', {
     templateUrl: 'menu.html',
     controller: 'menuCtrl'
-  }).when('/performance/:performanceid', {
+  }).when('/performance/', {
     templateUrl: '/map.html',
     controller: 'mapCtrl'
   }).when('/preview', {
@@ -68,6 +68,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.pstage = '';
   $scope.narrative = '';
   $scope.title = '';
+  $scope.stop = false;
   var visualIdx = 0;
   var visuals = '';
   var visualNum = 0;
@@ -179,82 +180,88 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         .style('opacity', '0')
     });
 
-    socket.on('vStop', function () {
-      visualMapBuilder.setStop();
 
-      var stop_flag = visualMapBuilder.getStop()
-      console.log('stop flag: ', stop_flag)
+    // if (stop_flag) {
+    //   d3Service.d3().then(function (d3) {
+    //     d3.select('#circle_summit')
+    //       .transition(INTERVAL)
+    //       .attr('fill', 'orange')
 
-      if (stop_flag) {
-        d3Service.d3().then(function (d3) {
-          d3.select('#circle_summit')
-            .transition(INTERVAL)
-            .attr('fill', 'orange')
+    //     d3.select('#title')
+    //       .transition()
+    //       .duration(INTERVAL)
+    //       .style('opacity', '0')
+    //       .text('Thanks')
 
-          d3.select('#title')
-            .transition()
-            .duration(INTERVAL)
-            .style('opacity', '0')
-            .text('Thanks')
+    //     d3.select('#narrative')
+    //       .transition()
+    //       .duration(INTERVAL)
+    //       .style('opacity', '0')
+    //       .text('Hope you enjoy!')
+    //   });
 
-          d3.select('#narrative')
-            .transition()
-            .duration(INTERVAL)
-            .style('opacity', '0')
-            .text('Hope you enjoy!')
-        });
+    //   d3Service.d3().then(function (d3) {
+    //     d3.select('#title')
+    //       .transition()
+    //       .duration(INTERVAL)
+    //       .style('opacity', '1')
 
-        d3Service.d3().then(function (d3) {
-          d3.select('#title')
-            .transition()
-            .duration(INTERVAL)
-            .style('opacity', '1')
+    //     d3.select('#narrative')
+    //       .transition()
+    //       .duration(INTERVAL)
+    //       .style('opacity', '1')
+    //   });
+    //}
+  })
 
-          d3.select('#narrative')
-            .transition()
-            .duration(INTERVAL)
-            .style('opacity', '1')
-        });
-      }
-    })
+  socket.on('vStop', function () {
+    visualMapBuilder.setStop();
 
+    $scope.stop = true;
 
+    var stop_flag = visualMapBuilder.getStop()
+    console.log('stop flag: ', stop_flag)
 
+    $scope.journey = visualMapBuilder.getJourney();
 
-    // $scope.flip = function () {
-    //   if (visualIdx === visualNum) {
-    //     visualIdx = 0;
-    //   }
-    //   if (!visuals) {
-    //     visuals = visualMapBuilder.getVisual($scope.cstage);
-    //     console.log('get visual' + visuals);
-    //     visualNum = visuals.length;
-    //   }
-
-    //   if (visualNum > 1) {
-    //     d3Service.d3().then(function () {
-    //       console.log('flip visual');
-
-    //       d3.select('#visualImg')
-    //         .transition()
-    //         .duration(1000)
-    //         .style('opacity', 0)
-
-    //       setTimeout(function () {
-    //         d3.select('#visualImg')
-    //           .attr('src', visuals[visualIdx])
-    //           .style('opacity', 0)
-    //           .transition()
-    //           .duration(1000)
-    //           .style('opacity', 1)
-    //         visualIdx++;
-    //       }, 1000)
-    //     })
-    //   }
-    // }
-
-
+    //console.log(journey);
+    
   });
+
+  // $scope.flip = function () {
+  //   if (visualIdx === visualNum) {
+  //     visualIdx = 0;
+  //   }
+  //   if (!visuals) {
+  //     visuals = visualMapBuilder.getVisual($scope.cstage);
+  //     console.log('get visual' + visuals);
+  //     visualNum = visuals.length;
+  //   }
+
+  //   if (visualNum > 1) {
+  //     d3Service.d3().then(function () {
+  //       console.log('flip visual');
+
+  //       d3.select('#visualImg')
+  //         .transition()
+  //         .duration(1000)
+  //         .style('opacity', 0)
+
+  //       setTimeout(function () {
+  //         d3.select('#visualImg')
+  //           .attr('src', visuals[visualIdx])
+  //           .style('opacity', 0)
+  //           .transition()
+  //           .duration(1000)
+  //           .style('opacity', 1)
+  //         visualIdx++;
+  //       }, 1000)
+  //     })
+  //   }
+  // }
+
+
+
 
   $scope.$watch('cstage', function (ns, os) {
     visualIdx = 0;
@@ -288,7 +295,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
       }
 
-      visualMapBuilder.startPerformMode($scope.cstage).then(function (t) {
+      visualMapBuilder.startPerformMode($scope.cstage, $scope.pstage).then(function (t) {
 
         $scope.narrativeData = visualMapBuilder.getNarrativeData();
         if (!$scope.narrativeData) {
@@ -327,7 +334,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
           var stageData = _.find($scope.mapData, { 'stage': $scope.cstage });
           $scope.title = stageData.name;
-
           $scope.narrative = narrativeData ? narrativeData.narrative : '';
 
           d3Service.d3().then(function (d3) {
@@ -422,8 +428,8 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
     console.log('vStart: get data ', data);
     var da = data.split(':')
     var performanceid = da[0];
-    console.log('PerformanceID: ', performanceid);
-    $location.path('/performance/' + performanceid);
+    //console.log('PerformanceID: ', performanceid);
+    $location.path('/performance/');
   });
 
   var params = $location.search();

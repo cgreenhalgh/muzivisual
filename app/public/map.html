@@ -1,5 +1,5 @@
 <div>
-  <div class='bg-img-container' >
+  <div class='bg-img-container'>
     <img class='bk-img' src='https://s25.postimg.org/a6snr8g1b/Climb_Map_background.jpg' alt='Map' width='100%' height='100%'
     />
   </div>
@@ -12,12 +12,19 @@
     <d3-map></d3-map>
   </div>
 
-  <div id="fragment" style="position:absolute;margin-top:-50%;text-align:center; width:100%; color:white;">
+  <div ng-if="!stop_flag" id="fragment" style="position:absolute;margin-top:-50%;text-align:center; width:100%; color:white;">
     <p>
       <h1 id="title">{{title}}</h1>
     </p>
-    <p id="narrative" style="font-size:25px; margin-left:5%; margin-right:5%">{{narrative}}</p>
+    <p id="narrative" style="font-size:25px; margin-left:5%; margin-right:5%; margin-top:10px">{{narrative}}</p>
     <!--<p>{{narrativeData}}</p>-->
+  </div>
+
+  <div style="background-color: #010101; height:100%; margin-top:-40%">
+    <div id="journey" style="color:white; padding-left:20px ;padding-right:20px; text-align: center; margin-bottom: 50px" ng-repeat="j in journey track by $index">
+      <h2> {{j.stageName}} </h2>
+      <p style="margin-top: -15px">{{j.narrative}} </p>
+    </div>
   </div>
 
   <!--
