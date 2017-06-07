@@ -59,7 +59,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function getLineOpacity(pstate, cstate) {
-        if ((pstate === 'rev_succ' && cstate === 'active') ||  (pstate === 'active' && cstate === 'revealed')) {
+        if ((pstate === 'rev_succ' && cstate === 'active') || (pstate === 'active' && cstate === 'revealed')) {
             return 1;
         } else {
             return 0; // 
@@ -67,6 +67,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function updateMapStage(stage, toState, delay) {
+        console.log('update map stage')
         _.find(mapData, { 'stage': stage }).state = toState;
 
         var data = _.find(mapData, { 'stage': stage });
@@ -110,25 +111,24 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
 
 
         d3Service.d3().then(function (d3) {
+            // update lines linking pstage and cstage -> turn solid and change color
+            pstage = p.stage;
+            ps = p.state;
+            d3.select('#line_' + pstage + '_' + cstage)
+                .transition()
+                .delay(INTERVAL * delay)
+                .duration(INTERVAL)
+                .style("stroke-dasharray", ("0, 0"))
+                .attr('opacity', function () { return getLineOpacity(ps, cs) })
+                .attr('stroke', function () { return getLineColor(ps) })
+
+            console.log("lines: ", '#line_' + pstage + '_' + cstage)
+
             if (fss.length > 0) {
                 _.forEach(fss, function (f) {
                     fstage = f.stage;
                     fs = f.state;
 
-                    // update lines linking pstage and cstage -> turn solid and change color
-                    if (p) {
-                        pstage = p.stage;
-                        ps = p.state;
-                        d3.select('#line_' + pstage + '_' + cstage)
-                            .transition()
-                            .delay(INTERVAL * delay)
-                            .duration(INTERVAL)
-                            .style("stroke-dasharray", ("0, 0"))
-                            .attr('opacity', function () { return getLineOpacity(ps, cs) })
-                            .attr('stroke', function () { return getLineColor(ps) })
-                    }
-
-                    console.log("lines: ", '#line_' + pstage + '_' + cstage)
                     // update lines linking cstage and fstage -> black dotted-line
                     d3.select('#line_' + cstage + '_' + fstage)
                         .transition()
@@ -360,7 +360,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                             .attr("x2", cueStageDatum.x * MAP_WIDTH)
                             .attr("y2", cueStageDatum.y * MAP_HEIGHT)
                             .attr("id", function () {
-                                return cueStageDatum.stage ? ('line_'+ cStageDatum.stage + '_' + cueStageDatum.stage
+                                return cueStageDatum.stage ? ('line_' + cStageDatum.stage + '_' + cueStageDatum.stage
                                 ) : ('line_' + cStageDatum.stage)
                             })
                             .style("stroke-dasharray", ("6, 6"))
@@ -417,7 +417,18 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         d3.select('#circle_' + sname)
                             .transition()
                             .duration(200)
-                            .attr('fill', 'red')
+                            .attr('fill', function () {
+                                return getCircleFillColor(stageDatum)
+                            })
+                            .transition()
+                            .duration(100)
+                            .attr('fill', function () {
+                                if (stageDatum.state === 'active') {
+                                    return 'red'
+                                } else {
+                                    return getCircleFillColor(stageDatum)
+                                }
+                            })
                         // .transition()
                         // .duration(200)
                         // .attr('fill', 'white')
@@ -451,7 +462,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 //console.log('fade out animation')
                 var record = _.find(mapData, { 'stage': stage });
                 journeyRecord.push(record);
-               // $timeout(function () { return false; console.log('performMode end') }, INTERVAL * 0.5);  // should be the same with following duration
+                // $timeout(function () { return false; console.log('performMode end') }, INTERVAL * 0.5);  // should be the same with following duration
                 // d3.select('#visualImg')
                 //     .style('opacity', 1)
                 //     .transition()

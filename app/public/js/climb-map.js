@@ -13,8 +13,6 @@ var delaybase = 1;
 var PRE_REVEAL_MODE = false;
 var ANI_DURATION = 8; // 8/5 PreMode ;
 
-
-
 map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
   $routeProvider.when('/', {
     templateUrl: 'menu.html',
@@ -25,9 +23,9 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
   }).when('/preview', {
     templateUrl: '/map.html',
     controller: 'previewCtrl'
-  }).when('/cus-map', {
+  }).when('/post-performance', {
     templateUrl: '/map.html',
-    controller: 'cusMapCtrl'
+    controller: 'postPerformanceCtrl'
   }).
     otherwise({
       redirectTo: '/'
@@ -184,6 +182,23 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         .style('opacity', '0')
     });
 
+    socket.on('vStop', function () {
+      console.log('stop');
+      $scope.narrative = 'Hope you enjoy!'
+      $scope.title = 'Thanks';
+
+    //  visualMapBuilder.recordMap();
+    //  visualMapBuilder.exitPerformMode($scope.pstage)
+
+
+      // setTimeout(function () {
+      //   $location.url('/post-performance');
+      //   $scope.$apply();
+      // }, 1000)
+    })
+
+
+
 
     // $scope.flip = function () {
     //   if (visualIdx === visualNum) {
@@ -220,26 +235,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
   });
 
-  socket.on('vStop', function (data) {
-    console.log('stop');
-    visualMapBuilder.recordMap();
-    //socket.emit('vTimer', '');
-    if ($scope.performing) {
-      visualMapBuilder.exitPerformMode($scope.pstage)
-    } else {
-      //clearInterval($scope.timerId);
-      console.log('visual stopped by Muzicode');
-      $scope.message = 'quitting...'
-      //socket.emit('vTimer', '');
-    }
-
-    setTimeout(function () {
-      $location.url('/cus-map');
-      $scope.$apply();
-    }, 1000)
-  })
-
-
   $scope.$watch('cstage', function (ns, os) {
     visualIdx = 0;
     visuals = '';
@@ -256,22 +251,10 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       }
 
       visualMapBuilder.exitPerformMode($scope.pstage).then(function (f) {
-        $scope.performing = f;
-        //socket.emit('vTimer', 'exiting...');
 
         if (PRE_REVEAL_MODE) {
           visualMapBuilder.updateMapPreMode($scope.pstage, $scope.cstage, 2);
         }
-        //console.log('start timer')
-        // setTimeout(function () {
-        //   $scope.timerId = setInterval(function () {
-        //     socket.emit('vTimer', countDown);
-        //     if(countDown>=0){
-        //     countDown--;
-        //     }
-        //   }, 1000)
-        //   $scope.$apply();
-        // }, 1000)
       });
       console.log('stage change: ' + os + '->' + ns);
     }
@@ -283,6 +266,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       else {
         visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
       }
+
       visualMapBuilder.startPerformMode($scope.cstage).then(function (t) {
 
         $scope.narrativeData = visualMapBuilder.getNarrativeData();
@@ -323,7 +307,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
           var stageData = _.find($scope.mapData, { 'stage': $scope.cstage });
           $scope.title = stageData.name;
 
-          $scope.narrative = narrativeData?  narrativeData.narrative : '';
+          $scope.narrative = narrativeData ? narrativeData.narrative : '';
 
           d3Service.d3().then(function (d3) {
             d3.select('#title')
@@ -406,7 +390,7 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
       // d3.selectAll('text').attr('opacity', '1')
       d3.select('#circle_begin').attr('fill', 'white')
     });
-  }ot
+  } ot
 
 }])
 
@@ -433,7 +417,7 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
   }
 }]);
 
-map.controller('cusMapCtrl', ['$scope', 'visualMapBuilder', 'd3Service', function ($scope, visualMapBuilder, d3Service) {
+map.controller('postPerformanceCtrl', ['$scope', 'visualMapBuilder', 'd3Service', function ($scope, visualMapBuilder, d3Service) {
   $scope.cstage = ''
   $scope.pstage = ''
   $scope.cusMap = 1;

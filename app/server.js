@@ -205,7 +205,6 @@ http.listen(port, function () {
       redisClient.rpush(key, JSON.stringify({ name: 'vStart', data: data, time: (new Date()).getTime() }));
     });
     io.to(key).emit('vStart', data);
-    console.log('send vStart')
   });
   // other messages
   serverSocket.on('vStageChange', function (data) {
@@ -222,6 +221,6 @@ http.listen(port, function () {
     console.log('stop performance ' + perf);
     var key = 'performance:' + perf;
     redisClient.rpush(key, JSON.stringify({ name: 'vStop', time: (new Date()).getTime() }));
-    io.to(key).emit('vStop', data);
+    io.to(key).emit('vStop');
   });
 })
