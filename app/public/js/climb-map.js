@@ -21,10 +21,10 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
     templateUrl: '/map.html',
     controller: 'mapCtrl'
   }).when('/preview', {
-    templateUrl: '/map.html',
+    templateUrl: 'map.html',
     controller: 'previewCtrl'
   }).when('/post-performance', {
-    templateUrl: '/map.html',
+    templateUrl: 'map.html',
     controller: 'postPerformanceCtrl'
   }).
     otherwise({
@@ -56,7 +56,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
       scope.mapRecord = null;
 
       scope.back = function () {
-        $location.url('/');
+        $location.path('/');
       }
 
     }
@@ -136,7 +136,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   //   visualMapBuilder.recordMap();
   //   d3Service.d3().then(function (d3) {
   //     d3.select('#map-container').remove();
-  //     $location.url('/cus-map');
+  //     $location.path('/cus-map');
   //   })
   // }
 

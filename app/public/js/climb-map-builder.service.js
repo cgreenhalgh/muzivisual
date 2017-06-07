@@ -498,7 +498,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         mapConfig: function (d) {
             return $q(function (resolve, reject) {
-                $http.get('/maps').then(function (rawdata) {
+                $http.get('maps').then(function (rawdata) {
                     mapData = rawdata.data
                     resolve(mapData);
                 }), function (err) {
@@ -508,7 +508,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         narrativeConfig: function (d) {
             return $q(function (resolve, reject) {
-                $http.get('/fragments').then(function (rawdata) {
+                $http.get('fragments').then(function (rawdata) {
                     narrativeData = rawdata.data
                     resolve(narrativeData);
                 }), function (err) {
