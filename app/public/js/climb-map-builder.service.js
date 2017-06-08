@@ -8,6 +8,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     var narrativeData;
     var stop_flag;
     var journeyRecord = [];
+    var passedRecord = [];
 
     function getCircleFillColor(d) { // check if its a path or a stage 
         if (stop_flag) {
@@ -74,6 +75,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         if (stop_flag) {
             return;
         }
+
         _.find(mapData, { 'stage': stage }).state = toState;
 
         var data = _.find(mapData, { 'stage': stage });
@@ -111,6 +113,12 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function updateMapLine(p, c, fss, pcstages, delay) {
+
+        // if (_.includes(passedRecord, c.stage)) {
+        //     console.log('stage already visited', p.stage)
+        //     return;
+        // }
+
         console.log(p.stage, c.stage)
         var cstage = c.stage;
         var cs = c.state;
@@ -228,7 +236,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 revealeds = _.filter(mapData, { 'state': 'revealed' })
                 if (revealeds.length > 0) {
                     _.forEach(revealeds, function (rs) {
+                        console.log('update to missed: ', rs);
                         updateMapStage(rs.stage, 'missed', delaybase + 1)
+
                     });
                 }
             }
@@ -240,10 +250,16 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     fs = _.find(mapData, { 'stage': s })
                     flist.push(fs);
 
-                    updateMapStage(fs.stage, 'revealed', delaybase + 4)
+                    //console.log('update to new: ', s);
+
+                    if (!_.includes(passedRecord, fs.stage)) {
+                        console.log('reveal new stage:', fs.stage); 
+                        updateMapStage(fs.stage, 'revealed', delaybase + 4)
+                    }
                 });
             }
-            updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase);
+                console.log('reveal new stage with lines', ps.stage, cs.stage)
+                updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase);
         },
         drawMap: function (canvas) {
             var data = journeyRecord;
@@ -419,6 +435,12 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 pname = ''
             var stageChange = pname + '->' + sname;
             journeyRecord.push(stageChange);
+            passedRecord.push(sname);
+
+            //  _.find(mapData, { to: pname }).to = '';
+            // console.log(mapData)
+
+            console.log('passedRecord:', passedRecord)
 
             console.log('Journey Record: ' + journeyRecord);
 
