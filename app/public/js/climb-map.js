@@ -417,7 +417,7 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchor
   if (performanceid) {
     if (performanceid === '9333e7a2-16a9-4352-a45a-f6f42d848cde') {
       $scope.title = 'test(title)'
-      $scope.performance2 = true;
+      //$scope.performance2 = true;
     } else if (performanceid === 'be418821-436d-41c2-880c-058dffb57d91') {
       $scope.title = 'Performance 1'
       $scope.performance1 = true;
@@ -438,12 +438,8 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchor
   $scope.gotoAnchor = function (anchorName) {
     console.log('go to anchor'+ anchorName);
     if ($location.hash() !== anchorName) {
-      // set the $location.hash to `newHash` and
-      // $anchorScroll will automatically scroll to it
       $location.hash(anchorName);
     } else {
-      // call $anchorScroll() explicitly,
-      // since $location.hash hasn't changed
       $anchorScroll();
     }
   }
