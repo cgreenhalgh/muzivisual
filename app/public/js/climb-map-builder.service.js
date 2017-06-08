@@ -155,8 +155,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         .attr('opacity', function () { return getLineOpacity(cs, fs) })
                         .attr('stroke', function () { return getLineColor(cs) })
                 })
-
-                // console.log("lines: ", '#line_' + cstage + '_' + fstage)
             }
             else {  // if there is no fs i.e. reach the summit - need test? 
                 d3.select('#line_' + ps)
@@ -541,10 +539,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             _.forEach(journeyRecord, function (stageChange) {
                 narrative = _.find(narrativeData, { 'stageChange': stageChange })
 
-                name = _.find(mapData, { 'stage': narrative.to }).name;
-                narrative.stageName = name;
-
-                journey.push(narrative);
+                if (narrative) {
+                    name = _.find(mapData, { 'stage': narrative.to }).name;
+                    narrative.stageName = name;
+                    journey.push(narrative);
+                }
             })
             return journey;
         }

@@ -1,7 +1,6 @@
+
 // var _ = require('lodash/core');
 'use strict'
-
-
 var map = angular.module('MuziVisual.map', ['ngRoute', 'MuziVisual.visualmapbuilder']);
 // used as unit for time delay
 var INTERVAL = 1000;
@@ -28,7 +27,7 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
     controller: 'postPerformanceCtrl'
   }).
     otherwise({
-      redirectTo: '/'
+      redirectTo: '/',
     });
 
   // $locationProvider.html5Mode({
@@ -43,10 +42,10 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
     scope: false,
     link: function (scope, element, attr) {
       MAP_WIDTH = $window.innerWidth;
-      MAP_HEIGHT = $window.innerHeight;
+      MAP_HEIGHT = MAP_WIDTH * 1.5; // the original img is 640*960
 
       console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
-      angular.element(document).find('d3-map').append('<svg width=' + MAP_WIDTH + ' height=' + MAP_HEIGHT + ' id=map-container></svg>')
+      angular.element(document).find('d3-map').append('<svg width=' + MAP_WIDTH + ' height=' + MAP_HEIGHT + ' id="map-container"></svg>')
 
       scope.pstage = null;
       scope.cstage = null;
@@ -58,12 +57,12 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
       scope.back = function () {
         $location.path('/');
       }
-
     }
   }
 }])
 
-map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location) {
+map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', '$route', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location, $route) {
+  console.log('mapCtrl')
   $scope.cstage = '';
   $scope.pstage = '';
   $scope.narrative = '';
@@ -73,7 +72,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   var visuals = '';
   var visualNum = 0;
 
-  console.log('mapctrl')
+  angular.element($window).bind('resize', function () {
+    console.log('window resized')
+    $window.location.reload();
+    $route.reload();
+  })
 
   var params = $location.search();
   console.log('params', params);
@@ -200,18 +203,18 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     //       .text('Hope you enjoy!')
     //   });
 
-    //   d3Service.d3().then(function (d3) {
-    //     d3.select('#title')
-    //       .transition()
-    //       .duration(INTERVAL)
-    //       .style('opacity', '1')
+      // d3Service.d3().then(function (d3) {
+      //   d3.select('#title')
+      //     .transition()
+      //     .duration(INTERVAL)
+      //     .style('opacity', '1')
 
-    //     d3.select('#narrative')
-    //       .transition()
-    //       .duration(INTERVAL)
-    //       .style('opacity', '1')
-    //   });
-    //}
+      //   d3.select('#narrative')
+      //     .transition()
+      //     .duration(INTERVAL)
+      //     .style('opacity', '1')
+      // });
+   // }
   })
 
   socket.on('vStop', function () {
@@ -225,7 +228,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     $scope.journey = visualMapBuilder.getJourney();
 
     //console.log(journey);
-    
+
   });
 
   // $scope.flip = function () {
@@ -314,7 +317,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
           });
         }
 
-
         if (!visualMapBuilder.getStop()) {
           $scope.performing = t;
 
@@ -329,8 +331,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
           }
 
           var narrativeData = _.find($scope.narrativeData, { "stageChange": stageChange });
-
-          console.log(stageChange, narrativeData, $scope.mapData)
 
           var stageData = _.find($scope.mapData, { 'stage': $scope.cstage });
           $scope.title = stageData.name;
@@ -436,6 +436,19 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
   console.log('params', params);
   var performanceid = params['p'] === undefined ? '' : params['p'];
   if (performanceid) {
+    if (performanceid === '9333e7a2-16a9-4352-a45a-f6f42d848cde') {
+      $scope.title = 'test(performance title)'
+      $scope.performance1 = true;
+    } else if (performanceid === 'be418821-436d-41c2-880c-058dffb57d91') {
+      $scope.title = 'Performance 1'
+      $scope.performance1 = true;
+      $scope.performance2 = false;
+    } else {
+      $scope.title = 'Performance 2'
+      $scope.performance2 = true;
+      $scope.performance1 = false;
+    }
+
     console.log('client for performance ' + performanceid);
     socket.emit('client', performanceid);
   } else {

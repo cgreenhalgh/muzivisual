@@ -1,37 +1,27 @@
-<div>
+<div style="height:100%; width: 100%">
   <div class='bg-img-container'>
-    <img class='bk-img' src='https://s25.postimg.org/a6snr8g1b/Climb_Map_background.jpg' alt='Map' width='100%' height='100%'
+    <img style='position:absolute; z-index:-1; left:0;top:0' src='Climb_Map_background.jpg' alt='Map' width='100%' height='auto'
     />
   </div>
 
-  <!--<a ng-show='!performing && openCusMap' href='/cus-map'>My Journey</a>-->
-  <!--<a href="#!preview" ng-show='cusMap'>Preview</a>-->
-  <button ng-show='preview || cusMap' ng-click='back()'>Back</button>
-  <!--<button ng-show="!performing" ng-click="startMapTransition()">START</button>-->
+  <!--<button ng-show='preview || cusMap' ng-click='back()'>Back</button>-->
   <div id="map">
     <d3-map></d3-map>
   </div>
 
-  <div ng-if="!stop_flag" id="fragment" style="position:absolute;margin-top:-50%;text-align:center; width:100%; color:white;">
+   <div ng-show="!stop" id="fragment" style="margin-top:-35%;text-align:center; width:100%; color:white;">
     <p>
-      <h1 id="title">{{title}}</h1>
+      <h1 id="title" style="line-height:1.3">{{title}}</h1>
     </p>
-    <p id="narrative" style="font-size:25px; margin-left:5%; margin-right:5%; margin-top:10px">{{narrative}}</p>
+    <p id="narrative" style="font-size:1em; margin-left:5%; margin-right:5%; ">{{narrative}}</p>
     <!--<p>{{narrativeData}}</p>-->
   </div>
 
-  <div style="background-color: #010101; height:100%; margin-top:-40%">
-    <div id="journey" style="color:white; padding-left:20px ;padding-right:20px; text-align: center; margin-bottom: 50px" ng-repeat="j in journey track by $index">
-      <h2> {{j.stageName}} </h2>
-      <p style="margin-top: -15px">{{j.narrative}} </p>
+  <div ng-show="stop" style="margin-top:-40%">
+    <div style="margin-bottom:20px"><h1>Journey</h1></div>
+    <div id="journey" style="color:white; padding-left:20px ;padding-right:20px; text-align: center;" ng-repeat="j in journey track by $index">
+      <h3> {{j.stageName}} </h3>
+      <p style="margin-top: 0px">{{j.narrative}} </p>
+      <p ng-if="j.stageName!=='Summit'">|</p>
     </div>
   </div>
-
-  <!--
-  <div ng-show="performing" ng-click='flip()'>
-    <img id="visualImg" src="#" alt="visual image">
-  </div>
-
-  <div ng-show="message">
-    <span id="map-message">{{message}}</span>
-  </div>-->
