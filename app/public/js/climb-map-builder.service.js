@@ -80,17 +80,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         var sname = data.name;
         var state = data.state;
 
-        if (sname === 'Summit') {
-            d3Service.d3().then(function (d3) {
-                d3.select('#circle_' + stage)
-                    .transition()
-                    .delay((delay - 4) * INTERVAL)
-                    .duration(INTERVAL)
-                    .attr('fill', function () { return getCircleFillColor(data) })
-                    .attr('r', function () { return getCircleRadius(data) })
-                    .attr('opacity', function () { return getStageOpacity(state) })
-            })
-        }
         d3Service.d3().then(function (d3) {
             d3.select('#circle_' + stage)
                 .transition()
@@ -100,6 +89,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('r', function () { return getCircleRadius(data) })
                 .attr('opacity', function () { return getStageOpacity(state) })
         })
+
     }
 
     function updateMapLinePreMode(p, c, delay) {
@@ -249,12 +239,8 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 _.forEach(fss, function (s) {
                     fs = _.find(mapData, { 'stage': s })
                     flist.push(fs);
-                    if (cname === 'basecamp') {
-                        updateMapStage(fs.stage, 'revealed', delaybase + 1)
-                    }
-                    else {
-                        updateMapStage(fs.stage, 'revealed', delaybase + 4)
-                    }
+
+                    updateMapStage(fs.stage, 'revealed', delaybase + 4)
                 });
             }
             updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase);
@@ -436,9 +422,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
 
             console.log('Journey Record: ' + journeyRecord);
 
-            //PreMode
-            if (PRE_REVEAL_MODE) {
-                var delay = INTERVAL * (delaybase + 2);
+            console.log('current stage name ', sname)
+            if (sname === 'summit') {
+                var delay = INTERVAL * (delaybase + 3);
             } else {
                 var delay = INTERVAL * (delaybase + 6);
             }
@@ -453,7 +439,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                                 return getCircleFillColor(stageDatum)
                             })
                             .transition()
-                            .duration(100)
+                            .duration(200)
                             .attr('fill', function () {
                                 if (stageDatum.state === 'active') {
                                     return 'red'
