@@ -17,7 +17,7 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
     templateUrl: 'menu.html',
     controller: 'menuCtrl'
   }).when('/performance/', {
-    templateUrl: '/map.html',
+    templateUrl: 'map.html',
     controller: 'mapCtrl'
   }).when('/preview', {
     templateUrl: 'map.html',
