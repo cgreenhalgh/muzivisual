@@ -17,7 +17,7 @@ map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $lo
     templateUrl: 'menu.html',
     controller: 'menuCtrl'
   }).when('/performance/', {
-    templateUrl: '/map.html',
+    templateUrl: 'map.html',
     controller: 'mapCtrl'
   }).when('/preview', {
     templateUrl: 'map.html',
@@ -399,7 +399,8 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
 
 }])
 
-map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function ($scope, $location, socket, $window) {
+map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', function ($scope, $location, socket, $window, $anchorScroll) {
+   $anchorScroll.yOffset = 40;
 
   console.log('menuctrl')
   socket.on('vStart', function (data) {
@@ -411,17 +412,17 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
   });
 
   var params = $location.search();
-  console.log('params', params);
+
   var performanceid = params['p'] === undefined ? '' : params['p'];
   if (performanceid) {
     if (performanceid === '9333e7a2-16a9-4352-a45a-f6f42d848cde') {
-      $scope.title = 'test(performance title)'
-      $scope.performance1 = true;
+      $scope.title = 'test(title)'
+      $scope.performance2 = true;
     } else if (performanceid === 'be418821-436d-41c2-880c-058dffb57d91') {
       $scope.title = 'Performance 1'
       $scope.performance1 = true;
       $scope.performance2 = false;
-    } else {
+    } else if (performanceid === '13a7fa70-ae91-4541-9526-fd3b332b585d') {
       $scope.title = 'Performance 2'
       $scope.performance2 = true;
       $scope.performance1 = false;
@@ -432,6 +433,19 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', function
   } else {
     console.log('no performance id!');
     alert('Sorry, this URL is wrong! (there is no performance specified)');
+  }
+
+  $scope.gotoAnchor = function (anchorName) {
+    console.log('go to anchor'+ anchorName);
+    if ($location.hash() !== anchorName) {
+      // set the $location.hash to `newHash` and
+      // $anchorScroll will automatically scroll to it
+      $location.hash(anchorName);
+    } else {
+      // call $anchorScroll() explicitly,
+      // since $location.hash hasn't changed
+      $anchorScroll();
+    }
   }
 }]);
 

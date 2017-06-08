@@ -6,7 +6,7 @@
         <li><a href="#!cus-map">Your Map</a></li>
     </ul>-->
     <div class='bg-img-container'>
-        <img class='bk-img' src='https://s25.postimg.org/b8gnh7cbz/Climb_App_Map_background.jpg' alt='Map' width='100%' height='auto'
+        <img class='bk-img' src='Climb_App_Map_background.jpg' alt='Map' width='100%' height='auto'
         />
     </div>
     <div class="program-note">
@@ -16,8 +16,15 @@
                 choosing her path carefully, and encountering weather, animals and other delights and perils along the way.
             </p>
         </div>
+
         <div ng-show="performance2">
-            <h4>Introduction</h4>
+            
+            <div style="margin-top:10px"><a href="" ng-click="gotoAnchor('intro')">Overview</a></div>
+            <div><a href="" ng-click="gotoAnchor('performer')">About the composer and performer</a></div>
+            <div><a href="" ng-click="gotoAnchor('tech')">About the technology Climb! </a></div>
+
+
+            <h4 id="intro" class = 'anchor'>Overview</h4>
             <p>
                 Climb! is a musical composition that combines the ideas of a classical virtuoso piece and a computer game. Written for a
                 Disklavier grand piano, the work engages the pianist in an unusual musical dialogue where there is no fixed
@@ -32,7 +39,7 @@
                 path. Depending on how the performer plays, they may continue to progress along their current path or be
                 diverted onto another one.
             </p>
-            <h4>About the composer and performer</h4>
+            <h4 id="performer" class='anchor'>About the composer and performer</h4>
             <p>
                 <b>Dr. Maria Kallionpää (1981)</b> is an internationally active composer and pianist. She earned her PhD
                 in composition at the university of Oxford in 2015. Kallionpää won the first prize of the OUPHIL composition
@@ -55,7 +62,7 @@
                 laureate of Académie de France à Rome in 2016.
             </p>
 
-            <h4> About the technology Climb! </h4>
+            <h4 id="tech" class="anchor"> About the technology Climb! </h4>
             <p>
                 Climb! Is realised using a combination of technologies. It is played on a Disklavier piano that can be instructed to physically
                 play back computer generated parts (using the MIDI protocol) and can even duet along with the pianist, moving
