@@ -74,10 +74,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   var visuals = '';
   var visualNum = 0;
 
-  angular.element($window).bind('resize', function () {
-    console.log('window resized')
-    $window.location.reload();
+  angular.element($window).bind('orientationchange', function () {
+    console.log('orientation changed')
+    $window.location.reload(true);
     $route.reload();
+
   })
 
   var params = $location.search();
@@ -400,7 +401,7 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
 }])
 
 map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', function ($scope, $location, socket, $window, $anchorScroll) {
-   $anchorScroll.yOffset = 40;
+  $anchorScroll.yOffset = 40;
 
   console.log('menuctrl')
   socket.on('vStart', function (data) {
@@ -436,7 +437,7 @@ map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchor
   }
 
   $scope.gotoAnchor = function (anchorName) {
-    console.log('go to anchor'+ anchorName);
+    console.log('go to anchor' + anchorName);
     if ($location.hash() !== anchorName) {
       $location.hash(anchorName);
     } else {
