@@ -78,7 +78,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     console.log('orientation changed')
     $window.location.reload(true);
     $route.reload();
-
   })
 
   var params = $location.search();
@@ -92,6 +91,10 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     alert('Sorry, this URL is wrong! (there is no performance specified)');
   }
 
+  socket.on('vStart', function(){
+    $scope.cstage = 'basecamp'; 
+  })
+
   $scope.narrativeData = visualMapBuilder.getNarrativeData();
   if (!$scope.narrativeData) {
     visualMapBuilder.narrativeConfig().then(function (data) {
@@ -104,7 +107,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
           visualMapBuilder.setMapData(data);
           $scope.mapData = data;
           initMap();
-          $scope.cstage = 'basecamp';
           $scope.mapLoaded = true;
         });
       }
@@ -244,7 +246,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     if ($scope.cstage) {
 
       visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
-
       visualMapBuilder.startPerformMode($scope.cstage, $scope.pstage).then(function (t) {
         $scope.narrativeData = visualMapBuilder.getNarrativeData();
         if (!$scope.narrativeData) {

@@ -253,13 +253,13 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     //console.log('update to new: ', s);
 
                     if (!_.includes(passedRecord, fs.stage)) {
-                        console.log('reveal new stage:', fs.stage); 
+                        console.log('reveal new stage:', fs.stage);
                         updateMapStage(fs.stage, 'revealed', delaybase + 4)
                     }
                 });
             }
-                console.log('reveal new stage with lines', ps.stage, cs.stage)
-                updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase);
+            console.log('reveal new stage with lines', ps.stage, cs.stage)
+            updateMapLine(ps, cs, flist, psCuesWithoutCs, delaybase);
         },
         drawMap: function (canvas) {
             var data = journeyRecord;
@@ -423,7 +423,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             return stop_flag;
         },
         setStop: function () {
-            stop_flag = true;
+            stop_flag = true;            //updateMapStage('summit', 'rev_succ', delaybase+1) 
         },
         startPerformMode: function (sname, pname) {  // cs
             if (stop_flag) {
