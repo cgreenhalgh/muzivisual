@@ -7,10 +7,7 @@ var INTERVAL = 1000;
 var MAP_WIDTH, MAP_HEIGHT;
 var delaybase = 1;
 
-// change these two parameter to switch reveal mode
-// post-reveal (false+8)  pre-review(true+5)
-var PRE_REVEAL_MODE = false;
-var ANI_DURATION = 8; // 8/5 PreMode ;
+var ANI_DURATION = 8;
 
 map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
   $routeProvider.when('/', {
@@ -51,7 +48,6 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
       scope.cstage = null;
 
       scope.mapData = null;
-      scope.performing = false;
       scope.mapRecord = null;
 
       scope.back = function () {
@@ -216,28 +212,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   }
 
   $scope.$watch('cstage', function (ns, os) {
-    visualIdx = 0;
-    visuals = '';
-    visualNum = 0;
-
-    if ($scope.performing) {
-      if (delaybase === 1) {
-        // PreMode
-        if (PRE_REVEAL_MODE) {
-          delaybase = 0;
-        } else {
-          delaybase = 2;
-        }
-      }
-
-      visualMapBuilder.exitPerformMode($scope.pstage).then(function (f) {
-
-        if (PRE_REVEAL_MODE) {
-          visualMapBuilder.updateMapPreMode($scope.pstage, $scope.cstage, 2);
-        }
-      });
-      console.log('stage change: ' + os + '->' + ns);
+    if (delaybase === 1) {
+      delaybase = 2;
     }
+
+    console.log('stage change: ' + os + '->' + ns);
 
     if ($scope.cstage) {
 
@@ -261,8 +240,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         }
 
         if (!visualMapBuilder.getStop()) {
-          $scope.performing = t;
-
           console.log('performMode on');
 
           var stageChange = '';
@@ -382,15 +359,11 @@ map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http
       d3.select('#visualImg').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
-      if (!PRE_REVEAL_MODE) {
-        visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
-      } else {
-        visualMapBuilder.initMapPreMode(canvas, visualMapBuilder.getMapData());
-      }
+
+      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
 
       d3.selectAll('line').attr('opacity', '1').attr('stroke', 'white')
       d3.selectAll('circle').attr('opacity', '1')
-      // d3.selectAll('text').attr('opacity', '1')
       d3.select('#circle_begin').attr('fill', 'white')
     });
   } ot
@@ -457,7 +430,6 @@ map.controller('postPerformanceCtrl', ['$scope', 'visualMapBuilder', 'd3Service'
       var canvas = d3.select('#map-container');
       visualMapBuilder.drawMap(canvas);
     })
-    // $scope.message = 'Following are the stages that you have visited today! Click and download your music scores!'
   } else {
     $scope.message = 'NO RECORD YET'
   }

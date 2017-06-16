@@ -45,8 +45,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     function getLineColor(state) {
         if (state === 'rev_succ') {
             return 'orange';
-        } else if (state === 'rev_fail') {
-            return 'red';
         }
         else {
             return 'white';
@@ -92,24 +90,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('opacity', function () { return getStageOpacity(state) })
         })
 
-    }
-
-    function updateMapLinePreMode(p, c, delay) {
-        console.log('updateLinePreMode')
-        var pstage = p.stage;
-        var cstage = c.stage;
-        var ps = p.state;
-        var cs = c.state;
-
-        d3Service.d3().then(function () {
-            d3.select('#' + pstage + '_' + cstage)
-                .transition()
-                //.delay(INTERVAL * delay)
-                //.duration(INTERVAL)
-                .style("stroke-dasharray", ("0, 0"))
-                .attr('opacity', 1)
-                .attr('stroke', 'orange')
-        })
     }
 
     function updateMapLine(p, c, fss, pcstages, delay) {
@@ -179,37 +159,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     return {
-        updateMapPreMode: function (cstage, pstage, flag) {
-            var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
-
-            if (flag === 1) {
-                cs = _.find(mapData, { 'stage': cstage });
-                updateMapStage(cstage, 'active', delaybase)
-            } else {
-                cs = _.find(mapData, { 'stage': cstage });
-                var cname = cs.name;
-                updateMapStage(cstage, 'rev_succ', delaybase)
-
-                // turn the previous active stage into past -  succ / fail
-                if (pstage) {
-                    ps = _.find(mapData, { 'stage': pstage });
-                    //updateMapStage(pstage, 'act', delaybase)
-
-                    // ps cue stage
-                    psCues = ps.cue.split('/');
-                    psCuesWithoutCs = _.filter(psCues, function (s) { return s !== cstage });
-
-                    // get missed stages
-                    revealeds = _.filter(mapData, { 'state': 'revealed' })
-                    if (revealeds.length > 0) {
-                        _.forEach(revealeds, function (rs) {
-                            updateMapStage(rs.stage, 'missed', delaybase)
-                        });
-                    }
-                }
-                updateMapLinePreMode(cs, ps, delaybase + 3);
-            }
-        },
         updateMap: function (cstage, pstage) {
             if (stop_flag) {
                 return;
@@ -238,7 +187,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     _.forEach(revealeds, function (rs) {
                         console.log('update to missed: ', rs);
                         updateMapStage(rs.stage, 'missed', delaybase + 1)
-
                     });
                 }
             }
@@ -315,55 +263,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('stroke', 'orange')
                 .attr('fill', 'orange')
                 .attr('opacity', 1)
-        },
-        initMapPreMode: function (canvas, data) {
-            _.forEach(data, function (cStageDatum) {
-                if (cStageDatum.stage !== 'summit') {
-                    // get all the cues of this stage
-                    var cueList = _.split(cStageDatum.cue, '/');
-                    var cueStageDatum;
-                    _.forEach(cueList, function (cueStage) {
-                        cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
-                        canvas
-                            .append('line')
-                            .attr("x1", cStageDatum.x * MAP_WIDTH)
-                            .attr("y1", cStageDatum.y * MAP_HEIGHT)
-                            .attr("x2", cueStageDatum.x * MAP_WIDTH)
-                            .attr("y2", cueStageDatum.y * MAP_HEIGHT)
-                            .attr("id", function () {
-                                return cueStageDatum.stage ? (cStageDatum.stage + '_' + cueStageDatum.stage
-                                ) : ('line_' + cStageDatum.stage)
-                            })
-                            .style("stroke-dasharray", ("6, 6"))
-                            .attr('stroke', 'white')
-                            .attr('opacity', 1)
-                            .attr('stroke-width', '2px')
-                    });
-                }
-            });
-
-            canvas
-                .selectAll('circle')
-                .data(data)
-                .enter()
-                .append('circle')
-                .attr('cx', function (d) {
-                    return d.x * MAP_WIDTH;
-                })
-                .attr('cy', function (d) {
-                    return d.y * MAP_HEIGHT;
-                })
-                .attr('r', function (d) { return 5 })
-                .attr('id', function (d) { return 'circle_' + d.stage })
-                .attr('fill', function (d) {
-                    return getCircleFillColor(d)
-                })
-                .attr('stroke', 'black')
-                .attr('stroke-width', '2px')
-                .attr('opacity', 1)
-
-            // initialize begin stage
-            d3.select('#circle_begin').attr('opacity', 1).attr('fill', 'white').attr('r', R);
         },
         initMap: function (canvas, data) {
             if (stop_flag) {
@@ -478,22 +377,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     setTimeout(function () {
                         resolve(true)
                     }, delay);  // 
-            })
-        },
-        exitPerformMode: function (stage) {
-            // d3Service.d3().then(function (d3) {
-            //     //console.log('fade out animation')
-            //     var record = _.find(mapData, { 'stage': stage });
-            //     journeyRecord.push(record);
-            // });
-
-
-            console.log('new status saved' + stage);
-
-            return $q(function (resolve, reject) {
-                // setTimeout(function () {
-                resolve(false)
-                // }, INTERVAL * 1.5)
             })
         },
         getMapRecord: function () {

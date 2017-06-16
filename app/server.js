@@ -218,6 +218,7 @@ http.listen(port, function () {
     redisClient.rpush(key, JSON.stringify({ name: 'vStageChange', data: data, time: (new Date()).getTime() }));
     io.to(key).emit('vStageChange', data);
   });
+  
   serverSocket.on('vStop', function (data) {
     var perf = data;
     console.log('stop performance ' + perf);
