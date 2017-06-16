@@ -91,10 +91,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     alert('Sorry, this URL is wrong! (there is no performance specified)');
   }
 
-  socket.on('vStart', function(){
-    $scope.cstage = 'basecamp'; 
-  })
-
   $scope.narrativeData = visualMapBuilder.getNarrativeData();
   if (!$scope.narrativeData) {
     visualMapBuilder.narrativeConfig().then(function (data) {
