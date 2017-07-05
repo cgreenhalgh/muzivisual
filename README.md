@@ -55,15 +55,19 @@ Use the same animation as Version 1.0 (post-reveal)
 Particularly in the 2nd performance, the map displays a fade path of the 1st perf for distinguish purpose
 
 
-
 ### Post-performance
 Have same content as Version 1.0 (colored path on map + journey summary)
+
 Differenetly, both paths can be viewed on the same map (highlight one and fade the other)
 
 ### Others
 Use one link for two performances (url ?p1=xxx ?p2=xxx)
+
 No automatic navigation to performances (use probably highlighted links on the top menu instead)
 
+During the performance, audiences can always flip back to the top menu
 
+### Future extesion
+Interactivity?
 
 
