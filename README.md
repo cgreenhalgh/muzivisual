@@ -3,23 +3,28 @@ Node.js + Express.js + Angualr.js + socket.io
 
 # Installation 
 
-## Prerequisites: 
+## Run: 
 Install VirtualBox, Vagrant and Chrome.
 
 Doadload and run Muzicodes[https://github.com/cgreenhalgh/musiccodes]
 
 On Windows double-click/run `musiccodes.bat`
+
 Enter bootstrap folder of Muzicodes
+
 vagrant up
+
 vagrant ssh
+
 cd /vagrant
 
-## Run
 In 'vagrant': get MuziVisual[https://github.com/littlebugivy/muzivisual]
+
 Run: node muzivisual/app/server.js
 
 ## Default port
 Muzicodes : localhost:3000
+
 MuziVisual: localhost:8000
 		 
 # Requirements
@@ -35,6 +40,7 @@ Allow the audieneces to choose what they want to look at
 
 ### Pre-performance
 Offers all the info about the performance in the first place 
+
 Have a top menu with links to 8 materials:
 - Performer info
 - Programme note
