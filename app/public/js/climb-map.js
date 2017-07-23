@@ -9,21 +9,15 @@ var delaybase = 1;
 
 var ANI_DURATION = 8;
 
-map.config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
-  $routeProvider.when('/', {
-    templateUrl: 'menu.html',
-    controller: 'menuCtrl'
-  }).when('/performance/', {
+map.config(['$routeProvider', function ($routeProvider) {
+  $routeProvider.when('/performance/', {
     templateUrl: 'map.html',
     controller: 'mapCtrl'
-  }).when('/preview', {
-    templateUrl: 'map.html',
-    controller: 'previewCtrl'
   }).when('/post-performance', {
     templateUrl: 'map.html',
     controller: 'postPerformanceCtrl'
   }).
-    otherwise({
+  otherwise({
       redirectTo: '/',
     });
 
@@ -335,86 +329,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   //   })
 }])
 
-map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', function ($scope, d3Service, visualMapBuilder, $http, $location) {
-  console.log('Open Preview')
-
-  $scope.cstage = ''
-  $scope.pstage = ''
-  $scope.preview = 1;
-  $scope.mapData = visualMapBuilder.getMapData();
-
-  if (!$scope.mapData) {
-    visualMapBuilder.mapConfig().then(function (data) {
-      console.log("LOAD MAP: " + JSON.stringify(data));
-      visualMapBuilder.setMapData(data);
-      $scope.mapData = data;
-      initMap();
-    })
-  } else {
-    initMap();
-  }
-
-  function initMap() {
-    d3Service.d3().then(function (d3) {
-      d3.select('#visualImg').style('width', '100%')
-        .style('max-height', MAP_HEIGHT + 'px')
-      var canvas = d3.select('#map-container');
-
-      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
-
-      d3.selectAll('line').attr('opacity', '1').attr('stroke', 'white')
-      d3.selectAll('circle').attr('opacity', '1')
-      d3.select('#circle_begin').attr('fill', 'white')
-    });
-  } ot
-
-}])
-
-map.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', function ($scope, $location, socket, $window, $anchorScroll) {
-  $anchorScroll.yOffset = 40;
-
-  console.log('menuctrl')
-  socket.on('vStart', function (data) {
-    console.log('vStart: get data ', data);
-    var da = data.split(':')
-    var performanceid = da[0];
-    //console.log('PerformanceID: ', performanceid);
-    $location.path('/performance/');
-  });
-
-  var params = $location.search();
-
-  var performanceid = params['p'] === undefined ? '' : params['p'];
-  if (performanceid) {
-    if (performanceid === '9333e7a2-16a9-4352-a45a-f6f42d848cde') {
-      $scope.title = 'test(title)'
-      //$scope.performance2 = true;
-    } else if (performanceid === 'be418821-436d-41c2-880c-058dffb57d91') {
-      $scope.title = 'Performance 1'
-      $scope.performance1 = true;
-      $scope.performance2 = false;
-    } else if (performanceid === '13a7fa70-ae91-4541-9526-fd3b332b585d') {
-      $scope.title = 'Performance 2'
-      $scope.performance2 = true;
-      $scope.performance1 = false;
-    }
-
-    console.log('client for performance ' + performanceid);
-    socket.emit('client', performanceid);
-  } else {
-    console.log('no performance id!');
-    alert('Sorry, this URL is wrong! (there is no performance specified)');
-  }
-
-  $scope.gotoAnchor = function (anchorName) {
-    console.log('go to anchor' + anchorName);
-    if ($location.hash() !== anchorName) {
-      $location.hash(anchorName);
-    } else {
-      $anchorScroll();
-    }
-  }
-}]);
 
 map.controller('postPerformanceCtrl', ['$scope', 'visualMapBuilder', 'd3Service', function ($scope, visualMapBuilder, d3Service) {
   $scope.cstage = ''

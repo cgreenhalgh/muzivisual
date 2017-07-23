@@ -101,7 +101,7 @@ app.get('/maps/', function (req, res) {
     }
   });
 
-  fs.readFile(DATA_DIR + '/Climb!June8.csv', function (err, data) {
+  fs.readFile(DATA_DIR + '/Climb!London.csv', function (err, data) {
     if (err) throw err;
     processData(data, res);
   });

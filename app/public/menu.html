@@ -1,15 +1,76 @@
-<div>
-    <!--  <a href="#!preview">Preview</a> -->
+<nav class='navbar navbar-inverse bg-inverse'><span class="navbar-brand">Climb!</span></nav>
+<div class="top-menu">
+    <div class="menu-container">
+    <!--<h5><a href="#!preview">Preview</a></h5>-->
+
     <!--<ul class="menu">
-        <li><a href="#!preview">Preview</a></li>
-        <li><a href="#!map">Start</a></li>
-        <li><a href="#!cus-map">Your Map</a></li>
+        <div><a href="#!preview">Preview</a></div>
+        <div><a href="#!map">Start</a></div>
+        <div><a href="#!cus-map">Your Map</a></div>
     </ul>-->
-    <div class='bg-img-container'>
-        <img class='bk-img' src='Climb_App_Map_background.jpg' alt='Map' width='100%' height='auto'
-        />
+    <!--<div class="menu-title"><h2>Climb!</h2></div>-->
+  
+    <ul class="list-btn-menu">
+        <div class='bg-img-container'>
+        <!--<img class='bk-img' src='Climb_App_Map_background.jpg' alt='Map' width='100%' height='auto' />-->
     </div>
-    <div class="program-note">
+
+        <li class="btn-menu">
+            <button type="button" class="btn btn-default" aria-label="Programme Note" ng-click='openContent("Programme Note")'>
+        <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+        <span class="btn-title" >Programme note</span>
+    </button>
+        </li>
+
+         <li class="btn-menu">
+            <button type="button" class="btn btn-default" aria-label="Performer" ng-click='openContent("Performer")'>
+        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+         <span class="btn-title">Performer</span>
+    </button>
+        </li>
+
+         <li class="btn-menu">
+            <button type="button" class="btn btn-default" aria-label="Map" ng-click='openContent("Map")'>
+        <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
+         <span class="btn-title">Map</span>
+    </button>
+        </li>
+
+         <li class="btn-menu">
+            <button type="button" class="btn btn-default" aria-label="What can see and hear" ng-click='openContent("What can see and hear")'>
+        <span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
+         <span class="btn-title">What can see and hear</span> 
+    </button>
+        </li>
+         <li class="btn-menu">
+            <button type="button" class="btn btn-default" aria-label="How it works" ng-click='openContent("How it works")'>
+        <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+         <span class="btn-title">How it works</span> 
+    </button>
+        </li>
+
+         <li class="btn-menu">
+            <button type="button" class="btn btn-default" aria-label="Performer" ng-click='openArchive()'>
+        <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
+         <span class="btn-title">Archive</span> 
+    </button>
+        </li>
+
+        <li class="btn-menu" style="margin-top:10%">
+            <button type="button" class="btn btn-default" aria-label="Performer">
+        <span class="glyphicon glyphicon-headphones" aria-hidden="true"></span> <span class="btn-title">Performance</span> 
+    </button>
+        </li>
+        <!--<div>
+            <button type="button" class="btn btn-default" aria-label="Performer">
+        <span class="glyphicon glyphicon-headphones" aria-hidden="true"></span>&nbsp Performance2
+    </button>
+        </div>-->
+
+    </ul>
+    </div>
+
+    <!--<div class="program-note">
         <h1 style="text-align:center">{{title}}</h1>
         <div ng-show="performance1">
             <p>Join composer and pianist Maria Kallionpää who – as “Avatar” – must negotiate two perilous ascents of a mountain,
@@ -18,13 +79,13 @@
         </div>
 
         <div ng-show="performance2">
-            
+
             <div style="margin-top:10px"><a href="" ng-click="gotoAnchor('intro')">Overview</a></div>
             <div><a href="" ng-click="gotoAnchor('performer')">About the composer and performer</a></div>
             <div><a href="" ng-click="gotoAnchor('tech')">About the technology Climb! </a></div>
 
 
-            <h4 id="intro" class = 'anchor'>Overview</h4>
+            <h4 id="intro" class='anchor'>Overview</h4>
             <p>
                 Climb! is a musical composition that combines the ideas of a classical virtuoso piece and a computer game. Written for a
                 Disklavier grand piano, the work engages the pianist in an unusual musical dialogue where there is no fixed
@@ -90,16 +151,6 @@
 
         </div>
 
-    </div>
-
-    <!--<button ng-click='start()'>Start</button>
-    <div id="introduction">
-        <h1>CLIMB!</h1>
-
-        <h3>Ger ready for the adventure.</h3>
-
     </div>-->
-    <!--<div id='start'>
-        <h3 ng-show='ready'>Performance starts in: {{counter}}s</h3>
-    </div>-->
+
 </div>

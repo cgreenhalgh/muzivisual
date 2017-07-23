@@ -1,4 +1,4 @@
-<div style="height:100%; width: 100%">
+<div style="height:100%; width: 100%; ">
   <div class='bg-img-container'>
     <img style='position:absolute; z-index:-1; left:0;top:0' src='Climb_Map_background.jpg' alt='Map' width='100%' height='auto'
     />
@@ -11,7 +11,7 @@
 
    <div ng-show="!stop" id="fragment" style="margin-top:-35%;text-align:center; width:100%; color:white;">
     <p>
-      <h1 id="title" style="line-height:1.3">{{title}}</h1>
+      <h1 id="narrative-title" style="line-height:1.3">{{title}}</h1>
     </p>
     <p id="narrative" style="font-size:1em; margin-left:5%; margin-right:5%; ">{{narrative}}</p>
     <!--<p>{{narrativeData}}</p>-->
@@ -25,3 +25,9 @@
       <p ng-if="j.stageName!=='Summit'">|</p>
     </div>
   </div>
+
+  <div class="float-button">
+    <div class="middle"><a href="#!/" class="glyphicon glyphicon-menu-left"></a></div>
+</div>
+
+<div class="black-bkg"></div>
