@@ -414,14 +414,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         setMapData: function (d) {
             mapData = d;
         },
-        getVisual: function (cstage) {
-            var datum = _.find(mapData, { 'stage': cstage })
-            console.log(datum)
-            var visual = datum.visual;
-            var img = datum.img;
-            visual.push(img);
-            return visual;
-        },
         getJourney: function () {
             var journey = [];
             var narrative = '';
@@ -437,6 +429,44 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 }
             })
             return journey;
+        },
+        openToolTip: function (cstage, data) {
+            window.navigator.vibrate([200, 100, 200]);
+
+            d3.select('.tool-tip')
+                .transition()
+                .duration(1000)
+                .remove()
+
+            var cData = _.find(mapData, { 'stage': cstage })
+            console.log("Data for the current stage: " + JSON.stringify(cData))
+
+            var maxWidth = 200;
+
+            d3.select('d3-map')
+                .append('div')
+                .attr('class', 'tool-tip')
+                .style('max-width', maxWidth + 'px')
+                .text(data)
+                .style('opacity', 0)
+
+            var str = d3.select('.tool-tip').style('width');
+            var substr = str.substring(0, str.length - 2);
+            var width = parseFloat(substr)
+
+            str = d3.select('.tool-tip').style('height');
+            substr = str.substring(0, str.length - 2);
+            var height = parseFloat(substr)
+
+            var windowX = cData.x * MAP_WIDTH - width / 2;
+            var windowY = cData.y * MAP_HEIGHT - height - 25;
+
+            d3.select('.tool-tip')
+                .style('top', windowY + 'px')
+                .style('left', windowX + 'px')
+                .transition()
+                .duration(1000)
+                .style('opacity', 0.8)
         }
     }
 }]);

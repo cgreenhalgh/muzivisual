@@ -6,6 +6,7 @@ var redisAdapter = require('socket.io-redis');
 var _ = require('lodash');
 var socketClient = require('socket.io-client');
 var redis = require("redis");
+var async = require('async');
 
 //CORS
 app.use(function (req, res, next) {
@@ -49,7 +50,9 @@ io.on('connection', function (socket) {
 
   var flag = 0;
   socket.on('client', function (perf) {
-    if (flag === 0) {
+    console.log('flag value: ', flag)
+    //if (flag === 0) {
+      {
       console.log('new client for performance ' + perf);
       var key = 'performance:' + perf;
       socket.join(key);
@@ -65,7 +68,7 @@ io.on('connection', function (socket) {
           socket.emit(data.name, data.data);
         }
       });
-      flag = 1;
+     // flag = 1;
     }
   });
 
@@ -197,6 +200,10 @@ http.listen(port, function () {
     console.log('GET MESSAGE FROM MUZICODES:', data);
     //io.to('mobileapp').emit('vStart', data);
     // perfid:stage
+    if(!data){
+      return;
+    }
+
     var parts = data.split(':');
     var perf = parts[0];
     var stage = parts[1];
@@ -206,6 +213,29 @@ http.listen(port, function () {
       console.log('cleared performance ' + perf);
       redisClient.rpush(key, JSON.stringify({ name: 'vStart', data: data, time: (new Date()).getTime() }));
     });
+    
+    // var jobs = [];
+    // redisClient.set('KEYS*', function (err, keys) {
+    //     if (err) return console.log(err);
+    //     if(keys){
+    //         async.map(keys, function(key, cb) {
+    //            redisClient.get(key, function (error, value) {
+    //                 if (error) return cb(error);
+    //                 var job = {};
+    //                 job['jobId']=key;
+    //                 job['data']=value;
+    //                 cb(null, job);
+    //             }); 
+    //         }, function (error, results) {
+    //            if (error) return console.log(error);
+    //            console.log(results);
+    //            res.json({data:results});
+    //         });
+    //     }
+    // });
+    // console.log(jobs)
+
+    io.emit('vStart') // need to change later
     io.to(key).emit('vStart', data);
   });
   // other messages
@@ -220,10 +250,14 @@ http.listen(port, function () {
   });
   
   serverSocket.on('vStop', function (data) {
+    if(!data){
+      return;
+    }
     var perf = data;
     console.log('stop performance ' + perf);
     var key = 'performance:' + perf;
     redisClient.rpush(key, JSON.stringify({ name: 'vStop', time: (new Date()).getTime() }));
+    io.emit('vStop') //change later
     io.to(key).emit('vStop');
   });
 })

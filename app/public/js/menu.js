@@ -21,18 +21,42 @@ menu.config(['$routeProvider', function ($routeProvider) {
 
 
 menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', function ($scope, $location, socket, $window, $anchorScroll) {
-    
+    $scope.performing = false;
+    $scope.perfOpacity = 0.2;
+    $scope.archOp = 1;
+    $scope.pstop = false;
+
+    socket.on('vStart', function () {
+        $scope.perfOpacity = 1;
+        $scope.performing = true;
+        $scope.archOp = 0.2;
+        console.log('start performing')
+    })
+
+    socket.on('vStop', function () {
+        $scope.perfOpacity = 0.2;
+        $scope.performing = false;
+        $scope.archOp = 1;
+        $scope.pstop = true;
+        console.log('stop performing');
+    })
+
     $scope.openContent = function openContent(title) {
         console.log('This is menuCtrl ' + title);
-        if(title === 'Map'){
-             $location.path('/content/map');
-             return;
+        if (title === 'Map') {
+            $location.path('/content/map');
+            return;
         }
         $location.path('/content/' + title);
     }
 
-    $scope.openArchive = function(){
-        $window.open('http://music-mrl.nott.ac.uk/1/archive/explore/Climb',"_self")
+    $scope.openArchive = function () {
+        $window.open('http://music-mrl.nott.ac.uk/1/archive/explore/Climb', '_self')
+    }
+
+    $scope.openPerformance = function () {
+        $window.location.href = 'http://localhost:8000/#!/performance/?p=9333e7a2-16a9-4352-a45a-f6f42d848cde'
+        $window.location.reload(true)
     }
 
 
@@ -101,7 +125,7 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', function ($scope, $rou
 }])
 
 
-map.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', function ($scope, d3Service, visualMapBuilder, $http, $location) {
+menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', function ($scope, d3Service, visualMapBuilder, $http, $location) {
     console.log('Open Preview')
 
     $scope.cstage = ''

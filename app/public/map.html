@@ -1,24 +1,25 @@
-<div style="height:100%; width: 100%; ">
+<div id='map' style="height:100%; width: 100%; ">
   <div class='bg-img-container'>
     <img style='position:absolute; z-index:-1; left:0;top:0' src='Climb_Map_background.jpg' alt='Map' width='100%' height='auto'
     />
   </div>
 
-  <!--<button ng-show='preview || cusMap' ng-click='back()'>Back</button>-->
   <div id="map">
     <d3-map></d3-map>
   </div>
 
-   <div ng-show="!stop" id="fragment" style="margin-top:-35%;text-align:center; width:100%; color:white;">
+  <div ng-show="!stop" id="fragment">
     <p>
-      <h1 id="narrative-title" style="line-height:1.3">{{title}}</h1>
+      <h1 id="narrative-title">{{title}}</h1>
     </p>
-    <p id="narrative" style="font-size:1em; margin-left:5%; margin-right:5%; ">{{narrative}}</p>
+    <p id="narrative">{{narrative}}</p>
     <!--<p>{{narrativeData}}</p>-->
   </div>
 
   <div ng-show="stop" style="margin-top:-40%">
-    <div style="margin-bottom:20px"><h1>Journey</h1></div>
+    <div style="margin-bottom:20px">
+      <h1>Journey</h1>
+    </div>
     <div id="journey" style="color:white; padding-left:20px ;padding-right:20px; text-align: center;" ng-repeat="j in journey track by $index">
       <h3> {{j.stageName}} </h3>
       <p style="margin-top: 0px">{{j.narrative}} </p>
@@ -27,7 +28,11 @@
   </div>
 
   <div class="float-button">
-    <div class="middle"><a href="#!/" class="glyphicon glyphicon-menu-left"></a></div>
-</div>
+    <div class="middle"><a href='#!/' class="glyphicon glyphicon-home"></a></div>
+  </div>
+  <div class="black-bkg"></div>
 
-<div class="black-bkg"></div>
+  <div ng-show="map">
+    <div class='map-left' ng-click="getHistory()"><span class='glyphicon glyphicon-menu-left'></span></div>
+    <div ng-show='history' class='map-right'><span class='glyphicon glyphicon-menu-right'></span></div>
+  </div>

@@ -17,6 +17,24 @@ p {
   margin:20px
 }
 
+#narrative-title{
+  line-height: 1.2
+}
+
+#fragment{
+  margin-top:-40%;
+  text-align:center; 
+  width:100%; 
+  color:white;
+}
+
+#narrative{
+  line-height: 1.3;
+  font-size: 1.5em;
+   margin-left:5%; 
+   margin-right:5%; 
+}
+
 .navbar-inverse .navbar-brand{
   color:white;
   font-size: 1.5em;
@@ -83,8 +101,8 @@ h4 {
 .float-button {
   position: fixed;
   display: table;
-  bottom: 3%;
-  right: 5%;
+  bottom: 2%;
+  right: 3%;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -99,17 +117,17 @@ h4 {
   vertical-align: middle;
 }
 
-.glyphicon-menu-left {
-  line-height: normal;
-  margin: 0px;
-  font-size: 1.25em;
-  color: black;
-}
 
 .float-button:hover {
   box-shadow: none;
 }
 
+.glyphicon.glyphicon-home{
+  line-height: normal;
+  margin: 0px;
+  font-size: 2em;
+  color: black;
+}
 
 /*menu.html*/
 
@@ -165,6 +183,86 @@ h4 {
 .black-bkg{
  background-color:black;
   position:fixed; 
-  width:100%;height:100%;
-   bottom:0; z-index:-100
+  width:100%;
+  height:100%;
+  bottom:0; 
+  z-index:-2;
 }
+
+
+.map-left{
+  display: inline-block;
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  color: #f9f9f9;
+  left:0px;
+  top:5%;
+  font-size: 15px;
+}
+
+.map-right{
+  display: inline-block;
+  position: fixed;
+  width: 60px;
+  height: 60px;
+  color: #f9f9f9;
+  right:0px;
+  top:5%;
+  font-size:15px;
+}
+
+
+
+.glyphicon.glyphicon-menu-left, .glyphicon.glyphicon-menu-right{
+  font-size: 2em;
+}
+
+/*.pop-window{
+  height:100px;
+  width: 50%;
+  display: block;
+  position: absolute;
+  z-index: 100;
+  background:white;
+}*/
+
+.tool-tip{
+ background-color: white;
+ position: absolute;
+ display: block;
+ z-index: 100; 
+ border-radius: 6px;
+ text-align: center;
+ padding: 2px 5px;
+ font-size: 20px;
+ word-wrap: break-word;
+}
+
+.tool-tip::after{
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+.glyphicon.glyphicon-asterisk.glyphicon-asterisk-1{
+  color:#e74c3c;
+  font-size:15px;
+  display: block;
+  float: right;
+  top:-10px;
+}
+
+.glyphicon.glyphicon-asterisk.glyphicon-asterisk-2{
+  color:#f9f9f9;
+  font-size:15px;
+  display: block;
+  float: left;
+  top:-10px;
+}
+

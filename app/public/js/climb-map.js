@@ -9,17 +9,19 @@ var delaybase = 1;
 
 var ANI_DURATION = 8;
 
+
 map.config(['$routeProvider', function ($routeProvider) {
   $routeProvider.when('/performance/', {
     templateUrl: 'map.html',
-    controller: 'mapCtrl'
+    controller: 'mapCtrl',
   }).when('/post-performance', {
     templateUrl: 'map.html',
     controller: 'postPerformanceCtrl'
   }).
-  otherwise({
+    otherwise({
       redirectTo: '/',
     });
+
 
   // $locationProvider.html5Mode({
   //   enabled: true,
@@ -53,6 +55,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
 
 map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', '$route', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location, $route) {
   console.log('mapCtrl')
+  $scope.map = true;
   $scope.cstage = '';
   $scope.pstage = '';
   $scope.narrative = '';
@@ -60,9 +63,21 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.stop = false;
   $scope.mapLoaded = false;
   $scope.narrativeLoaded = false;
+  $scope.history = false;
+  $scope.popWindow = true;
+
   var visualIdx = 0;
   var visuals = '';
   var visualNum = 0;
+
+  socket.on('vContents', function (data) {
+    console.log('get content: ' + data)
+    visualMapBuilder.openToolTip($scope.cstage, data);
+  })
+
+  $scope.getHistory = function () {
+    $scope.history = true;
+  }
 
   angular.element($window).bind('orientationchange', function () {
     console.log('orientation changed')
@@ -96,7 +111,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
           $scope.mapLoaded = true;
         });
       }
-
     })
   }
 
@@ -151,6 +165,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     });
     if (!$scope.cstage) {
       $scope.cstage = 'basecamp'; // reveal basecamp
+      visualMapBuilder.openToolTip($scope.cstage, 'this is a pop up');
     }
   }
 
@@ -167,6 +182,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       var stages = stageChange.split('->');
       $scope.pstage = stages[0];
       $scope.cstage = stages[1];
+      visualMapBuilder.openToolTip($scope.cstage, 'this is a pop up');
 
       d3Service.d3().then(function (d3) {
         d3.select('#title')
@@ -183,7 +199,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
     socket.on('vStop', function () {
       visualMapBuilder.setStop();
-
       $scope.stop = true;
 
       var stop_flag = visualMapBuilder.getStop()
@@ -192,7 +207,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       $scope.journey = visualMapBuilder.getJourney();
     });
   }
-
 
   // to avoid the asynchronized file loading latency
   if ($scope.mapLoaded)
@@ -213,7 +227,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     console.log('stage change: ' + os + '->' + ns);
 
     if ($scope.cstage) {
-
       visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
       visualMapBuilder.startPerformMode($scope.cstage, $scope.pstage).then(function (t) {
         $scope.narrativeData = visualMapBuilder.getNarrativeData();
@@ -304,7 +317,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   //     })
   //   }
   // }
-
 
   // room: room name (default "default")
   // pin: room pin/ password(default "")

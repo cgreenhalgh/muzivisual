@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "angular-sanitize": "^1.6.5",
+    "async": "^2.5.0",
     "body-parser": "^1.17.1",
     "express": "^4.14.1",
     "fs": "0.0.1-security",
