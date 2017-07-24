@@ -2,7 +2,7 @@
 
 var socket = angular.module('MuziVisual.socket', []);
 socket.factory('socket', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
-  var socket = io.connect();  // connect to visual channel 
+  var socket = io.connect({path:'/1/muzivisual/socket.io' });  // connect to visual channel 
   var queue = [];
   socket.on('vStart', function (msg) {
     queue.push({ name: 'vStart', msg: msg });
