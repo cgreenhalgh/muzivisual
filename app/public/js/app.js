@@ -6,7 +6,8 @@ var visual = angular.module('MuziVisual', [
   'MuziVisual.map',
   'MuziVisual.menu',
   'MuziVisual.socket',
-  'MuziVisual.visualmapbuilder'
+  'MuziVisual.visualmapbuilder',
+  'mpm-loguse'
 ]);
 
 visual.config(['$locationProvider', '$routeProvider', function ($locationProvider, $routeProvider) {

@@ -7,6 +7,10 @@ var _ = require('lodash');
 var socketClient = require('socket.io-client');
 var redis = require("redis");
 var async = require('async');
+var logging = require("./lib/logging");
+var loguse = require("./lib/loguse");
+
+logging.init('server', 'muzivisual');
 
 //CORS
 app.use(function (req, res, next) {
@@ -38,6 +42,7 @@ io.on('connection', function (socket) {
   //   if (data <= 0) { return; }
   //   io.to('mobileapp').emit('vTimer', data);
   // })
+  loguse.addClient(socket);
 
   socket.on('disconnect', function () {
     socket.disconnect();
@@ -192,8 +197,9 @@ function processData(data, res) {
 var port = process.env.PORT || 8000;
 http.listen(port, function () {
   console.log('Visual listening on port ' + port + '!');
+  logging.log('server','http.listen',{port:port},logging.LEVEL_INFO);
 
-  var serverSocket = socketClient('http://localhost:8000');
+  var serverSocket = socketClient('http://localhost:'+port);
   serverSocket.emit('serverSocket');
 
   serverSocket.on('vStart', function (data) {
@@ -247,6 +253,16 @@ http.listen(port, function () {
     var key = 'performance:' + perf;
     redisClient.rpush(key, JSON.stringify({ name: 'vStageChange', data: data, time: (new Date()).getTime() }));
     io.to(key).emit('vStageChange', data);
+  });
+  
+  serverSocket.on('vEvent', function (data) {
+    var parts = data.split(':');
+    var perf = parts[0];
+    var rest = parts.slice(1).join(':');
+    console.log('eevnt in performance ' + perf + ': ' + rest);
+    var key = 'performance:' + perf;
+    redisClient.rpush(key, JSON.stringify({ name: 'vEvent', data: data, time: (new Date()).getTime() }));
+    io.to(key).emit('vEvent', data);
   });
   
   serverSocket.on('vStop', function (data) {
