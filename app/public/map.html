@@ -8,11 +8,11 @@
     <d3-map></d3-map>
   </div>
 
-  <div ng-show="!stop" id="fragment">
+  <div id="fragment">
     <p>
       <h1 id="narrative-title">{{title}}</h1>
     </p>
-    <p id="narrative">{{narrative}}</p>
+    <p ng-show="!stop" id="narrative">{{narrative}}</p>
     <!--<p>{{narrativeData}}</p>-->
   </div>
 

@@ -29,7 +29,7 @@ map.config(['$routeProvider', function ($routeProvider) {
   // });
 }])
 
-map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '$location', 'visualMapBuilder', function (d3Service, $http, $window, $timeout, socket, $location, visualMapBuilder) {
+map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '$location', 'visualMapBuilder', '$compile',function (d3Service, $http, $window, $timeout, socket, $location, visualMapBuilder, $compile) {
   return {
     restrict: 'EA',
     scope: false,
@@ -39,16 +39,6 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
 
       console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
       angular.element(document).find('d3-map').append('<svg width=' + MAP_WIDTH + ' height=' + MAP_HEIGHT + ' id="map-container"></svg>')
-
-      scope.pstage = null;
-      scope.cstage = null;
-
-      scope.mapData = null;
-      scope.mapRecord = null;
-
-      scope.back = function () {
-        $location.path('/');
-      }
     }
   }
 }])
@@ -70,6 +60,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   var visualIdx = 0;
   var visuals = '';
   var visualNum = 0;
+
+  $scope.backToMenu = function(){
+    // $window.location.href = 'http://localhost:8000'
+    $location.path('/#!/')
+  }
 
   socket.on('vContents', function (data) {
     console.log('get content: ' + data)
@@ -162,7 +157,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
 
-      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
+      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData(), 'perf');
     });
     if (!$scope.cstage) {
       $scope.cstage = 'basecamp'; // reveal basecamp

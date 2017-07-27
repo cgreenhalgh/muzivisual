@@ -127,14 +127,19 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', function 
 }])
 
 
-menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', 'mpmLoguse', function ($scope, d3Service, visualMapBuilder, $http, $location, mpmLoguse) {
-    console.log('Open Preview')
+menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', '$compile', 'mpmLoguse', function ($scope, d3Service, visualMapBuilder, $http, $location, $compile, mpmLoguse) {
+    console.log('PreviewCtrl')
     mpmLoguse.view('/content/map', {});
 
     $scope.cstage = ''
     $scope.pstage = ''
     $scope.preview = 1;
     $scope.mapData = visualMapBuilder.getMapData();
+
+    $scope.showStageTitle = function (name) {
+        $scope.title = name;
+        console.log('show stage title:' + name)
+    }
 
     if (!$scope.mapData) {
         visualMapBuilder.mapConfig().then(function (data) {
@@ -153,12 +158,18 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
                 .style('max-height', MAP_HEIGHT + 'px')
             var canvas = d3.select('#map-container');
 
-            visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData());
+            visualMapBuilder.setStop();
+            visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData(), 'preview');
 
             d3.selectAll('line').attr('opacity', '1').attr('stroke', 'white')
-            d3.selectAll('circle').attr('opacity', '1')
-            d3.select('#circle_begin').attr('fill', 'white')
+
+            d3.selectAll('circle')
+                .attr('opacity', '1')
+                .attr('ng-click', function (d) {
+                    return 'showStageTitle("' + d.name + '")'
+                })
+            var circles = document.getElementsByClassName('circle');
+            $compile(angular.element(circles))($scope);
         });
     }
-
 }])

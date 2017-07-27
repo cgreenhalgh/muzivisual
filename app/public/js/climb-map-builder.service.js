@@ -3,12 +3,27 @@ var visualMapBuilder = angular.module('MuziVisual.visualmapbuilder', []);
 
 visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', function (d3Service, $timeout, $q, $http) {
     console.log('visualMapBuilder');
-    var mapRecord;
+    var recordMap;
     var mapData;
     var narrativeData;
     var stop_flag;
     var journeyRecord = [];
     var passedRecord = [];
+
+    function getPreviewCircleFillColor(d) {
+        if (d.path === '1') {
+            return '#C8F0D2' //green
+        }
+        else if (d.path === '2') {
+            return '#F6E5A9' //yellow
+        }
+        else if (d.path === '0') {
+            return '#C3C2F4' //purple
+        }
+        else {
+            return 'white';
+        }
+    }
 
     function getCircleFillColor(d) { // check if its a path or a stage 
         if (stop_flag) {
@@ -88,6 +103,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('fill', function () { return getCircleFillColor(data) })
                 .attr('r', function () { return getCircleRadius(data) })
                 .attr('opacity', function () { return getStageOpacity(state) })
+
         })
 
     }
@@ -252,6 +268,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     return 'circle_' + d.stage;
                 })
                 .attr('r', R)
+                .attr('class', 'circle')
                 // .attr('ng-click', function (d) {
                 //     var len = d.visual.length;
                 //     if (len) {
@@ -264,8 +281,8 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('fill', 'orange')
                 .attr('opacity', 1)
         },
-        initMap: function (canvas, data) {
-            if (stop_flag) {
+        initMap: function (canvas, data, mode) {
+            if (stop_flag && mode != "preview") {
                 return;
             }
             _.forEach(data, function (cStageDatum) {
@@ -308,11 +325,16 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('r', function (d) { return getCircleRadius(d) })
                 .attr('id', function (d) { return 'circle_' + d.stage })
                 .attr('fill', function (d) {
+                    if (mode === "preview") {
+                        console.log('preview mode')
+                        return getPreviewCircleFillColor(d)
+                    }
                     return getCircleFillColor(d)
                 })
                 .attr('stroke', 'black')
                 .attr('stroke-width', '2px')
                 .attr('opacity', 0)
+                .attr('class', 'circle')
 
             // initialize begin stage
             d3.select('#circle_begin').attr('opacity', 1).attr('fill', 'white').attr('r', R);
