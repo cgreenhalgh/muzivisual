@@ -28,6 +28,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 
     socket.on('vStart', function () {
         $scope.perfOpacity = 1;
+        // $scope.bborder = '2px solid red'
         $scope.performing = true;
         $scope.archOp = 0.2;
         console.log('start performing')
@@ -35,7 +36,8 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 
     socket.on('vStop', function () {
         $scope.perfOpacity = 0.2;
-        $scope.performing = false;
+
+        // $scope.performing = false;
         $scope.archOp = 1;
         $scope.pstop = true;
         console.log('stop performing');
@@ -55,7 +57,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
     }
 
     $scope.openPerformance = function () {
-        $window.location.href = 'http://localhost:8000/#!/performance/?p=9333e7a2-16a9-4352-a45a-f6f42d848cde'
+        $window.location.href = 'http://localhost:8000/#!/performance/?p=13a7fa70-ae91-4541-9526-fd3b332b585d'
         $window.location.reload(true)
     }
 
@@ -115,9 +117,14 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', function ($scope, $rou
     } else if (title === 'Performer') {
         $scope.text = '<div><b>Dr. Maria Kallionpää (1981)</b> is an internationally active composer and pianist. She earned her PhD in composition at the university of Oxford in 2015. Kallionpää won the first prize of the OUPHIL composition competition in 2013. She has graduated from the Royal Academy of Music (2009) and Universität für Musik and Darstellende Kunst Wien (2010) and has also studied composition and piano at Sibelius Academy and Universität Mozarteum Salzburg. Her works have been performed at Musikverein Wien, Philharmonie Luxembourg, and Sibiu Philharmonia. In 2011 Kallionpää was a commissioned composer of the Turku European Culture Capital and a finalist of the Tenso European Chamber Choir Composition Competition. Kallionpää has performed at numerous music festivals including Rainy Days Festival at Philharmonie Luxembourg, Musica Nova (Helsinki), Spitalfields Festival (London), and Neue Musik von Thuringen. In 2016 her music was performed at the Florida International Toy Piano Festival.</div>'
     } else if (title === 'What can see and hear') {
-        $scope.text = 'What can see and hear'
-    } else if (title === 'How it works') {
-        $scope.text = '<p>Climb! Is realised using a combination of technologies. It is played on a Disklavier piano that can be instructed to physically play back computer generated parts (using the MIDI protocol) and can even duet along with the pianist, moving its keys around and between their fingers. Climb! also uses the Max/MSP software running on a laptop to generate various audio effects that transform the piano’s sound.</p><p>The performer controls how the work progresses – which path they follow and how they negotiate various events along the way – directly through their playing rather than by pressing buttons, pushing pedals or having someone do this from behind the scenes. This employs a technology called Muzicodes from the University of Nottingham’s Mixed Reality Lab. Muzicodes allows certain phrases in the score to be designated as hidden codes that, when successfully played by the pianist, trigger events such as jumping to a new place in the score (like following a hyperlink on the World Wide Web); introducing an audio effect to represent weather, animals, stones and so forth; causing the Disklavier to duet with the pianist; driving the projected animations; and finally controlling these very programme notes!</p><p>The MELD software from the University of Oxford is used to render the pianist’s score, turning the digital pages for them as they negotiate their route through the piece. </p>'
+        $scope.text = '<p>A performance of Climb! contains a number of audio visual interactions that are triggered by musical codes (muzicodes) embedded in the pianist’s piano part.</p><p>On stage, the pianist plays the Disklavier piano and at times the Disklavier self-plays, taking over from the pianist or dueting alongside them. These Disklavier parts are triggered by specific musical codes played by the pianist in the preceding musical material. The sound of the piano is fed through audio processing effects that aim to mimic weather conditions, which are rain, snow, wind, sun and storm, also triggered by musical codes. The performer is reading the music from a dynamic digital score, where the page turns are enacted by a footpedal. Musical codes (challenges) determine the route that the performer takes through the composition and these codes also queue the next appropriate score section for their unfolding route. These ‘challenges’ are musical phrases that are difficult to perform, where a ‘correct’ performance will find the performer staying on their chosen path, but an incorrect performance may result in being forced over to a different path.</p><p>The projections on the large screen display a visual representation of the musical interactions. Each new section of the composition is accompanied by a distinct background animation within the mountain outline. The self-playing Disklavier parts are represented by an animated mountain outline. When a musical code is played that determines the performer route the inside of the mountain turns red for a few seconds. When a code is played that starts playback of the self-playing Disklavier the inside of the mountain turns blue for a few seconds. The random weather conditions are also visualised. Blended into these visualisations is a live camera feed that shows a birds eye view of the Disklavier keyboard, to provide a more focused view of the interactions between pianist and the self-playing Disklavier.</p><p>The ‘Climb! Audience App’ provides a range of information about the composition and a performance of it. The ‘performance’ view shows the pianist’s progress through the composition in real-time as they perform it, with updates also being triggered by the musical codes they play. The mountain view displays the performer’s route up the mountain. A brief narrative outline is displayed as the performer progress from section to section. Text notifications with accompanying handset vibrations alert you to upcoming codes and state if the pianist was successful in performing them correctly.</p><p>Selecting the left-hand arrow will display the completed routes taken at the previous performances of Climb!, so as to provide a comparison. Selecting the right-hand arrow will display the mountain with all possible paths and branching points in the composition.</p>'
+    } else if (title === 'Archive') {
+        $scope.text = '<p>This archive keeps a historical record of Climb! performances, enabling you to explore and compare different readings of this interactive work. The archive contains performance details (e.g. date, venue, performer and programme notes) alongside audio and video recordings of each performance. Accompanying visual representations of these performances highlight each unique journey through the branching composition. You can listen to complete performances or select individual sections from any chosen performance.</p><p><i>Select this link if you would like to visit the archive.</i></p><p><a class="menu-text" href="http://music-mrl.nott.ac.uk/1/archive/explore/Climb">http://music-mrl.nott.ac.uk/1/archive/explore/Climb</a></p>'
+    }
+    else if (title === 'How it works') {
+        $scope.text = '<p>Climb! Is realised using a combination of technologies. It is played on a Disklavier piano that can be instructed to physically play back computer generated parts (using the MIDI protocol) and can even duet along with the pianist, moving its keys around and between their fingers. Climb! also uses the Max/MSP software running on a laptop to generate various audio effects that transform the piano’s sound.</p><p>The performer controls how the work progresses – which path they follow and how they negotiate various events along the way – directly through their playing rather than by pressing buttons, pushing pedals or having someone do this from behind the scenes. This employs a technology called Muzicodes1from the University of Nottingham’s Mixed Reality Lab. Muzicodes allows certain phrases in the score to be designated as hidden codes that, when successfully played by the pianist, trigger events such as jumping to a new place in the score (like following a hyperlink on the World Wide Web); introducing an audio effect to represent weather, animals, stones and so forth; causing the Disklavier to duet with the pianist; driving the projected animations; and finally controlling these very programme notes!</p><p>The MELD software from the University of Oxford is used to render the pianist’s score, turning the digital pages for them as they negotiate their route through the piece.1Greenhalgh, Chris and Benford, Steve and Hazzard, Adrian (2016) ^muzicode$: composing and performing musical codes. In: Audio Mostly 2016, 4-6 Oct 2016, Norrköping, Sweden. Available from: <a class="menu-text" href="http://eprints.nottingham.ac.uk/37081/">http://eprints.nottingham.ac.uk/37081/</a></p>'
+    } else if (title == 'Research') {
+        $scope.text = '<p>This app collects <b>anonymous</b> data about how it is used, e.g. what pages within the app are looked at, for how long. Neither you nor this device can be identified from the collected data. No other data is collected, for example no data is collected from other apps or web pages.</p><p>The data collected from this device is linked to the following anonymous “User ID”: UXXXX. </p><p> This data will be used to help us to understand how audience members perceive and respond to Climb! and the technologies that it uses, and will help to shape future technologies and performances. This research is supported by the University of Nottingham and the EPSRC-funded FAST IMPACt project.</p><p>If you have any questions or concerns then you can contact <a href="mailto:chris.greenhalgh@nottingham.ac.uk?Subject=Climb!-London Performance" target="_top" class="menu-text">chris.greenhalgh@nottingham.ac.uk</a>, Chris Greenhalgh, School of Computer Science, The University of Nottingham, Jubilee Campus, Nottingham NG8 1BB.</p>'
     } else {
         $scope.text = 'Sorry this page is empty'
     }
@@ -128,13 +135,27 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', function ($scope, $rou
 menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', '$compile', function ($scope, d3Service, visualMapBuilder, $http, $location, $compile, ) {
     console.log('PreviewCtrl')
 
+    $scope.previewCtrl = true;
+    $scope.mapTitle = 'Climb!';
     $scope.cstage = ''
     $scope.pstage = ''
     $scope.preview = 1;
     $scope.mapData = visualMapBuilder.getMapData();
 
-    $scope.showStageTitle = function (name) {
+    var tempRecord = {};
+
+    $scope.showStageTitle = function (name, stage) {
         $scope.title = name;
+        d3Service.d3().then(function (d3) {
+            if (tempRecord) {
+                d3.select(tempRecord.id).attr('fill', tempRecord.fill)
+                tempRecord = {}
+            }
+            var id = '#circle_' + stage;
+            tempRecord.id = id;
+            tempRecord.fill = d3.select(id).attr('fill')
+            d3.select(id).attr('fill', 'red')
+        })
         console.log('show stage title:' + name)
     }
 
@@ -163,7 +184,7 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
             d3.selectAll('circle')
                 .attr('opacity', '1')
                 .attr('ng-click', function (d) {
-                    return 'showStageTitle("' + d.name + '")'
+                    return 'showStageTitle("' + d.name + '","' + d.stage + '")'
                 })
             var circles = document.getElementsByClassName('circle');
             $compile(angular.element(circles))($scope);

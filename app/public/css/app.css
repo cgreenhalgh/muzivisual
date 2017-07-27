@@ -192,7 +192,7 @@ h4 {
 
 .map-left{
   display: inline-block;
-  position: fixed;
+  position: absolute;
   width: 60px;
   height: 60px;
   color: #f9f9f9;
@@ -203,7 +203,7 @@ h4 {
 
 .map-right{
   display: inline-block;
-  position: fixed;
+  position: absolute;
   width: 60px;
   height: 60px;
   color: #f9f9f9;
@@ -264,5 +264,48 @@ h4 {
   display: block;
   float: left;
   top:-10px;
+  opacity: 0
 }
 
+.menu-text{
+  color:blue;
+  text-decoration: underline
+}
+
+.alert {
+  position:fixed;
+  top:0px;
+  z-index:101; 
+  width:100%
+}
+
+.map-title{
+  color:white;
+  position: absolute; 
+  top:0px; 
+  left:25%; 
+  z-index:100;
+  width:50%; 
+  height:auto;
+  text-align:center; 
+  margin-top:5%
+}
+
+#journey{
+  color:white; 
+  padding-left:20px;
+  padding-right:20px; 
+  Ïtext-align: center;
+}
+
+.map-img{
+  position:absolute; 
+  z-index:-1; 
+  left:0;
+  width:100%;
+  height:auto
+}
+
+.navbar{
+  margin-bottom: 0px
+}
