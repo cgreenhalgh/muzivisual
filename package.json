@@ -39,6 +39,7 @@
     "fs": "0.0.1-security",
     "lodash": "^4.17.4",
     "redis": "^2.7.1",
+    "redis-dump": "^0.1.10",
     "socket.io": "1.7.x",
     "socket.io-client": "^1.7.4",
     "socket.io-redis": "^4.0.0",

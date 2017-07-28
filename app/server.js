@@ -6,7 +6,6 @@ var redisAdapter = require('socket.io-redis');
 var _ = require('lodash');
 var socketClient = require('socket.io-client');
 var redis = require("redis");
-var async = require('async');
 var logging = require("./lib/logging");
 var loguse = require("./lib/loguse");
 
@@ -57,7 +56,7 @@ io.on('connection', function (socket) {
   socket.on('client', function (perf) {
     console.log('flag value: ', flag)
     //if (flag === 0) {
-      {
+    {
       console.log('new client for performance ' + perf);
       var key = 'performance:' + perf;
       socket.join(key);
@@ -73,7 +72,7 @@ io.on('connection', function (socket) {
           socket.emit(data.name, data.data);
         }
       });
-     // flag = 1;
+      // flag = 1;
     }
   });
 
@@ -98,6 +97,20 @@ app.get('/css/*.css', returnPublicFile);
 app.get('/js/*', returnPublicFile);
 app.get('/vendor/*', returnPublicFile);
 app.get('/components/*', returnPublicFile);
+
+app.get('/allPerformances/', function (req, res) {
+  fs.readdir(__dirname, function (err, fnames) {
+    if (err) {
+      res.status(500).send('Could not read performances file directory (' + err + ')');
+      return;
+    }
+  });
+  fs.readFile(__dirname + '/performances.json', function (err, data) {
+    if (err) throw err;
+    res.set('Content-Type', 'application/json').send(data);
+  });
+});
+
 
 var DATA_DIR = __dirname + '/maps/';
 app.get('/maps/', function (req, res) {
@@ -126,7 +139,7 @@ app.get('/fragments/', function (req, res) {
     }
   });
 
-  fs.readFile(NARR_DIR + '/narrativesJune8.csv', function (err, data) {
+  fs.readFile(NARR_DIR + '/narrativesLondon.csv', function (err, data) {
     if (err) throw err;
     processNarrativeData(data, res);
   });
@@ -144,12 +157,13 @@ function processNarrativeData(data, res) {
     row = rows[i].split('/');
 
     stageChange = row[0] + '->' + row[1];
+    var narrative = row[2].substring(0, row[2].length - 1)
 
     narrativeData = {
       "from": row[0],
       "to": row[1],
       "stageChange": stageChange,
-      "narrative": row[2]
+      "narrative": narrative
     }
     resp.push(narrativeData);
   }
@@ -206,7 +220,7 @@ http.listen(port, function () {
     console.log('GET MESSAGE FROM MUZICODES:', data);
     //io.to('mobileapp').emit('vStart', data);
     // perfid:stage
-    if(!data){
+    if (!data) {
       return;
     }
 
@@ -219,7 +233,7 @@ http.listen(port, function () {
       console.log('cleared performance ' + perf);
       redisClient.rpush(key, JSON.stringify({ name: 'vStart', data: data, time: (new Date()).getTime() }));
     });
-    
+
     // var jobs = [];
     // redisClient.set('KEYS*', function (err, keys) {
     //     if (err) return console.log(err);
@@ -266,7 +280,7 @@ http.listen(port, function () {
   });
   
   serverSocket.on('vStop', function (data) {
-    if(!data){
+    if (!data) {
       return;
     }
     var perf = data;

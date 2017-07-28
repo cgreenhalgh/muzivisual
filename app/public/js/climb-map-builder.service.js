@@ -1,4 +1,4 @@
-var R = 10;
+var R = 12;
 var visualMapBuilder = angular.module('MuziVisual.visualmapbuilder', []);
 
 visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', function (d3Service, $timeout, $q, $http) {
@@ -9,6 +9,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     var stop_flag;
     var journeyRecord = [];
     var passedRecord = [];
+    var lastMapRecorder = [];
 
     function getPreviewCircleFillColor(d) {
         if (d.path === '1') {
@@ -67,10 +68,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function getCircleRadius(d) {
-        if (_.head(d.stage) === 'p') {
-            return 6;
-        } else if (d.state === 'active') {
+        if (d.state === 'active') {
             return 15;
+        }
+        else if (_.head(d.stage) === 'p') {
+            return 8;
         } else {
             return R;
         }
@@ -281,6 +283,70 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('fill', 'orange')
                 .attr('opacity', 1)
         },
+        getPastMap: function (msgs, perfIndex) {
+            console.log('This is the performance index: -', perfIndex)
+            //cancel last draw if there was
+            if (lastMapRecorder.length > 0) {
+                d3Service.d3().then(function (d3) {
+                    console.log('last draw', lastMapRecorder)
+                    _.forEach(lastMapRecorder, function (draw) {
+                        d3.select(draw.cid).attr('opacity', draw.opacity).attr('fill', draw.fill)
+                    })
+                    lastMapRecorder = [];
+                    if (perfIndex) {
+                        drawPastPerfMap(msgs);
+                    }
+                })
+            } else {
+                drawPastPerfMap(msgs);
+            }
+
+            function drawPastPerfMap(msgs) {
+                _.forEach(msgs, function (m) {
+                    var msg = JSON.parse(m)
+
+                    var msgData = _.split(msg.data, ':');
+                    var stages = _.split(msgData[1], '->')
+
+                    if (!_.includes(passedRecord, stages[0])) {
+                        if (msg.name === "vStop") {
+                            var cid = "#circle_summit"
+                            recordOneDraw(cid);
+                        } else if (stages[0]) {
+                            var cid = '#circle_' + stages[0];
+                            recordOneDraw(cid);
+                        }
+                    }
+
+                    if (!stages[1]) {
+                        return;
+                    }
+                    var cid = '#line_' + stages[0] + '_' + stages[1];
+                    recordOneDraw(cid);
+                });
+
+                d3Service.d3().then(function (d3) {
+                    _.forEach(lastMapRecorder, function (draw) {
+                        d3.select(draw.cid).transition().duration(INTERVAL).attr('opacity', 0.6).attr('fill', 'white')
+                    })
+                })
+
+                function recordOneDraw(cid) {
+                    d3Service.d3().then(function (d3) {
+                        var cfill = d3.select(cid).attr('fill');
+                        var cop = d3.select(cid).attr('opacity');
+                        var draw = {
+                            "cid": cid,
+                            "fill": cfill,
+                            "opacity": cop
+                        }
+                        lastMapRecorder.push(draw)
+                    })
+
+                }
+
+            }
+        },
         initMap: function (canvas, data, mode) {
             if (stop_flag && mode != "preview") {
                 return;
@@ -407,6 +473,17 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         recordMap: function () {
             mapRecord = mapData;
         },
+        pastPerfConfig: function () {
+            return $q(function (resolve, reject) {
+                $http.get('/allPerformances').then(function (data) {
+                    var performances = _.sortBy(data.data, 'time').reverse();
+                    resolve(performances);
+                }), function (err) {
+                    reject(err);
+                }
+            })
+        }
+        ,
         mapConfig: function (d) {
             return $q(function (resolve, reject) {
                 $http.get('maps').then(function (rawdata) {
@@ -419,7 +496,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         narrativeConfig: function (d) {
             return $q(function (resolve, reject) {
-                $http.get('fragments').then(function (rawdata) {
+                $http.get('/fragments/').then(function (rawdata) {
                     narrativeData = rawdata.data
                     resolve(narrativeData);
                 }), function (err) {

@@ -1,14 +1,14 @@
-<div id='map' style="height:100%; width: 100%; ">
+<nav class='navbar navbar-inverse bg-inverse' ng-show="previewCtrl"><span class="navbar-brand">Map Composition</span></nav>
+<div id='map' style=" width: 100%; ">
   <div class='bg-img-container'>
-    <img style='position:absolute; z-index:-1; left:0;top:0' src='Climb_Map_background.jpg' alt='Map' width='100%' height='auto'
-    />
+    <img class='map-img' src='Climb_APP_Map_background_noTitle.jpg' alt='Map' />
   </div>
 
   <div id="map">
     <d3-map></d3-map>
   </div>
 
-  <div id="fragment">
+  <div ng-show="!stop" id="fragment">
     <p>
       <h1 id="narrative-title">{{title}}</h1>
     </p>
@@ -16,15 +16,21 @@
     <!--<p>{{narrativeData}}</p>-->
   </div>
 
+  <div ng-show='mapCtrl' class="map-title">
+    <h1>{{mapTitle}}</h1>
+    <h4  style="margin-top:0px">{{performer}} in {{location}}</h4>
+  </div>
+
   <div ng-show="stop" style="margin-top:-40%">
-    <div style="margin-bottom:20px">
+    <div style="margin-bottom:20px; color:white">
       <h1>Journey</h1>
     </div>
-    <div id="journey" style="color:white; padding-left:20px ;padding-right:20px; text-align: center;" ng-repeat="j in journey track by $index">
+    <div id="journey" ng-repeat="j in journey track by $index">
       <h3> {{j.stageName}} </h3>
       <p style="margin-top: 0px">{{j.narrative}} </p>
       <p ng-if="j.stageName!=='Summit'">|</p>
     </div>
+    <div style='height:100px;width:100%'></div>
   </div>
 
   <div class="float-button">
@@ -32,7 +38,11 @@
   </div>
   <div class="black-bkg"></div>
 
-  <div ng-show="map">
-    <div class='map-left' ng-click="getHistory()"><span class='glyphicon glyphicon-menu-left'></span></div>
-    <div ng-show='history' class='map-right'><span class='glyphicon glyphicon-menu-right'></span></div>
+  <div ng-show="mapCtrl">
+    <div ng-show="showBackArrow" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
+    <div ng-show='pastCounter' class='map-right'><span class='glyphicon glyphicon-menu-right' ng-click="getNextPerf()"></span></div>
   </div>
+
+  <!--<div class="alert alert-success" ng-show='mapCtrl' role="alert">
+    <span>{{alertMsg}}</span>
+  </div>-->
