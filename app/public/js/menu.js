@@ -43,19 +43,25 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
             return;
         }
 
-        if(title === 'Archive'){
+        if (title === 'Archive') {
             $scope.archiveHighlight = false;
         }
 
         $location.path('/content/' + title);
     }
 
+    var params = $location.search();
+    var performanceid = params['p'] === undefined ? '' : params['p'];
+
+    console.log('performanceid:' ,performanceid)
+    socket.emit('client', performanceid);
+
     $scope.openArchive = function () {
         $window.open('http://music-mrl.nott.ac.uk/1/archive/explore/Climb', '_self')
     }
 
     $scope.openPerformance = function () {
-        $window.location.href = 'http://localhost:8000/#!/performance/?p=13a7fa70-ae91-4541-9526-fd3b332b585d'
+        $window.location.href = 'http://localhost:8000/#!/performance/?p='+performanceid;
         $window.location.reload(true)
     }
 
@@ -108,7 +114,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 
 menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', function ($scope, $routeParams, mpmLoguse) {
     console.log('open: ', $routeParams.inquery)
-    mpmLoguse.view('/content/'+$routeParams.inquery, {});
+    mpmLoguse.view('/content/' + $routeParams.inquery, {});
     var title = $scope.title = $routeParams.inquery;
     //change contents for different parts
     if (title === 'Programme Note') {

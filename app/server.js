@@ -255,7 +255,6 @@ http.listen(port, function () {
     // });
     // console.log(jobs)
 
-    io.emit('vStart') // need to change later
     io.to(key).emit('vStart', data);
   });
   // other messages
@@ -287,7 +286,6 @@ http.listen(port, function () {
     console.log('stop performance ' + perf);
     var key = 'performance:' + perf;
     redisClient.rpush(key, JSON.stringify({ name: 'vStop', time: (new Date()).getTime() }));
-    io.emit('vStop') //change later
     io.to(key).emit('vStop');
   });
 })
