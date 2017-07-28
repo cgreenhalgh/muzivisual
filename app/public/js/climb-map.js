@@ -43,8 +43,9 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
   }
 }])
 
-map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', '$route', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location, $route) {
+map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', '$route', 'mpmLoguse', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location, $route, mpmLoguse) {
   console.log('mapCtrl')
+  mpmLoguse.view('/performance/', {});
   $scope.mapCtrl = true;
   $scope.cstage = '';
   $scope.pstage = '';
@@ -351,7 +352,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 }])
 
 
-map.controller('postPerformanceCtrl', ['$scope', 'visualMapBuilder', 'd3Service', function ($scope, visualMapBuilder, d3Service) {
+map.controller('postPerformanceCtrl', ['$scope', 'visualMapBuilder', 'd3Service', 'mpmLoguse', function ($scope, visualMapBuilder, d3Service, mpmLoguse) {
+  mpmLoguse.view('/post-performance', {});
   $scope.cstage = ''
   $scope.pstage = ''
   $scope.cusMap = 1;

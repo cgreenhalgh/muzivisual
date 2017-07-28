@@ -27,6 +27,28 @@ Muzicodes : localhost:3000
 
 MuziVisual: localhost:8000
 		 
+# Logs
+
+Writes client usage logs to `app/logs`. Log file name is time created, i.e. time server (re)started.
+
+Files are UTF-8, newline-separated; each line is a JSON log record.
+
+Each event has:
+- `time` - UNIX time (ms)
+- `datetime` - ISO time
+- `component` - name of component logging message, typ. `server`, `loguse` or `loguse:USERID` (i.e. client app).
+- `event` - name of event (see below)
+- `info` - JSON object with event-specific information (see below)
+
+Main event types:
+- `log.start` - first record in file, includes information about program and version
+- `http.listen` - `port` being listened on by server
+- `loguse.client.add` - a new client has connected for logging use (allocates new USER ID - note IDs not persisted across server restarts)
+- `loguse.client.visible` - client app view visible (e.g. opened or unlocked or returned to after visiting another page)
+- `loguse.client.hidden` - client app view hidden (e.g. closed, locked or navigated to another page)
+- `loguse.client.view` - `path` of app now being viewed
+- `loguse.client.log` - some other log event from client
+
 # Requirements
 ## Version 1.0 for June performance
 Doc: [https://github.com/cgreenhalgh/fast-performance-demo/edit/master/docs/appnotes.md] (uplate later)

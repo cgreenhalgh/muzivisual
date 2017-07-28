@@ -20,7 +20,8 @@ menu.config(['$routeProvider', function ($routeProvider) {
 }])
 
 
-menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', function ($scope, $location, socket, $window, $anchorScroll) {
+menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', 'mpmLoguse', function ($scope, $location, socket, $window, $anchorScroll, mpmLoguse) {
+    mpmLoguse.view('/', {});
     $scope.performing = false;
     $scope.perfOpacity = 0.2;
     $scope.archOp = 1;
@@ -108,8 +109,9 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 }]);
 
 
-menu.controller('contentCtrl', ['$scope', '$routeParams', function ($scope, $routeParams) {
+menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', function ($scope, $routeParams, mpmLoguse) {
     console.log('open: ', $routeParams.inquery)
+    mpmLoguse.view('/content/'+$routeParams.inquery, {});
     var title = $scope.title = $routeParams.inquery;
     //change contents for different parts
     if (title === 'Programme Note') {
@@ -132,8 +134,9 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', function ($scope, $rou
 }])
 
 
-menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', '$compile', function ($scope, d3Service, visualMapBuilder, $http, $location, $compile, ) {
+menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', '$compile', 'mpmLoguse', function ($scope, d3Service, visualMapBuilder, $http, $location, $compile, mpmLoguse) {
     console.log('PreviewCtrl')
+    mpmLoguse.view('/content/map', {});
 
     $scope.previewCtrl = true;
     $scope.mapTitle = 'Climb!';
