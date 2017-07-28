@@ -65,20 +65,14 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.pastCounter = 0;
   $scope.alert = false;
   $scope.alertMsg = 'The challenge was performed successfully'
+  $scope.vibTime = 0;
 
-  var visualIdx = 0;
-  var visuals = '';
-  var visualNum = 0;
-
-  $scope.backToMenu = function () {
-    // $window.location.href = 'http://localhost:8000'
-    $location.path('/#!/')
-  }
-
-  socket.on('vContents', function (data) {
+  socket.on('vEvent', function (data) {
     console.log('get content: ' + data)
     $scope.alert = true;
-    $scope.alertMsg = data;
+    $scope.alertMsg = data.data;
+    $scope.vibration = data.vibration;
+    $scope.vibTime = data.time
     //visualMapBuilder.openToolTip($scope.cstage, data);
   })
 
@@ -131,11 +125,10 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     $route.reload();
   })
 
-  var params = $location.search();
-  console.log('params', params);
-  var performanceid = params['p'] === undefined ? '' : params['p'];
+  var performanceid = $location.search()['p']
+
   if (performanceid) {
-    console.log('client for performance ' + performanceid);
+    $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
     socket.emit('client', performanceid);
   } else {
     console.log('no performance id!');

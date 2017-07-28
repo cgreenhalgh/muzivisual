@@ -20,10 +20,18 @@ menu.config(['$routeProvider', function ($routeProvider) {
 }])
 
 
-menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', 'mpmLoguse', function ($scope, $location, socket, $window, $anchorScroll, mpmLoguse) {
+menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', 'mpmLoguse',  function ($scope, $location, socket, $window, $anchorScroll, mpmLoguse) {
     mpmLoguse.view('/', {});
     $scope.performing = false;
     $scope.archiveHighlight = false;
+
+
+    console.log()
+
+    var params = $location.search();
+    var performanceid = params['p'] === undefined ? '' : params['p'];
+
+    console.log('performanceid: ', performanceid)
 
     socket.on('vStart', function () {
         $scope.performing = true;
@@ -39,7 +47,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
     $scope.openContent = function openContent(title) {
         console.log('This is menuCtrl ' + title);
         if (title === 'Map') {
-            $location.path('/content/map');
+            $location.path('/content/map').search({ 'p': performanceid })
             return;
         }
 
@@ -47,22 +55,12 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
             $scope.archiveHighlight = false;
         }
 
-        $location.path('/content/' + title);
+        $location.path('/content/' + title).search({ 'p': performanceid });
     }
 
-    var params = $location.search();
-    var performanceid = params['p'] === undefined ? '' : params['p'];
-
-    console.log('performanceid:' ,performanceid)
-    socket.emit('client', performanceid);
-
-    $scope.openArchive = function () {
-        $window.open('http://music-mrl.nott.ac.uk/1/archive/explore/Climb', '_self')
-    }
 
     $scope.openPerformance = function () {
-        $window.location.href = 'http://localhost:8000/#!/performance/?p='+performanceid;
-        $window.location.reload(true)
+       $location.path('/performance').search({ 'p': performanceid })
     }
 
 
@@ -112,10 +110,19 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 }]);
 
 
-menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', function ($scope, $routeParams, mpmLoguse) {
+menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window', '$location', function ($scope, $routeParams, mpmLoguse, $window, $location) {
     console.log('open: ', $routeParams.inquery)
     mpmLoguse.view('/content/' + $routeParams.inquery, {});
     var title = $scope.title = $routeParams.inquery;
+
+    var performanceid = $location.search()['p'];
+    if (performanceid) {
+        $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
+    } else {
+        console.log('no performance id!');
+        alert('Sorry, this URL is wrong! (there is no performance specified)');
+    }
+
     //change contents for different parts
     if (title === 'Programme Note') {
         $scope.text = '<p>Climb! is a new interactive work for piano by composer and pianist Maria Kallionpää.</p><p>Climb! combines contemporary piano with elements of computer games to create a non-linear musical journal in which the pianist negotiates an ascent of a mountain, choosing their path as they go and encountering weather, animals and other obstacles along the way.</p><p>Climb! employs the Mixed Reality Lab’s Muzicodes technology to embed musical triggers within the composition. Like hyperlinks, these may transport the player to another point in the score when successfully played, and may also trigger additional musical effects or control visuals. Climb! also uses a disklavier piano which physically plays alongside the human pianist during key passages, engaging them in a human-machine musical dialogue. The interactive score is delivered using The University of Oxford’s MELD dynamic annotated score renderer.</p><p>The performance is part of the Nottingham Forum for Artistic Research (NottFAR) concert and events series. Climb! is supported by the EPSRC-funded FAST project (EP/L019981/1) and University of Nottingham’s Research Priority Area (RPA) Development Fund.</p>'
@@ -137,7 +144,7 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', function 
 }])
 
 
-menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', '$compile', 'mpmLoguse', function ($scope, d3Service, visualMapBuilder, $http, $location, $compile, mpmLoguse) {
+menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', '$compile', 'mpmLoguse', '$window', function ($scope, d3Service, visualMapBuilder, $http, $location, $compile, mpmLoguse, $window) {
     console.log('PreviewCtrl')
     mpmLoguse.view('/content/map', {});
 
@@ -148,6 +155,15 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
     $scope.mapData = visualMapBuilder.getMapData();
 
     var tempRecord = {};
+
+    var performanceid = $location.search()['p'];
+    if (performanceid) {
+        $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
+    } else {
+        console.log('no performance id!');
+        alert('Sorry, this URL is wrong! (there is no performance specified)');
+    }
+
 
     $scope.showStageTitle = function (name, stage) {
         $scope.title = name;

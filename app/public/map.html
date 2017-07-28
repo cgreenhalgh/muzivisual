@@ -34,10 +34,10 @@
   </div>
 
   <div class="float-button">
-    <div class="middle"><a href='#!/' class="glyphicon glyphicon-home"></a></div>
+    <div class="middle"><a ng-click="goToMenu()" class="glyphicon glyphicon-home"></a></div>
   </div>
   <div class="black-bkg"></div>
-
+<h1>{{backBtnLink}}</h1>
   <div>
     <div ng-show="showBackArrow" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
     <div ng-show='pastCounter' class='map-right'><span class='glyphicon glyphicon-menu-right' ng-click="getNextPerf()"></span></div>
