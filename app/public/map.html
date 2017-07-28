@@ -1,4 +1,3 @@
-<nav class='navbar navbar-inverse bg-inverse' ng-show="previewCtrl"><span class="navbar-brand">Map Composition</span></nav>
 <div id='map' style=" width: 100%; ">
   <div class='bg-img-container'>
     <img class='map-img' src='Climb_APP_Map_background_noTitle.jpg' alt='Map' />
@@ -16,13 +15,14 @@
     <!--<p>{{narrativeData}}</p>-->
   </div>
 
-  <div ng-show='mapCtrl' class="map-title">
-    <h1>{{mapTitle}}</h1>
-    <h4  style="margin-top:0px">{{performer}} in {{location}}</h4>
+  <div class="map-title">
+    <span style="color:lightgray; font-size:14px;padding-top:2px" ng-style="{opacity: pastCounter? 1:0}">{{mapIndicator}}</span>
+    <h1 style="margin-bottom:3px">{{mapTitle}}</h1>
+    <h4 style="margin-top:0px">{{performer}} in {{location}}</h4>
   </div>
 
   <div ng-show="stop" style="margin-top:-40%">
-    <div style="margin-bottom:20px; color:white">
+    <div style="margin-bottom:20px; color:#FAFAFB">
       <h1>Journey</h1>
     </div>
     <div id="journey" ng-repeat="j in journey track by $index">
@@ -38,7 +38,7 @@
   </div>
   <div class="black-bkg"></div>
 
-  <div ng-show="mapCtrl">
+  <div>
     <div ng-show="showBackArrow" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
     <div ng-show='pastCounter' class='map-right'><span class='glyphicon glyphicon-menu-right' ng-click="getNextPerf()"></span></div>
   </div>

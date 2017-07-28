@@ -22,7 +22,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             return '#C3C2F4' //purple
         }
         else {
-            return 'white';
+            return '#FAFAFB'; //white
         }
     }
 
@@ -44,7 +44,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             return '#C3C2F4' //purple
         }
         else {
-            return 'white';
+            return '#FAFAFB'; //white
         }
     }
 
@@ -327,7 +327,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
 
                 d3Service.d3().then(function (d3) {
                     _.forEach(lastMapRecorder, function (draw) {
-                        d3.select(draw.cid).transition().duration(INTERVAL).attr('opacity', 0.6).attr('fill', 'white')
+                        d3.select(draw.cid).transition().duration(INTERVAL).attr('opacity', 0.6).attr('fill', '#FAFAFB') //white
                     })
                 })
 
@@ -370,7 +370,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                                 ) : ('line_' + cStageDatum.stage)
                             })
                             .style("stroke-dasharray", ("6, 6"))
-                            .attr('stroke', 'white')
+                            .attr('stroke', '#FAFAFB') //white
                             .attr('opacity', 0)
                             .attr('stroke-width', '2px')
                     });

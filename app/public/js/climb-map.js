@@ -46,7 +46,8 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
 map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', '$route', 'mpmLoguse', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location, $route, mpmLoguse) {
   console.log('mapCtrl')
   mpmLoguse.view('/performance/', {});
-  $scope.mapCtrl = true;
+
+  $scope.mapIndicator = 'Past Performance'
   $scope.cstage = '';
   $scope.pstage = '';
   $scope.narrative = '';

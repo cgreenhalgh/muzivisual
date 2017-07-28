@@ -8,7 +8,7 @@ menu.config(['$routeProvider', function ($routeProvider) {
         templateUrl: 'menu.html',
         controller: 'menuCtrl'
     }).when('/content/map', {
-        templateUrl: 'map.html',
+        templateUrl: 'previewMap.html',
         controller: 'previewCtrl'
     }).when('/content/:inquery', {
         templateUrl: 'textContent.html',
@@ -23,24 +23,16 @@ menu.config(['$routeProvider', function ($routeProvider) {
 menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', 'mpmLoguse', function ($scope, $location, socket, $window, $anchorScroll, mpmLoguse) {
     mpmLoguse.view('/', {});
     $scope.performing = false;
-    $scope.perfOpacity = 0.2;
-    $scope.archOp = 1;
-    $scope.pstop = false;
+    $scope.archiveHighlight = false;
 
     socket.on('vStart', function () {
-        $scope.perfOpacity = 1;
-        // $scope.bborder = '2px solid red'
         $scope.performing = true;
-        $scope.archOp = 0.2;
         console.log('start performing')
     })
 
     socket.on('vStop', function () {
-        $scope.perfOpacity = 0.2;
-
-        // $scope.performing = false;
-        $scope.archOp = 1;
-        $scope.pstop = true;
+        $scope.archiveHighlight = true;
+        $scope.performing = false;
         console.log('stop performing');
     })
 
@@ -50,6 +42,11 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
             $location.path('/content/map');
             return;
         }
+
+        if(title === 'Archive'){
+            $scope.archiveHighlight = false;
+        }
+
         $location.path('/content/' + title);
     }
 
@@ -138,7 +135,6 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
     console.log('PreviewCtrl')
     mpmLoguse.view('/content/map', {});
 
-    $scope.previewCtrl = true;
     $scope.mapTitle = 'Climb!';
     $scope.cstage = ''
     $scope.pstage = ''
@@ -182,7 +178,7 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
             visualMapBuilder.setStop();
             visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData(), 'preview');
 
-            d3.selectAll('line').attr('opacity', '1').attr('stroke', 'white')
+            d3.selectAll('line').attr('opacity', '1').attr('stroke', '#FAFAFB') //white
 
             d3.selectAll('circle')
                 .attr('opacity', '1')

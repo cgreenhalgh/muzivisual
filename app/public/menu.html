@@ -1,6 +1,6 @@
-<nav class='navbar navbar-inverse bg-inverse'><span class="navbar-brand">Climb!</span></nav>
-<div class="top-menu">
-    <div class="menu-container">
+<div class="menu-container">
+    <nav class='navbar navbar-inverse bg-inverse'><span class="navbar-brand">Climb!</span></nav>
+    <div class="top-menu">
         <!--<h5><a href="#!preview">Preview</a></h5>-->
 
         <!--<ul class="menu">
@@ -15,65 +15,71 @@
                 <!--<img class='bk-img' src='Climb_App_Map_background.jpg' alt='Map' width='100%' height='auto' />-->
             </div>
 
-            <li class="btn-menu">
+            <li class="btn-menu-left">
                 <button type="button" class="btn btn-default" aria-label="Programme Note" ng-click='openContent("Programme Note")'>
         <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
         <span class="btn-title" >Programme note</span>
     </button>
             </li>
 
-            <li class="btn-menu">
+            <li class="btn-menu-right">
                 <button type="button" class="btn btn-default" aria-label="Performer" ng-click='openContent("Performer")'>
         <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
          <span class="btn-title">Performer</span>
     </button>
             </li>
 
-            <li class="btn-menu">
+            <li class="btn-menu-left">
                 <button type="button" class="btn btn-default" aria-label="Map" ng-click='openContent("Map")'>
         <span class="glyphicon glyphicon-picture" aria-hidden="true"></span>
          <span class="btn-title">Map Composition</span>
     </button>
             </li>
 
-            <li class="btn-menu">
+            <li class="btn-menu-right">
                 <button type="button" class="btn btn-default" aria-label="What can see and hear" ng-click='openContent("What can see and hear")'>
         <span class="glyphicon glyphicon-zoom-in" aria-hidden="true"></span>
          <span class="btn-title">What you can see and hear</span> 
     </button>
             </li>
-            <li class="btn-menu">
+            <li class="btn-menu-left">
                 <button type="button" class="btn btn-default" aria-label="How it works" ng-click='openContent("How it works")'>
         <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
          <span class="btn-title">How it works</span> 
     </button>
             </li>
-            <li class="btn-menu" ng-style="{opacity:archOp}">
-
-                <button type="button" class="btn btn-default" aria-label="Performer" ng-click='openContent("Archive")' ng-disabled="performing">
-                    <div ng-show='pstop'>
+            <li class="btn-menu-right">
+                <button type="button" class="btn btn-default" aria-label="Performer" ng-click='openContent("Archive")' ng-disabled="performing"
+                    ng-style='{color:archiveHighlight ? "white": "#C4C7CB", "background-color":archiveHighlight?"#1D8DEE": "#1B2836","opacity":performing?0:1}'>
+                    <!--<div ng-show='archiveHighlight'>
                 <span class="glyphicon glyphicon-asterisk glyphicon-asterisk-1"></span>
                 <span class="glyphicon glyphicon-asterisk glyphicon-asterisk-2"></span>
-                    </div>
+                    </div>-->
         <span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>
          <span class="btn-title">Archive</span> 
          
     </button>
             </li>
-            <li class="btn-menu btn-perf" style="margin-top:10%;">
-                <button type="button" class="btn btn-default" aria-label="Performer" ng-click="openPerformance()">
-                    <div ng-show='performing'>
+            <div class="bottom-btn">
+                <li class="btn-menu-left" style="margin-top:10%;">
+                    <button type="button" class="btn btn-default" aria-label="Performer" ng-click="openPerformance()" ng-style='{color:performing ? "white": "#C4C7CB", "background-color":performing?"#1D8DEE": "#1B2836"}'>
+
+<!--ng-style='{color:performing ? "white": "#C4C7CB", "background-color":performing?"#1D8DEE": "#1B2836"}'-->
+
+
+                    <!--<div ng-show='performing'>
                 <span class="glyphicon glyphicon-asterisk glyphicon-asterisk-1"></span>
                 <span class="glyphicon glyphicon-asterisk glyphicon-asterisk-2"></span>
-                    </div>
+                    </div>-->
         <span class="glyphicon glyphicon-music" aria-hidden="true"></span> <span class="btn-title">Performance</span> 
     </button>
-            </li>
-            <li class="btn-menu btn-perf" style="margin-top:10%;">
-                <button type="button" class="btn btn-default" aria-label="Research" ng-click='openContent("Research")'>
+                </li>
+                <li class="btn-menu-right" style="margin-top:10%;">
+                    <button type="button" class="btn btn-default" aria-label="Research" ng-click='openContent("Research")'>
         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> <span class="btn-title">Research Study</span> 
     </button>
-            </li>
+                </li>
+            </div>
             <!--<div>
             <button type="button" class="btn btn-default" aria-label="Performer">
         <span class="glyphicon glyphicon-headphones" aria-hidden="true"></span>&nbsp Performance2
@@ -82,88 +88,6 @@
 
         </ul>
     </div>
-
-    <!--<div class="program-note">
-        <h1 style="text-align:center">{{title}}</h1>
-        <div ng-show="performance1">
-            <p>Join composer and pianist Maria Kallionpää who – as “Avatar” – must negotiate two perilous ascents of a mountain,
-                choosing her path carefully, and encountering weather, animals and other delights and perils along the way.
-            </p>
-        </div>
-
-        <div ng-show="performance2">
-
-            <div style="margin-top:10px"><a href="" ng-click="gotoAnchor('intro')">Overview</a></div>
-            <div><a href="" ng-click="gotoAnchor('performer')">About the composer and performer</a></div>
-            <div><a href="" ng-click="gotoAnchor('tech')">About the technology Climb! </a></div>
-
-
-            <h4 id="intro" class='anchor'>Overview</h4>
-            <p>
-                Climb! is a musical composition that combines the ideas of a classical virtuoso piece and a computer game. Written for a
-                Disklavier grand piano, the work engages the pianist in an unusual musical dialogue where there is no fixed
-                musical form: the performer’s/gamer’s actions define how the story continues. As the performer plays key
-                passages, so both the music and the instrument respond, jumping to new points in the score, transforming
-                the sound, or independently playing along with them – physically in the case of the Disklavier. An interactive
-                system like this resembles “an invisible chamber music partner” leading some musicians to claim that electroacoustic
-                works can never be treated as solo compositions, but should instead be seen as “concertos in a modern guise”.
-                Like a computer game or the World Wide Web, Climb! is non-linear, with a branching structure that allows
-                the performer to choose different routes through the work. It consists of three macro-compositions called
-                paths with some further side paths between them. Various micro-compositions are then dispersed along each
-                path. Depending on how the performer plays, they may continue to progress along their current path or be
-                diverted onto another one.
-            </p>
-            <h4 id="performer" class='anchor'>About the composer and performer</h4>
-            <p>
-                <b>Dr. Maria Kallionpää (1981)</b> is an internationally active composer and pianist. She earned her PhD
-                in composition at the university of Oxford in 2015. Kallionpää won the first prize of the OUPHIL composition
-                competition in 2013. She has graduated from the Royal Academy of Music (2009) and Universität für Musik und
-                Darstellende Kunst Wien (2010) and has also studied composition and piano at Sibelius Academy and Universität
-                Mozarteum Salzburg. Her works have been performed at Musikverein Wien, Philharmonie Luxembourg, and Sibiu
-                Philharmonia. In 2011 Kallionpää was a commissioned composer of the Turku European Culture Capital and a
-                finalist of the Tenso European Chamber Choir Composition Competition. Kallionpää has performed at numerous
-                music festivals including Rainy Days Festival at Philharmonie Luxembourg, Musica Nova (Helsinki), Spitalfields
-                Festival (London), and Neue Musik von Thuringen. In 2016 her music was performed at the Florida International
-                Toy Piano Festival.
-            </p>
-            <p>
-                Kallionpää currently works as a postdoctoral fellow at the university of Aalborg and as a composer in residence of the Mixed
-                Reality Laboratory of the Nottingham University. Her artistic research project focuses on designing a music
-                engine that uses gamification as a composition technique. Kallionpää is a winner of the Fabbrica Young Artist
-                Development Program of Opera di Roma, for which she is currently composing a new opera that will be premiered
-                in 2017. Moreover, in collaboration with her colleague Markku Klami, Kallionpää is also working on the first
-                full-length puppet opera produced in the Nordic Countries, which will premiere in 2018. Kallionpää was a
-                laureate of Académie de France à Rome in 2016.
-            </p>
-
-            <h4 id="tech" class="anchor"> About the technology Climb! </h4>
-            <p>
-                Climb! Is realised using a combination of technologies. It is played on a Disklavier piano that can be instructed to physically
-                play back computer generated parts (using the MIDI protocol) and can even duet along with the pianist, moving
-                its keys around and between their fingers. Climb! also uses the Max/MSP software running on a laptop to generate
-                various audio effects that transform the piano’s sound.
-            </p>
-            <p>
-                The performer controls how the work progresses – which path they follow and how they negotiate various events along the way
-                – directly through their playing rather than by pressing buttons, pushing pedals or having someone do this
-                from behind the scenes. This employs a technology called Muzicodes1 from the University of Nottingham’s Mixed
-                Reality Lab. Muzicodes allows certain phrases in the score to be designated as hidden codes that, when successfully
-                played by the pianist, trigger events such as jumping to a new place in the score (like following a hyperlink
-                on the World Wide Web); introducing an audio effect to represent weather, animals, stones and so forth; causing
-                the Disklavier to duet with the pianist; driving the projected animations; and finally controlling these
-                very programme notes!
-            </p>
-            <p>
-                The MELD software from the University of Oxford is used to render the pianist’s score, turning the digital pages for them
-                as they negotiate their route through the piece.
-            </p>
-            <p style="font-size:0.8em">
-                <i>1Greenhalgh, Chris and Benford, Steve and Hazzard, Adrian (2016) ^muzicode$: composing and performing musical codes. In:
-                Audio Mostly 2016, 4-6 Oct 2016, Norrköping, Sweden. Available from: <a href="http://eprints.nottingham.ac.uk/37081/">http://eprints.nottingham.ac.uk/37081/</a><i>
-            </p>
-
-        </div>
-
-    </div>-->
-
 </div>
+
+<div class='menu-bkg'></div>

@@ -3,7 +3,13 @@
 
 html {
   font-family: sans-serif;
-  color: white;
+  color: #FAFAFB;
+}
+
+html,body { height:100%; }
+
+h1{
+  text-align: center
 }
 
 p {
@@ -37,7 +43,7 @@ p {
 
 .navbar-inverse .navbar-brand{
   color:white;
-  font-size: 1.5em;
+  font-size: 1.8em;
 }
 
 a{
@@ -62,7 +68,7 @@ body{
 
 .bg-img-container{
   width:100%;
-  height:auto;
+  height:100%;
   z-index: -1;
 }
 
@@ -71,7 +77,6 @@ h1,
 h3 {
   padding:0px;
   margin:0px;
-  text-align: center;
 }
 
 #visualImg{
@@ -81,10 +86,10 @@ h3 {
     -webkit-animation-name: fadeIn;
     animation-name: fadeIn;
 }
-
+/*
 h4 {
   margin-top:50px
-}
+}*/
 
 #intro{
   margin-top: 40%;
@@ -132,28 +137,27 @@ h4 {
 /*menu.html*/
 
 .top-menu{
-    width: 100%;
+  overflow: auto;
+  background-color: #1B2836;
+  width: 100%;
+  height:100%;
 }
-.btn-menu{
+
+.btn-menu-right{
     width:50%;    
     float: left;
-    padding:4px;
+    padding:0px;
     font-size: 12px;
     text-align: center;    
 }
 
-.menu-container{
-    margin:10px; 
-}
-
-.btn{
-    border-radius: 0px;
-    width:100%;
-    height:115px;
-    border: none;
-    background: #f9f9f9;
+.btn-menu-left{
+    width:50%;    
     float: left;
-    text-align: center;
+    padding:0px;
+    font-size: 12px;
+    text-align: center;    
+    border-right-width: 0px
 }
 
 .list-btn-menu{
@@ -162,11 +166,43 @@ h4 {
     padding: 0;
 }
 
+.bottom-btn{
+  bottom: 0px;
+  position: absolute;
+  width: 100%;
+}
+
+
+.menu-container{
+  height: 100%;
+  width: 100%;
+  margin:15px; 
+}
+
+.btn.btn-default{
+    border-radius: 0px;
+    width:100%;
+    color: #C4C7CB;
+    height:130px;
+    border: 1px solid black;
+    background-color: #1B2836;
+    float: left;
+    text-align: center;
+}
+
+.btn.btn-default.active,
+.btn.btn-default:active{
+  color:white;
+  background-color:#1D8DEE
+}
+
+
+
 .glyphicon{
     text-align: center;
     display: block;
     position: relative;
-    font-size: 2.5em;
+    font-size: 2.25em;
 }
 .btn-title{
     display: block;
@@ -182,6 +218,16 @@ h4 {
 
 .black-bkg{
  background-color:black;
+  position:fixed; 
+  width:100%;
+  height:100%;
+  bottom:0; 
+  z-index:-2;
+}
+
+
+.menu-bkg{
+ background-color:#1B2836;
   position:fixed; 
   width:100%;
   height:100%;
@@ -252,6 +298,7 @@ h4 {
 
 .glyphicon.glyphicon-asterisk.glyphicon-asterisk-1{
   color:#e74c3c;
+  opacity: 0;
   font-size:15px;
   display: block;
   float: right;
@@ -259,7 +306,6 @@ h4 {
 }
 
 .glyphicon.glyphicon-asterisk.glyphicon-asterisk-2{
-  color:#f9f9f9;
   font-size:15px;
   display: block;
   float: left;
@@ -268,7 +314,7 @@ h4 {
 }
 
 .menu-text{
-  color:blue;
+  color:#1D8DEE;
   text-decoration: underline
 }
 
@@ -288,14 +334,15 @@ h4 {
   width:50%; 
   height:auto;
   text-align:center; 
-  margin-top:5%
+  margin-top:0%;
+  line-height: 1.1;
 }
 
 #journey{
   color:white; 
   padding-left:20px;
   padding-right:20px; 
-  Ïtext-align: center;
+  text-align: center;
 }
 
 .map-img{
@@ -308,4 +355,18 @@ h4 {
 
 .navbar{
   margin-bottom: 0px
+}
+
+#preview-map-title{
+  position:absolute;
+  left:0;
+  right:0; 
+  margin-top:20px;
+  color:white
+}
+
+.menu-container{
+  margin:0px;
+  background: #1B2836;
+  color: #C4C7CB
 }
