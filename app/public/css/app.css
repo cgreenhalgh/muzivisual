@@ -1,4 +1,13 @@
 /* app css stylesheet */
+
+/*color scheme:
+
+menu/menu content background: #1B2836
+menu highlight: #1D8DEE
+menu content text: #C4C7CB
+other text: #FAFAFB/white
+*/
+
 @import url('https://fonts.googleapis.com/css?family=Lato');
 
 html {
@@ -264,14 +273,6 @@ h4 {
   font-size: 2em;
 }
 
-/*.pop-window{
-  height:100px;
-  width: 50%;
-  display: block;
-  position: absolute;
-  z-index: 100;
-  background:white;
-}*/
 
 .tool-tip{
  background-color: white;
