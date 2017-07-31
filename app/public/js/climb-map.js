@@ -47,7 +47,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   console.log('mapCtrl')
   mpmLoguse.view('/performance/', {});
 
-  $scope.mapIndicator = 'Past Performance'
+  // $scope.mapIndicator = 'Past Performance'
   $scope.cstage = '';
   $scope.pstage = '';
   $scope.narrative = '';
@@ -63,18 +63,37 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.performer = 'Maria'
   $scope.pastPerfs = '';
   $scope.pastCounter = 0;
-  $scope.alert = false;
+  $scope.alert = true;
   $scope.alertMsg = 'The challenge was performed successfully'
-  $scope.vibTime = 0;
   $scope.prePerf = true;
-  $scope.showBackArrow = true;
+  $scope.showLeftArrow = true;
 
   socket.on('vEvent', function (data) {
     console.log('get content: ' + data)
     $scope.alert = true;
     $scope.alertMsg = data.data;
-    $scope.vibration = data.vibration;
-    $scope.vibTime = data.time
+
+    d3Service.d3().then(function (d3) {
+      d3.select('.alert')
+        .transition()
+        .duration(1000)
+        .style('opacity', '1')
+        .style('z-index', 100)
+
+      $timeout(function () {
+        d3.select('.alert')
+          .transition()
+          .duration(1000)
+          .style('opacity', '0')
+          .style('z-index', 0)
+      }, 2000)
+    })
+
+
+    if (data.vibration && data.time) {
+      $window.navigator.vibrate(data.time);
+    }
+
     //visualMapBuilder.openToolTip($scope.cstage, data);
   })
 
@@ -152,13 +171,12 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     }
 
     $scope.journey = visualMapBuilder.getPastMap(msgs, $scope.pastCounter)
-    console.log($scope.journey)
 
     if ($scope.pastCounter === $scope.pastPerfs.length) {
-      $scope.showBackArrow = false;
+      $scope.showLeftArrow = false;
       return;
     } else {
-      $scope.showBackArrow = true;
+      $scope.showLeftArrow = true;
     }
   }
 
@@ -292,7 +310,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         if (!visualMapBuilder.getStop()) {
           console.log('performMode on');
 
-          $scope.showBackArrow = true;
+          $scope.showLeftArrow = true;
           var stageChange = '';
 
           if ($scope.pstage) {

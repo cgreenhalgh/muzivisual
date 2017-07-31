@@ -274,13 +274,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 })
                 .attr('r', R)
                 .attr('class', 'circle')
-                // .attr('ng-click', function (d) {
-                //     var len = d.visual.length;
-                //     if (len) {
-                //         return d.visual[0];
-                //     }
-                //     return '#';
-                // })
                 .attr('opacity', 0)
                 .attr('stroke', 'orange')
                 .attr('fill', 'orange')
@@ -292,7 +285,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             //cancel last draw if there was
             if (lastMapRecorder.length > 0) {
                 d3Service.d3().then(function (d3) {
-                    console.log('last draw', lastMapRecorder)
                     _.forEach(lastMapRecorder, function (draw) {
                         d3.select(draw.cid).attr('opacity', draw.opacity).attr('fill', draw.fill)
                     })
@@ -361,8 +353,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         lastMapRecorder.push(draw)
                     })
                 }
-
-                console.log('Get narratives for the past performance: '+ JSON.stringify(journey))
             }
             return journey;
         },

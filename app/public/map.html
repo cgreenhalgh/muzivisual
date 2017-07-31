@@ -48,11 +48,13 @@
   <div class="black-bkg"></div>
   <h1>{{backBtnLink}}</h1>
   <div>
-    <div ng-show="showBackArrow" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
+    <div ng-show="showLeftArrow" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
     <div ng-show='pastCounter' class='map-right'><span class='glyphicon glyphicon-menu-right' ng-click="getNextPerf()"></span></div>
     <div ng-show='!pastCounter' class='map-right'><span class='glyphicon glyphicon-picture' ng-style="{color: mapIconColor}" ng-click="preview()"></span></div>
   </div>
-
-  <!--<div class="alert alert-success" ng-show='mapCtrl' role="alert">
+ 
+   <div class="alert alert-success" role="alert" style="opacity:0">
     <span>{{alertMsg}}</span>
-  </div>-->
+  </div>  
+
+  
