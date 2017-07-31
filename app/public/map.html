@@ -15,9 +15,8 @@
     <!--<p>{{narrativeData}}</p>-->
   </div>
 
-  <div ng-show="prePerf && pastCounter==0" class="pre-perf-text" >
-    The current performance hasn't started yet. 
-    Click the left arrow of the top left screen to view past performances.
+  <div ng-show="prePerf && pastCounter==0" class="pre-perf-text">
+    The current performance hasn't started yet. Click the left arrow of the top left screen to view past performances.
   </div>
 
   <div class="map-title">
@@ -26,14 +25,16 @@
     <h4 style="margin-top:0px">{{performer}} in {{location}}</h4>
   </div>
 
-  <div ng-show="stop" style="margin-top:-40%">
+  <div ng-show="stop||(prePerf && pastCounter)" style="margin-top:-40%">
     <div style="margin-bottom:20px; color:#FAFAFB">
       <h1>Journey</h1>
     </div>
     <div id="journey" ng-repeat="j in journey track by $index">
       <h3> {{j.stageName}} </h3>
-      <p style="margin-top: 0px">{{j.narrative}} </p>
-      <p ng-if="j.stageName!=='Summit'">|</p>
+      <div style="display:inline-block;margin-top:20px">
+        <div class="narrative-content" style="float:right;display:block;width:90%; margin-top: 0px; font-size:1.25em">{{j.narrative}} </div>
+         <!-- <div ng-if="j.stageName!=='Summit'" style="float:left;display:block; width:10%; overflow:hidden;font-size:2em; "><b>|</b></div>  -->
+      </div>
     </div>
     <div style='height:100px;width:100%'></div>
   </div>

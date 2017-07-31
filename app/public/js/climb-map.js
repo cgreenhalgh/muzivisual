@@ -151,7 +151,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       $scope.performer = 'Maria';
     }
 
-    visualMapBuilder.getPastMap(msgs, $scope.pastCounter)
+    $scope.journey = visualMapBuilder.getPastMap(msgs, $scope.pastCounter)
+    console.log($scope.journey)
 
     if ($scope.pastCounter === $scope.pastPerfs.length) {
       $scope.showBackArrow = false;

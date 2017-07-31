@@ -287,6 +287,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('opacity', 1)
         },
         getPastMap: function (msgs, perfIndex) {
+             var journey = [];
             console.log('This is the performance index: -', perfIndex)
             //cancel last draw if there was
             if (lastMapRecorder.length > 0) {
@@ -305,11 +306,25 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             }
 
             function drawPastPerfMap(msgs) {
+                var narrative = '';
+                var name = '';
                 _.forEach(msgs, function (m) {
                     var msg = JSON.parse(m)
 
                     var msgData = _.split(msg.data, ':');
                     var stages = _.split(msgData[1], '->')
+                    narrative = _.find(narrativeData, { 'stageChange': msgData[1] })
+
+                    if (narrative) {
+                        name = _.find(mapData, { 'stage': narrative.from }).name;
+                        narrative.stageName = name;
+                        journey.push(narrative);
+                        if(narrative.to === 'summit'){
+                            narrative = {}
+                            narrative.stageName = 'Summit';
+                            journey.push(narrative);
+                        }
+                    }
 
                     if (!_.includes(passedRecord, stages[0])) {
                         if (msg.name === "vStop") {
@@ -345,10 +360,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         }
                         lastMapRecorder.push(draw)
                     })
-
                 }
 
+                console.log('Get narratives for the past performance: '+ JSON.stringify(journey))
             }
+            return journey;
         },
         initMap: function (canvas, data, mode) {
             if (stop_flag && mode != "preview") {
