@@ -66,6 +66,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.alert = false;
   $scope.alertMsg = 'The challenge was performed successfully'
   $scope.vibTime = 0;
+  $scope.prePerf = true;
+  $scope.showBackArrow = true;
 
   socket.on('vEvent', function (data) {
     console.log('get content: ' + data)
@@ -76,7 +78,17 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     //visualMapBuilder.openToolTip($scope.cstage, data);
   })
 
+  socket.on('vStart', function () {
+    console.log('start performing')
+    $scope.prePerf = false;
+    $scope.cstage = 'basecamp';
+  })
+
   $scope.getLastPerf = function () {
+    if ($scope.mapIconColor == '#1D8DEE') {
+      $scope.mapIconColor = 'white'
+      $scope.preview();
+    }
     loadPastPerf(++$scope.pastCounter);
   }
 
@@ -84,12 +96,35 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     loadPastPerf(--$scope.pastCounter)
   }
 
-  function loadPastPerf(index) {
-    // if (index === -1) {
-    //   visualMapBuilder.getPastMap(visualMapBuilder.getMapData, 100);
-    //   return;
-    // }
+  $scope.preview = function () {
+    d3Service.d3().then(function (d3) {
+      d3.selectAll('line').each(
+        function (d) {
+          getOpacity(this)
+        }
+      )
 
+      d3.selectAll('circle').each(
+        function (d) {
+          getOpacity(this)
+        }
+      )
+    })
+
+    function getOpacity(d) {
+      var op;
+      op = d3.select(d).attr('opacity');
+      if (op == 0) {
+        $scope.mapIconColor = '#1D8DEE'
+        d3.select(d).attr('opacity', 0.5);
+      } else if (op == 0.5) {
+        $scope.mapIconColor = 'white'
+        d3.select(d).attr('opacity', 0);
+      }
+    }
+  }
+
+  function loadPastPerf(index) {
     if (!$scope.pastPerfs) {
       visualMapBuilder.pastPerfConfig().then(function (data) {
         console.log(data)
@@ -103,15 +138,22 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   }
 
   function getPastPerfInfo(index) {
-    var pperf = $scope.pastPerfs[index];
-    $scope.mapTitle = pperf.title;
-    $scope.performer = pperf.performer;
-    $scope.location = pperf.location;
-    var msgs = pperf.value;
+    if (index) {
+      var msgs;
+      var pperf = $scope.pastPerfs[index - 1];
+      $scope.mapTitle = pperf.title;
+      $scope.performer = pperf.performer;
+      $scope.location = pperf.location;
+      msgs = pperf.value;
+    } else {
+      $scope.mapTitle = 'Climb!'; // config file later
+      $scope.location = 'Earth';
+      $scope.performer = 'Maria';
+    }
 
     visualMapBuilder.getPastMap(msgs, $scope.pastCounter)
 
-    if ($scope.pastCounter === $scope.pastPerfs.length - 1) {
+    if ($scope.pastCounter === $scope.pastPerfs.length) {
       $scope.showBackArrow = false;
       return;
     } else {
@@ -133,6 +175,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   } else {
     console.log('no performance id!');
     alert('Sorry, this URL is wrong! (there is no performance specified)');
+    $location.path('/#!/')
   }
 
   $scope.narrativeData = visualMapBuilder.getNarrativeData();
@@ -166,10 +209,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
       visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData(), 'perf');
     });
-    if (!$scope.cstage) {
-      $scope.cstage = 'basecamp'; // reveal basecamp
-      // visualMapBuilder.openToolTip($scope.cstage, 'this is a pop up');
-    }
   }
 
   function mapLoaded() {
@@ -289,60 +328,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       'delay': delay
     })
   }
-
-  // $scope.flip = function () {
-  //   if (visualIdx === visualNum) {
-  //     visualIdx = 0;
-  //   }
-  //   if (!visuals) {
-  //     visuals = visualMapBuilder.getVisual($scope.cstage);
-  //     console.log('get visual' + visuals);
-  //     visualNum = visuals.length;
-  //   }
-
-  //   if (visualNum > 1) {
-  //     d3Service.d3().then(function () {
-  //       console.log('flip visual');
-
-  //       d3.select('#visualImg')
-  //         .transition()
-  //         .duration(1000)
-  //         .style('opacity', 0)
-
-  //       setTimeout(function () {
-  //         d3.select('#visualImg')
-  //           .attr('src', visuals[visualIdx])
-  //           .style('opacity', 0)
-  //           .transition()
-  //           .duration(1000)
-  //           .style('opacity', 1)
-  //         visualIdx++;
-  //       }, 1000)
-  //     })
-  //   }
-  // }
-
-  // room: room name (default "default")
-  // pin: room pin/ password(default "")
-  // name: control input name (required)
-  // client: optional client identification
-
-  //   $http({
-  //     url: 'http://127.0.0.1:3000/input',
-  //     method: 'POST',
-  //     data: {
-  //       contentType: 'application/x-www-form-urlencoded',
-  //       room: "",
-  //       pin: "",
-  //       name: "visual",
-  //       client: "visual",
-  //       stage: $scope.stage
-  //     }
-  //   }).success(function (data) {
-  //     console.log("Success" + data);
-  //   }).error(function (data) {
-  //     console.log("Erro: " + data);
-  //   })
 }])
 
 

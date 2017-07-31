@@ -177,6 +177,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     return {
+        getPassedRecord: function () {
+            return passedRecord;
+        },
         updateMap: function (cstage, pstage) {
             if (stop_flag) {
                 return;
@@ -416,6 +419,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             if (stop_flag) {
                 return;
             }
+
             var stageDatum = _.find(mapData, { 'stage': sname })
 
             if (pname === null)

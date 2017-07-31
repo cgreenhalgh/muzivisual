@@ -1,15 +1,4 @@
 {
-    "performance:13a7fa70-ae91-4541-9526-fd3b332b585d": {
-        "type": "list",
-        "performer": "Maria",
-        "location": "Earth",
-        "time": "1501142877528",
-        "title": "Nov 22nd",
-        "value": [
-            "{\"name\":\"vStart\",\"data\":\"13a7fa70-ae91-4541-9526-fd3b332b585d:basecamp\",\"time\":1501142877528}",
-            "{\"name\":\"vStageChange\",\"data\":\"13a7fa70-ae91-4541-9526-fd3b332b585d:basecamp->1c\",\"time\":1501142885680}"
-        ]
-    },
     "performance:9333e7a2-16a9-4352-a45a-f6f42d848cde": {
         "type": "list",
         "performer": "Maria",
