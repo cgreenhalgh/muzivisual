@@ -247,6 +247,7 @@ h4 {
 .map-left{
   display: inline-block;
   position: absolute;
+  z-index:100;
   width: 60px;
   height: 60px;
   color: #f9f9f9;
@@ -256,6 +257,7 @@ h4 {
 }
 
 .map-right{
+  z-index:100;
   display: inline-block;
   position: absolute;
   width: 60px;
@@ -325,17 +327,22 @@ h4 {
   width:100%
 }
 
-.map-title{
+.map-title-container{
   color:white;
   position: absolute; 
-  top:0px; 
-  left:25%; 
-  z-index:100;
-  width:50%; 
+  top:2%; 
+  z-index:1;
+  width:100%; 
   height:auto;
   text-align:center; 
   margin-top:0%;
   line-height: 1.1;
+}
+
+.map-title{
+  margin-bottom:3px;
+  display:block;
+  float:right;
 }
 
 #journey{
@@ -381,4 +388,23 @@ h4 {
 
 .glyphicon.glyphicon-picture{
   font-size: 2em
+}
+
+.pperf-indicator{
+  border:white 2px solid;
+  display:block;
+  float:left;
+  border-radius:4px;
+  height:16px;
+  width:16px;
+  text-align:center;
+  margin-right:5px;
+}
+
+.narrative-content{
+  float:right;
+  display:block;
+  width:90%; 
+  margin-top: 0px; 
+  font-size:1.25em
 }

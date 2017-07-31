@@ -19,9 +19,12 @@
     The current performance hasn't started yet. Click the left arrow of the top left screen to view past performances.
   </div>
 
-  <div class="map-title">
-    <span style="color:lightgray; font-size:14px;padding-top:2px" ng-style="{opacity: pastCounter? 1:0}">{{mapIndicator}}</span>
-    <h1 style="margin-bottom:3px">{{mapTitle}}</h1>
+  <div class="map-title-container">
+    <!-- <span style="color:lightgray; font-size:14px;padding-top:2px" ng-style="{opacity: pastCounter? 1:0}">{{mapIndicator}}</span> -->
+   <div style="display:inline-block">
+    <span ng-show="pastCounter" class="pperf-indicator">P</span>
+    <h1 class="map-title">{{mapTitle}}</h1>
+   </div>
     <h4 style="margin-top:0px">{{performer}} in {{location}}</h4>
   </div>
 
@@ -32,7 +35,7 @@
     <div id="journey" ng-repeat="j in journey track by $index">
       <h3> {{j.stageName}} </h3>
       <div style="display:inline-block;margin-top:20px">
-        <div class="narrative-content" style="float:right;display:block;width:90%; margin-top: 0px; font-size:1.25em">{{j.narrative}} </div>
+        <div class="narrative-content" >{{j.narrative}} </div>
          <!-- <div ng-if="j.stageName!=='Summit'" style="float:left;display:block; width:10%; overflow:hidden;font-size:2em; "><b>|</b></div>  -->
       </div>
     </div>
