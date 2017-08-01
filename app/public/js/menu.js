@@ -20,18 +20,24 @@ menu.config(['$routeProvider', function ($routeProvider) {
 }])
 
 
-menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', 'mpmLoguse',  function ($scope, $location, socket, $window, $anchorScroll, mpmLoguse) {
+menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', 'mpmLoguse', function ($scope, $location, socket, $window, $anchorScroll, mpmLoguse) {
     mpmLoguse.view('/', {});
     $scope.performing = false;
     $scope.archiveHighlight = false;
-
-
-    console.log()
 
     var params = $location.search();
     var performanceid = params['p'] === undefined ? '' : params['p'];
 
     console.log('performanceid: ', performanceid)
+
+    if (performanceid) {
+        $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
+        socket.emit('client', performanceid);
+    } else {
+        console.log('no performance id!');
+        alert('Sorry, this URL is wrong! (there is no performance specified)');
+        return;
+    }
 
     socket.on('vStart', function () {
         $scope.performing = true;
@@ -60,7 +66,13 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 
 
     $scope.openPerformance = function () {
-       $location.path('/performance').search({ 'p': performanceid })
+        var performanceid = $location.search()['p'];
+        if (performanceid) {
+            $window.location.href = 'http://localhost:8000/#!/performance/?p=' + performanceid;
+        } else {
+            alert('Sorry, this URL is wrong! (there is no performance specified)');
+            return;
+        }
     }
 
 
@@ -164,7 +176,6 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
         alert('Sorry, this URL is wrong! (there is no performance specified)');
     }
 
-
     $scope.showStageTitle = function (name, stage) {
         $scope.title = name;
         d3Service.d3().then(function (d3) {
@@ -197,8 +208,8 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
                 .style('max-height', MAP_HEIGHT + 'px')
             var canvas = d3.select('#map-container');
 
-            visualMapBuilder.setStop();
-            visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData(), 'preview');
+            visualMapBuilder.setStop(true);
+            visualMapBuilder.initMap(canvas, $scope.mapData, 'preview');
 
             d3.selectAll('line').attr('opacity', '1').attr('stroke', '#FAFAFB') //white
 
@@ -209,6 +220,7 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
                 })
             var circles = document.getElementsByClassName('circle');
             $compile(angular.element(circles))($scope);
+            visualMapBuilder.setStop(false);
         });
     }
 }])

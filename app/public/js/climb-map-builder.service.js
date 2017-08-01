@@ -280,24 +280,32 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('opacity', 1)
         },
         getPastMap: function (msgs, perfIndex) {
-             var journey = [];
+            var journey = [];
+            console.log('This is last map recorder', lastMapRecorder)
             console.log('This is the performance index: -', perfIndex)
+
+            // clean past map
             //cancel last draw if there was
             if (lastMapRecorder.length > 0) {
                 d3Service.d3().then(function (d3) {
                     _.forEach(lastMapRecorder, function (draw) {
+                        console.log(draw)
                         d3.select(draw.cid).attr('opacity', draw.opacity).attr('fill', draw.fill)
                     })
                     lastMapRecorder = [];
+                    console.log('clean map')
                     if (perfIndex) {
                         drawPastPerfMap(msgs);
                     }
                 })
             } else {
-                drawPastPerfMap(msgs);
+                if (perfIndex) {
+                    drawPastPerfMap(msgs);
+                }
             }
 
             function drawPastPerfMap(msgs) {
+                console.log('draw new past')
                 var narrative = '';
                 var name = '';
                 _.forEach(msgs, function (m) {
@@ -311,7 +319,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         name = _.find(mapData, { 'stage': narrative.from }).name;
                         narrative.stageName = name;
                         journey.push(narrative);
-                        if(narrative.to === 'summit'){
+                        if (narrative.to === 'summit') {
                             narrative = {}
                             narrative.stageName = 'Summit';
                             journey.push(narrative);
@@ -335,11 +343,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     recordOneDraw(cid);
                 });
 
-                d3Service.d3().then(function (d3) {
-                    _.forEach(lastMapRecorder, function (draw) {
-                        d3.select(draw.cid).transition().duration(INTERVAL).attr('opacity', 0.6).attr('fill', '#FAFAFB') //white
-                    })
-                })
+                // d3Service.d3().then(function (d3) {
+                //     _.forEach(lastMapRecorder, function (draw) {
+                //         d3.select(draw.cid).transition().duration(INTERVAL).attr('opacity', 1)
+                //     })
+                // })
 
                 function recordOneDraw(cid) {
                     d3Service.d3().then(function (d3) {
@@ -351,6 +359,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                             "opacity": cop
                         }
                         lastMapRecorder.push(draw)
+                        d3.select(cid).transition().duration(INTERVAL).attr('opacity', 1)
                     })
                 }
             }
@@ -413,13 +422,17 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
 
             // initialize begin stage
             d3.select('#circle_begin').attr('opacity', 1).attr('fill', 'white').attr('r', R);
+
+            return $q(function (resolve, rej) {
+                resolve(true)
+            })
         }
         ,
         getStop: function () {
             return stop_flag;
         },
-        setStop: function () {
-            stop_flag = true;            //updateMapStage('summit', 'rev_succ', delaybase+1) 
+        setStop: function (bool) {
+            stop_flag = bool;
         },
         startPerformMode: function (sname, pname) {  // cs
             if (stop_flag) {
@@ -438,7 +451,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             // console.log(mapData)
 
             console.log('passedRecord:', passedRecord)
-
             console.log('Journey Record: ' + journeyRecord);
 
             console.log('current stage name ', sname)

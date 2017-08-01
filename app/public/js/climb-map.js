@@ -3,7 +3,7 @@
 'use strict'
 var map = angular.module('MuziVisual.map', ['ngRoute', 'MuziVisual.visualmapbuilder']);
 // used as unit for time delay
-var INTERVAL = 1;
+var INTERVAL = 500;
 var MAP_WIDTH, MAP_HEIGHT;
 var delaybase = 1;
 
@@ -68,6 +68,32 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.prePerf = true;
   $scope.showLeftArrow = true;
 
+  // d3Service.d3().then(function (d3) {
+  //   d3.select('.alert')
+  //     .transition()
+  //     .duration(1000)
+  //     .style('opacity', '1')
+  //     .style('z-index', 100)
+
+  //   $timeout(function () {
+  //     d3.select('.alert')
+  //       .transition()
+  //       .duration(1000)
+  //       .style('opacity', '0')
+  //       .style('z-index', 0)
+  //   }, 2000)
+  // })
+
+  var performanceid = $location.search()['p']
+
+  if (performanceid) {
+    socket.emit('client', performanceid);
+  } else {
+    console.log('no performance id!');
+    alert('Sorry, this URL is wrong! (there is no performance specified)');
+    return;
+  }
+
   socket.on('vEvent', function (data) {
     console.log('get content: ' + data)
     $scope.alert = true;
@@ -89,18 +115,23 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       }, 2000)
     })
 
-
     if (data.vibration && data.time) {
       $window.navigator.vibrate(data.time);
     }
-
     //visualMapBuilder.openToolTip($scope.cstage, data);
   })
 
+
   socket.on('vStart', function () {
-    console.log('start performing')
     $scope.prePerf = false;
-    $scope.cstage = 'basecamp';
+
+    // for perf->menu->perf
+    if (visualMapBuilder.getMapData() && visualMapBuilder.getNarrativeData && !$scope.mapLoaded) {
+
+      console.log('inside the vStart');
+      initMap();
+      $scope.mapLoaded = true;
+    }
   })
 
   $scope.getLastPerf = function () {
@@ -186,16 +217,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     $route.reload();
   })
 
-  var performanceid = $location.search()['p']
-
-  if (performanceid) {
-    $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
-    socket.emit('client', performanceid);
-  } else {
-    console.log('no performance id!');
-    alert('Sorry, this URL is wrong! (there is no performance specified)');
-    $location.path('/#!/')
-  }
 
   $scope.narrativeData = visualMapBuilder.getNarrativeData();
   if (!$scope.narrativeData) {
@@ -215,7 +236,27 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     })
   }
 
-  $scope.mapData = visualMapBuilder.getMapData();
+  // to avoid the asynchronized file loading latency
+  if ($scope.mapLoaded)
+    mapLoaded();
+  else {
+    $scope.$watch('mapLoaded', function (newvalue, oldvalue) {
+      if (newvalue) {
+        mapLoaded();
+      }
+    });
+  }
+
+
+  $scope.goToMenu = function () {
+
+    //$state.go('/', $state.params, { reload: true });
+    $window.location.href = "http://localhost:8000/#!/?p=" + performanceid;
+    // $window.location.reload(true);
+  }
+
+  //  $scope.mapData = visualMapBuilder.getMapData();
+
 
   function initMap() {
     console.log("initmap")
@@ -226,7 +267,25 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
 
-      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData(), 'perf');
+      console.log('inside initMap: get map data', canvas, visualMapBuilder.getMapData())
+      visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData(), 'perf').then(function () {
+        if (!$scope.cstage && !$scope.prePerf) {
+          $scope.cstage = 'basecamp'
+        } else {
+          $scope.$watch('prePerf', function (n, o) {
+            if (!n) {
+              $scope.cstage = 'basecamp'
+            }
+          })
+        }
+      })
+
+      if (!$scope.cstage && !$scope.prePerf) {
+        $scope.cstage = 'basecamp'
+      }
+
+      //  console.log($scope.cstage, visualMapBuilder.getPrePerf())
+
     });
   }
 
@@ -259,7 +318,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     })
 
     socket.on('vStop', function () {
-      visualMapBuilder.setStop();
+      visualMapBuilder.setStop(true);
       $scope.stop = true;
 
       var stop_flag = visualMapBuilder.getStop()
@@ -269,22 +328,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     });
   }
 
-  // to avoid the asynchronized file loading latency
-  if ($scope.mapLoaded)
-    mapLoaded();
-  else {
-    $scope.$watch('mapLoaded', function (newvalue, oldvalue) {
-      if (newvalue) {
-        mapLoaded();
-      }
-    });
-  }
-
   $scope.$watch('cstage', function (ns, os) {
-    if (delaybase === 1) {
-      delaybase = 2;
-    }
-
     console.log('stage change: ' + os + '->' + ns);
 
     if ($scope.cstage) {
@@ -301,7 +345,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         $scope.mapData = visualMapBuilder.getMapData();
         if (!$scope.mapData) {
           visualMapBuilder.mapConfig().then(function (data) {
-            console.log("LOAD MAP: " + JSON.stringify(data));
+            console.log("load map: " + JSON.stringify(data));
             visualMapBuilder.setMapData(data);
             $scope.mapData = data;
           });

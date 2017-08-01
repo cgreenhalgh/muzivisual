@@ -31,16 +31,8 @@ io.adapter(redisAdapter(redis_config));
 var redisClient = redis.createClient(redis_config);
 
 io.on('connection', function (socket) {
-
-  //  socket.join('mobileapp');
-
-
   console.log('A client connected.');
-  // socket.on('vTimer', function (data) {
-  //   console.log(data);
-  //   if (data <= 0) { return; }
-  //   io.to('mobileapp').emit('vTimer', data);
-  // })
+
   loguse.addClient(socket);
 
   socket.on('disconnect', function () {
@@ -75,6 +67,10 @@ io.on('connection', function (socket) {
       // flag = 1;
     }
   });
+
+  // socket.on('performance',function(){
+  //   console.log('get data about performance')
+  // })
 
 });
 
