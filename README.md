@@ -26,7 +26,16 @@ Run: node muzivisual/app/server.js
 Muzicodes : localhost:3000
 
 MuziVisual: localhost:8000
-		 
+
+## Paths
+
+- `/` - menu
+- `/content/NAME` - named content
+- `/performance/`
+- `/post-performance/`
+
+Note, to run behind a reverse proxy on a non-root path change the `base` href in `app/public/index.html`.
+
 # Logs
 
 Writes client usage logs to `app/logs`. Log file name is time created, i.e. time server (re)started.

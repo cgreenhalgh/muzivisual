@@ -78,11 +78,14 @@ io.on('connection', function (socket) {
 
 });
 
-app.get('/', function (req, res) {
-  console.log('get /');
+function returnIndex(req, res) {
+  console.log('get index.html as '+req.url);
   res.sendFile(__dirname + '/public/index.html');
-});
-
+}
+app.get('/', returnIndex);
+app.get('/content/*', returnIndex);
+app.get('/performance/*', returnIndex);
+app.get('/past-performance/*', returnIndex);
 
 function returnPublicFile(req, res) {
   var url = require('url').parse(req.url);

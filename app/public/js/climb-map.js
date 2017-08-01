@@ -170,13 +170,12 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
   var performanceid = $location.search()['p']
 
+  $scope.goToMenu = function () { $location.path('/'); }
   if (performanceid) {
-    $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
     socket.emit('client', performanceid);
   } else {
     console.log('no performance id!');
     alert('Sorry, this URL is wrong! (there is no performance specified)');
-    $location.path('/#!/')
   }
 
   $scope.narrativeData = visualMapBuilder.getNarrativeData();

@@ -47,7 +47,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
     $scope.openContent = function openContent(title) {
         console.log('This is menuCtrl ' + title);
         if (title === 'Map') {
-            $location.path('/content/map').search({ 'p': performanceid })
+            $location.path('/content/map');
             return;
         }
 
@@ -55,12 +55,12 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
             $scope.archiveHighlight = false;
         }
 
-        $location.path('/content/' + title).search({ 'p': performanceid });
+        $location.path('/content/' + title);
     }
 
 
     $scope.openPerformance = function () {
-       $location.path('/performance').search({ 'p': performanceid })
+       $location.path('/performance');
     }
 
 
@@ -115,13 +115,7 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window'
     mpmLoguse.view('/content/' + $routeParams.inquery, {});
     var title = $scope.title = $routeParams.inquery;
 
-    var performanceid = $location.search()['p'];
-    if (performanceid) {
-        $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
-    } else {
-        console.log('no performance id!');
-        alert('Sorry, this URL is wrong! (there is no performance specified)');
-    }
+    $scope.goToMenu = function () { $location.path('/'); }
 
     //change contents for different parts
     if (title === 'Programme Note') {
@@ -157,9 +151,8 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
     var tempRecord = {};
 
     var performanceid = $location.search()['p'];
-    if (performanceid) {
-        $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
-    } else {
+    $scope.goToMenu = function () { $location.path('/'); }
+    if (!performanceid) {
         console.log('no performance id!');
         alert('Sorry, this URL is wrong! (there is no performance specified)');
     }
