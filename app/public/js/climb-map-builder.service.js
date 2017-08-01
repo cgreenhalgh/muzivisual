@@ -219,8 +219,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     fs = _.find(mapData, { 'stage': s })
                     flist.push(fs);
 
-                    //console.log('update to new: ', s);
-
                     if (!_.includes(passedRecord, fs.stage)) {
                         console.log('reveal new stage:', fs.stage);
                         updateMapStage(fs.stage, 'revealed', delaybase + 4)
@@ -289,19 +287,18 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             if (lastMapRecorder.length > 0) {
                 d3Service.d3().then(function (d3) {
                     _.forEach(lastMapRecorder, function (draw) {
-                        console.log(draw)
                         d3.select(draw.cid).attr('opacity', draw.opacity).attr('fill', draw.fill)
                     })
                     lastMapRecorder = [];
                     console.log('clean map')
-                    if (perfIndex) {
-                        drawPastPerfMap(msgs);
-                    }
+
+                    drawPastPerfMap(msgs);
+
                 })
             } else {
-                if (perfIndex) {
-                    drawPastPerfMap(msgs);
-                }
+
+                drawPastPerfMap(msgs);
+
             }
 
             function drawPastPerfMap(msgs) {
@@ -334,6 +331,19 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                             var cid = '#circle_' + stages[0];
                             recordOneDraw(cid);
                         }
+                    } else {
+                        // var cid = '#circle_' + stages[0];
+                        // d3Service.d3().then(function (d3) {
+                        //     d3.select('#circle_basecamp').style("filter", "url(#glow)")
+                        //     d3.select('#circle_1b').style("filter", "url(#glow)")
+                        //     d3.select('#circle_p2a').style("filter", "url(#glow)")
+                        //     d3.select('#circle_p2b').style("filter", "url(#glow)")
+                        //     d3.select('#circle_3b').style("filter", "url(#glow)")
+                        //     d3.select('#circle_p2c').style("filter", "url(#glow)")
+                        //     d3.select('#circle_2b').style("filter", "url(#glow)")
+                            
+
+                        // })
                     }
 
                     if (!stages[1]) {
@@ -359,7 +369,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                             "opacity": cop
                         }
                         lastMapRecorder.push(draw)
-                        d3.select(cid).transition().duration(INTERVAL).attr('opacity', 1)
+                        d3.select(cid).transition().duration(400).attr('opacity', 0.95)
                     })
                 }
             }
@@ -369,6 +379,8 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             if (stop_flag && mode != "preview") {
                 return;
             }
+
+            //Container for the gradients
             _.forEach(data, function (cStageDatum) {
                 if (cStageDatum.stage !== 'summit') {
                     // get all the cues of this stage
@@ -446,9 +458,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             var stageChange = pname + '->' + sname;
             journeyRecord.push(stageChange);
             passedRecord.push(sname);
-
-            //  _.find(mapData, { to: pname }).to = '';
-            // console.log(mapData)
 
             console.log('passedRecord:', passedRecord)
             console.log('Journey Record: ' + journeyRecord);

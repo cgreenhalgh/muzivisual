@@ -94,6 +94,30 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     return;
   }
 
+  $scope.mapData = visualMapBuilder.getMapData();
+  $scope.narrativeData = visualMapBuilder.getNarrativeData();
+
+  if (!$scope.narrativeData) {
+    visualMapBuilder.narrativeConfig().then(function (data) {
+      console.log('load narrative: ' + JSON.stringify(data));
+      $scope.narrativeData = data;
+      $scope.narrativeLoaded = true;
+      if (!$scope.mapData) {
+        visualMapBuilder.mapConfig().then(function (data) {
+          console.log("LOAD MAP: " + JSON.stringify(data));
+          visualMapBuilder.setMapData(data);
+          $scope.mapData = data;
+          initMap();
+        });
+      }
+    })
+  }
+
+  if ($scope.prePerf && $scope.mapData) {
+    initMap();
+  }
+
+
   socket.on('vEvent', function (data) {
     console.log('get content: ' + data)
     $scope.alert = true;
@@ -127,12 +151,11 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
     // for perf->menu->perf
     if (visualMapBuilder.getMapData() && visualMapBuilder.getNarrativeData && !$scope.mapLoaded) {
-
-      console.log('inside the vStart');
       initMap();
-      $scope.mapLoaded = true;
     }
   })
+
+
 
   $scope.getLastPerf = function () {
     if ($scope.mapIconColor == '#1D8DEE') {
@@ -163,13 +186,25 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
     function getOpacity(d) {
       var op;
+      var glow = d3.select(d).style('filter');
+
       op = d3.select(d).attr('opacity');
       if (op == 0) {
         $scope.mapIconColor = '#1D8DEE'
-        d3.select(d).attr('opacity', 0.5);
-      } else if (op == 0.5) {
+        d3.select(d).transition().duration(400).attr('opacity', 0.95);
+      } else if (op == 0.95) {
         $scope.mapIconColor = 'white'
-        d3.select(d).attr('opacity', 0);
+        d3.select(d).transition().duration(400).attr('opacity', 0);
+      }else{
+        d3.select(d).transition().duration(400).attr('opacity', 1);
+      }
+   
+      if (op==1 && glow=='none') {
+        d3.select(d)
+          .style("filter", "url(#glow)");
+      }else if(glow){
+        d3.select(d)
+          .style("filter", "");
       }
     }
   }
@@ -217,25 +252,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     $route.reload();
   })
 
-
-  $scope.narrativeData = visualMapBuilder.getNarrativeData();
-  if (!$scope.narrativeData) {
-    visualMapBuilder.narrativeConfig().then(function (data) {
-      console.log('load narrative: ' + JSON.stringify(data));
-      $scope.narrativeData = data;
-      $scope.narrativeLoaded = true;
-      if (!$scope.mapData) {
-        visualMapBuilder.mapConfig().then(function (data) {
-          console.log("LOAD MAP: " + JSON.stringify(data));
-          visualMapBuilder.setMapData(data);
-          $scope.mapData = data;
-          initMap();
-          $scope.mapLoaded = true;
-        });
-      }
-    })
-  }
-
   // to avoid the asynchronized file loading latency
   if ($scope.mapLoaded)
     mapLoaded();
@@ -247,15 +263,12 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     });
   }
 
-
   $scope.goToMenu = function () {
 
     //$state.go('/', $state.params, { reload: true });
     $window.location.href = "http://localhost:8000/#!/?p=" + performanceid;
     // $window.location.reload(true);
   }
-
-  //  $scope.mapData = visualMapBuilder.getMapData();
 
 
   function initMap() {
@@ -266,6 +279,20 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       d3.select('#bg-img').style('width', '100%')
         .style('max-height', MAP_HEIGHT + 'px')
       var canvas = d3.select('#map-container');
+
+      var defs = canvas.append("defs");
+
+      //Filter for the outside glow
+      var filter = defs.append("filter")
+        .attr("id", "glow");
+      filter.append("feGaussianBlur")
+        .attr("stdDeviation", "4")
+        .attr("result", "coloredBlur");
+      var feMerge = filter.append("feMerge");
+      feMerge.append("feMergeNode")
+        .attr("in", "coloredBlur");
+      feMerge.append("feMergeNode")
+        .attr("in", "SourceGraphic");
 
       console.log('inside initMap: get map data', canvas, visualMapBuilder.getMapData())
       visualMapBuilder.initMap(canvas, visualMapBuilder.getMapData(), 'perf').then(function () {
@@ -283,7 +310,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       if (!$scope.cstage && !$scope.prePerf) {
         $scope.cstage = 'basecamp'
       }
-
+      $scope.mapLoaded = true;
       //  console.log($scope.cstage, visualMapBuilder.getPrePerf())
 
     });
