@@ -495,7 +495,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         pastPerfConfig: function () {
             return $q(function (resolve, reject) {
-                $http.get('/allPerformances').then(function (data) {
+                $http.get('allPerformances').then(function (data) {
                     var performances = _.sortBy(data.data, 'time').reverse();
                     resolve(performances);
                 }), function (err) {
@@ -516,7 +516,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         narrativeConfig: function (d) {
             return $q(function (resolve, reject) {
-                $http.get('/fragments/').then(function (rawdata) {
+                $http.get('fragments/').then(function (rawdata) {
                     narrativeData = rawdata.data
                     resolve(narrativeData);
                 }), function (err) {
