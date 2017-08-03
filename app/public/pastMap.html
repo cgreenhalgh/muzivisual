@@ -19,7 +19,7 @@
     <!--<p>{{narrativeData}}</p>-->
   </div>
 
-  <div class="map-title-container">
+  <div ng-show="!preview" class="map-title-container">
     <!-- <span style="color:lightgray; font-size:14px;padding-top:2px" ng-style="{opacity: pastCounter? 1:0}">{{mapIndicator}}</span> -->
     <div style="display:inline-block">
       <span ng-show="pastCounter" class="pperf-indicator">P</span>
@@ -28,7 +28,7 @@
     <h4 style="margin-top:0px">{{performer}} in {{location}}</h4>
   </div>
 
-  <div ng-show="stop||(prePerf && pastCounter)" style="margin-top:-40%">
+  <div ng-show="!preview && (prePerf && pastCounter)" style="margin-top:-40%">
     <div style="margin-bottom:20px; color:#FAFAFB">
       <h1>Journey</h1>
     </div>
@@ -49,7 +49,7 @@
   <h1>{{backBtnLink}}</h1>
   <div>
     <div ng-show="showLeftArrow && existPmap" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
-    <div ng-show='pastCounter' class='map-right'><span class='glyphicon glyphicon-menu-right' ng-click="getNextPerf()"></span></div>
+    <div ng-show='pastCounter && pastCounter!=100' class='map-right'><span class='glyphicon glyphicon-menu-right' ng-click="getNextPerf()"></span></div>
     <div ng-show='!pastCounter' class='map-right'><span class='glyphicon glyphicon-picture' ng-style="{color: mapIconColor}" ng-click="preview()"></span></div>
   </div>
 

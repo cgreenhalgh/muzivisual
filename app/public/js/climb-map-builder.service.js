@@ -1,15 +1,55 @@
 var R = 12;
 var visualMapBuilder = angular.module('MuziVisual.visualmapbuilder', []);
 
-visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', function (d3Service, $timeout, $q, $http) {
+visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', '$location', function (d3Service, $timeout, $q, $http, $location) {
     console.log('visualMapBuilder');
+    var MAP_WIDTH, MAP_HEIGHT;
     var recordMap;
     var mapData;
     var narrativeData;
+    var pperfData = null; // pperf does not exist
     var stop_flag;
     var journeyRecord = [];
     var passedRecord = [];
     var lastMapRecorder = [];
+    var performanceid;
+
+    function pastPerfConfig() {
+        return $q(function (resolve, reject) {
+            $http.get('/allPerformances').then(function (d) {
+                var performances = _.sortBy(d.data, 'time').reverse();
+                console.log('getPastPerfs:', performances)
+                if (performances) {
+                    resolve(performances);
+                } else {
+                    resolve(null);
+                }
+            }), function (err) {
+                alert('Missing data files for past performances (performance.json & performance_metadata.json)')
+                reject(err);
+            }
+        })
+    }
+
+    function mapConfig(d) {
+        return $q(function (resolve, reject) {
+            $http.get('maps').then(function (rawdata) {
+                resolve(rawdata.data);
+            }), function (err) {
+                reject(err);
+            }
+        })
+    }
+
+    function narrativeConfig(d) {
+        return $q(function (resolve, reject) {
+            $http.get('/fragments/').then(function (rawdata) {
+                resolve(rawdata.data);
+            }), function (err) {
+                reject(err);
+            }
+        })
+    }
 
     function getPreviewCircleFillColor(d) {
         if (d.path === '1') {
@@ -177,8 +217,34 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     return {
+        setMapSize(mw, mh) {
+            MAP_WIDTH = mw;
+            MAP_HEIGHT = mh;
+        },
+        setPerfId: function (id) {
+            performanceid = id;
+        },
+        getPerfId: function () {
+            if (!performanceid) {
+                performanceid = $location.search()['p'];
+                console.log("get perf id: ", performanceid
+                )
+                return performanceid;
+            }
+            return performanceid;
+        },
+        getPastPerf: function (index) {
+            return pperfData[index - 1];
+        },
         getPassedRecord: function () {
             return passedRecord;
+        },
+        drawPreviewMap: function () {
+            d3Service.d3().then(function (d3) {
+                d3.selectAll('line').attr('opacity', 1)
+
+                d3.selectAll('circle').attr('opacity', 1)
+            })
         },
         updateMap: function (cstage, pstage) {
             if (stop_flag) {
@@ -277,169 +343,157 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 .attr('fill', 'orange')
                 .attr('opacity', 1)
         },
-        getPastMap: function (msgs, perfIndex) {
-            var journey = [];
-            console.log('This is last map recorder', lastMapRecorder)
+        drawPastMap: function (msgs, perfIndex) {
+            var pjourney = [];
+
             console.log('This is the performance index: -', perfIndex)
 
-            // clean past map
-            //cancel last draw if there was
-            if (lastMapRecorder.length > 0) {
-                d3Service.d3().then(function (d3) {
-                    _.forEach(lastMapRecorder, function (draw) {
-                        d3.select(draw.cid).attr('opacity', draw.opacity).attr('fill', draw.fill)
-                    })
-                    lastMapRecorder = [];
-                    console.log('clean map')
+            console.log('draw new past')
+            var narrative = '';
+            var name = '';
+            _.forEach(msgs, function (m) {
+                var msg = JSON.parse(m)
 
-                    drawPastPerfMap(msgs);
+                var msgData = _.split(msg.data, ':');
+                var stages = _.split(msgData[1], '->')
+                narrative = _.find(narrativeData, { 'stageChange': msgData[1] })
 
-                })
-            } else {
-
-                drawPastPerfMap(msgs);
-
-            }
-
-            function drawPastPerfMap(msgs) {
-                console.log('draw new past')
-                var narrative = '';
-                var name = '';
-                _.forEach(msgs, function (m) {
-                    var msg = JSON.parse(m)
-
-                    var msgData = _.split(msg.data, ':');
-                    var stages = _.split(msgData[1], '->')
-                    narrative = _.find(narrativeData, { 'stageChange': msgData[1] })
-
-                    if (narrative) {
-                        name = _.find(mapData, { 'stage': narrative.from }).name;
-                        narrative.stageName = name;
-                        journey.push(narrative);
-                        if (narrative.to === 'summit') {
-                            narrative = {}
-                            narrative.stageName = 'Summit';
-                            journey.push(narrative);
-                        }
+                if (narrative) {
+                    name = _.find(mapData, { 'stage': narrative.from }).name;
+                    narrative.stageName = name;
+                    pjourney.push(narrative);
+                    if (narrative.to === 'summit') {
+                        narrative = {}
+                        narrative.stageName = 'Summit';
+                        pjourney.push(narrative);
                     }
-
-                    if (!_.includes(passedRecord, stages[0])) {
-                        if (msg.name === "vStop") {
-                            var cid = "#circle_summit"
-                            recordOneDraw(cid);
-                        } else if (stages[0]) {
-                            var cid = '#circle_' + stages[0];
-                            recordOneDraw(cid);
-                        }
-                    } else {
-                        // var cid = '#circle_' + stages[0];
-                        // d3Service.d3().then(function (d3) {
-                        //     d3.select('#circle_basecamp').style("filter", "url(#glow)")
-                        //     d3.select('#circle_1b').style("filter", "url(#glow)")
-                        //     d3.select('#circle_p2a').style("filter", "url(#glow)")
-                        //     d3.select('#circle_p2b').style("filter", "url(#glow)")
-                        //     d3.select('#circle_3b').style("filter", "url(#glow)")
-                        //     d3.select('#circle_p2c').style("filter", "url(#glow)")
-                        //     d3.select('#circle_2b').style("filter", "url(#glow)")
-
-
-                        // })
-                    }
-
-                    if (!stages[1]) {
-                        return;
-                    }
-                    var cid = '#line_' + stages[0] + '_' + stages[1];
-                    recordOneDraw(cid);
-                });
-
-                // d3Service.d3().then(function (d3) {
-                //     _.forEach(lastMapRecorder, function (draw) {
-                //         d3.select(draw.cid).transition().duration(INTERVAL).attr('opacity', 1)
-                //     })
-                // })
-
-                function recordOneDraw(cid) {
-                    d3Service.d3().then(function (d3) {
-                        var cfill = d3.select(cid).attr('fill');
-                        var cop = d3.select(cid).attr('opacity');
-                        var draw = {
-                            "cid": cid,
-                            "fill": cfill,
-                            "opacity": cop
-                        }
-                        lastMapRecorder.push(draw)
-                        d3.select(cid).transition().duration(400).attr('opacity', 0.95)
-                    })
                 }
-            }
-            return journey;
-        },
-        initMap: function (canvas, data, mode) {
-            if (stop_flag && mode != "preview") {
-                return;
-            }
 
-            //Container for the gradients
-            _.forEach(data, function (cStageDatum) {
-                if (cStageDatum.stage !== 'summit') {
-                    // get all the cues of this stage
-                    var cueList = _.split(cStageDatum.cue, '/');
-                    var cueStageDatum;
-                    _.forEach(cueList, function (cueStage) {
-                        cueStageDatum = _.find(data, { 'stage': _.trim(cueStage) });
-
-                        canvas
-                            .append('line')
-                            .attr("x1", cStageDatum.x * MAP_WIDTH)
-                            .attr("y1", cStageDatum.y * MAP_HEIGHT)
-                            .attr("x2", cueStageDatum.x * MAP_WIDTH)
-                            .attr("y2", cueStageDatum.y * MAP_HEIGHT)
-                            .attr("id", function () {
-                                return cueStageDatum.stage ? ('line_' + cStageDatum.stage + '_' + cueStageDatum.stage
-                                ) : ('line_' + cStageDatum.stage)
-                            })
-                            .style("stroke-dasharray", ("6, 6"))
-                            .attr('stroke', '#FAFAFB') //white
-                            .attr('opacity', 0)
-                            .attr('stroke-width', '2px')
-                    });
+                //if (!_.includes(passedRecord, stages[0])) {
+                var cid;
+                if (msg.name === "vStop") {
+                    cid = "#circle_summit"
+                    draw(cid);
+                } else if (stages[0]) {
+                    cid = '#circle_' + stages[0];
+                    draw(cid);
                 }
+                // }
+
+                if (!stages[1]) {
+                    return;
+                }
+                var lid = '#line_' + stages[0] + '_' + stages[1];
+                draw(lid);
             });
 
-            canvas
-                .selectAll('circle')
-                .data(data)
-                .enter()
-                .append('circle')
-                .attr('cx', function (d) {
-                    return d.x * MAP_WIDTH;
+            function draw(cid) {
+                d3Service.d3().then(function (d3) {
+                    d3.select(cid).transition().duration(400).attr('opacity', 1)
                 })
-                .attr('cy', function (d) {
-                    return d.y * MAP_HEIGHT;
+            }
+
+            return pjourney;
+        },
+        drawCurrentMap: function (stages) {
+            var records;
+            if(passedRecord.length>0){
+                records = passedRecord;
+            }else{
+                records = stages;
+            }
+            var cid;
+            d3Service.d3().then(function () {
+                _.forEach(records, function (stage) {
+                    console.log('draw current stage:', stage)
+                    cid = '#circle_' + stage;
+                    d3.select(cid).transition().duration(400).attr('opacity', 1).style('filter', "url(#glow)").attr('fill', 'orange').style('z-index', 200)
                 })
-                .attr('r', function (d) { return getCircleRadius(d) })
-                .attr('id', function (d) { return 'circle_' + d.stage })
-                .attr('fill', function (d) {
-                    if (mode === "preview") {
-                        console.log('preview mode')
-                        return getPreviewCircleFillColor(d)
+            })
+        },
+        initMap: function () {
+            console.log("initmap")
+            var mode = 'perf'
+            d3Service.d3().then(function (d3) {
+                d3.select('#visualImg').style('width', '100%')
+                    .style('max-height', MAP_HEIGHT + 'px')
+                d3.select('#bg-img').style('width', '100%')
+                    .style('max-height', MAP_HEIGHT + 'px')
+                var canvas = d3.select('#map-container');
+
+                var defs = canvas.append("defs");
+
+                //Filter for the outside glow
+                var filter = defs.append("filter")
+                    .attr("id", "glow");
+                filter.append("feGaussianBlur")
+                    .attr("stdDeviation", "4")
+                    .attr("result", "coloredBlur");
+                var feMerge = filter.append("feMerge");
+                feMerge.append("feMergeNode")
+                    .attr("in", "coloredBlur");
+                feMerge.append("feMergeNode")
+                    .attr("in", "SourceGraphic");
+
+                _.forEach(mapData, function (cStageDatum) {
+                    if (cStageDatum.stage !== 'summit') {
+                        // get all the cues of this stage
+                        var cueList = _.split(cStageDatum.cue, '/');
+                        var cueStageDatum;
+                        _.forEach(cueList, function (cueStage) {
+                            cueStageDatum = _.find(mapData, { 'stage': _.trim(cueStage) });
+
+                            canvas
+                                .append('line')
+                                .attr("x1", cStageDatum.x * MAP_WIDTH)
+                                .attr("y1", cStageDatum.y * MAP_HEIGHT)
+                                .attr("x2", cueStageDatum.x * MAP_WIDTH)
+                                .attr("y2", cueStageDatum.y * MAP_HEIGHT)
+                                .attr("id", function () {
+                                    return cueStageDatum.stage ? ('line_' + cStageDatum.stage + '_' + cueStageDatum.stage
+                                    ) : ('line_' + cStageDatum.stage)
+                                })
+                                .style("stroke-dasharray", ("6, 6"))
+                                .attr('stroke', '#FAFAFB') //white
+                                .attr('opacity', 0)
+                                .attr('stroke-width', '2px')
+                        });
                     }
-                    return getCircleFillColor(d)
-                })
-                .attr('stroke', 'black')
-                .attr('stroke-width', '2px')
-                .attr('opacity', 0)
-                .attr('class', 'circle')
+                });
 
-            // initialize begin stage
-            d3.select('#circle_begin').attr('opacity', 1).attr('fill', 'white').attr('r', R);
+                canvas
+                    .selectAll('circle')
+                    .data(mapData)
+                    .enter()
+                    .append('circle')
+                    .attr('cx', function (d) {
+                        return d.x * MAP_WIDTH;
+                    })
+                    .attr('cy', function (d) {
+                        return d.y * MAP_HEIGHT;
+                    })
+                    .attr('r', function (d) { return getCircleRadius(d) })
+                    .attr('id', function (d) { return 'circle_' + d.stage })
+                    .attr('fill', function (d) {
+                        if (mode === "preview") {
+                            console.log('preview mode')
+                            return getPreviewCircleFillColor(d)
+                        }
+                        return getCircleFillColor(d)
+                    })
+                    .attr('stroke', 'black')
+                    .attr('stroke-width', '2px')
+                    .attr('opacity', 0)
+                    .attr('class', 'circle')
 
+                // initialize begin stage
+                d3.select('#circle_begin').attr('opacity', 1).attr('fill', 'white').attr('r', R);
+            });
             return $q(function (resolve, rej) {
                 resolve(true)
             })
-        }
-        ,
+        },
+
         getStop: function () {
             return stop_flag;
         },
@@ -508,38 +562,37 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         recordMap: function () {
             mapRecord = mapData;
         },
-        pastPerfConfig: function () {
-            return $q(function (resolve, reject) {
-                $http.get('/allPerformances').then(function (d) {
-                    var performances = _.sortBy(d.data, 'time').reverse();
-                    console.log('getPastPerfs:', performances)
-                    resolve(performances);
-                }), function (err) {
-                    alert('Missing data of past performance ')
-                    reject(err);
-                }
-            })
-        }
-        ,
-        mapConfig: function (d) {
-            return $q(function (resolve, reject) {
-                $http.get('maps').then(function (rawdata) {
-                    mapData = rawdata.data
-                    resolve(mapData);
-                }), function (err) {
-                    reject(err);
-                }
-            })
+        loadData: function () {
+            if (mapData && narrativeData) {
+                return $q(function (res, rej) {
+                    res(true)
+                });
+            }
+            else {
+                return $q(function (res, rej) {
+                    console.log('Load data...')
+                    mapConfig().then(function (mapd) {
+                        console.log('Load mapdata:', mapd);
+                        mapData = mapd;
+                        narrativeConfig().then(function (nd) {
+                            console.log('Narrative data:', nd);
+                            narrativeData = nd;
+                            pastPerfConfig().then(function (ppd) {
+                                pperfData = ppd;
+                                console.log('Past Perf data:', ppd);
+                                if (mapData && narrativeData) {
+                                    res(true);
+                                } else {
+                                    rej(true)
+                                }
+                            })
+                        })
+                    })
+                })
+            }
         },
-        narrativeConfig: function (d) {
-            return $q(function (resolve, reject) {
-                $http.get('/fragments/').then(function (rawdata) {
-                    narrativeData = rawdata.data
-                    resolve(narrativeData);
-                }), function (err) {
-                    reject(err);
-                }
-            })
+        getPPerfData: function () {
+            return pperfData;
         },
         getNarrativeData: function () {
             return narrativeData;

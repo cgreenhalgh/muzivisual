@@ -250,27 +250,6 @@ http.listen(port, function () {
       redisClient.rpush(key, JSON.stringify({ name: 'vStart', data: data, time: (new Date()).getTime() }));
     });
 
-    // var jobs = [];
-    // redisClient.set('KEYS*', function (err, keys) {
-    //     if (err) return console.log(err);
-    //     if(keys){
-    //         async.map(keys, function(key, cb) {
-    //            redisClient.get(key, function (error, value) {
-    //                 if (error) return cb(error);
-    //                 var job = {};
-    //                 job['jobId']=key;
-    //                 job['data']=value;
-    //                 cb(null, job);
-    //             }); 
-    //         }, function (error, results) {
-    //            if (error) return console.log(error);
-    //            console.log(results);
-    //            res.json({data:results});
-    //         });
-    //     }
-    // });
-    // console.log(jobs)
-
     io.to(key).emit('vStart', data);
   });
   // other messages
