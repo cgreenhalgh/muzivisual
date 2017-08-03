@@ -291,9 +291,9 @@ http.listen(port, function () {
     var parts = data.split(':');
     var perf = parts[0];
     var rest = parts.slice(1).join(':');
-    console.log('eevnt in performance ' + perf + ': ' + rest);
+    console.log('event in performance ' + perf + ': ' + rest);
     var key = 'performance:' + perf;
-    redisClient.rpush(key, JSON.stringify({ name: 'vEvent', data: data, time: (new Date()).getTime() }));
+    // don't persist
     io.to(key).emit('vEvent', data);
   });
 

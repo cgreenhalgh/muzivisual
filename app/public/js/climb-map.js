@@ -120,28 +120,40 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
 
   socket.on('vEvent', function (data) {
-    console.log('get content: ' + data)
+    console.log('get content: ' + data);
+    var parts = data.split(':');
+    if (parts.length==0) {
+    	console.log('vEvent with no data');
+    	return;
+    }
     $scope.alert = true;
-    $scope.alertMsg = data.data;
-
+    $scope.alertMsg = parts[1];
+    var delay = parts.length>2 ? Number(parts[2])*1000 : 2000;
+    
     d3Service.d3().then(function (d3) {
       d3.select('.alert')
         .transition()
-        .duration(1000)
+        .duration($scope.alertTimeout ? 100 : 0)
+        .style('opacity', '0')
+        .transition()
+        .duration($scope.alertTimeout ? 200 : 1000)
         .style('opacity', '1')
         .style('z-index', 100)
 
-      $timeout(function () {
+      if ($scope.alertTimeout)
+        $timeout.cancel($scope.alertTimeout);
+      $scope.alertTimeout = $timeout(function () {
+        $scope.alertTimeout = null;
         d3.select('.alert')
           .transition()
           .duration(1000)
           .style('opacity', '0')
           .style('z-index', 0)
-      }, 2000)
+      }, delay)
     })
 
-    if (data.vibration && data.time) {
-      $window.navigator.vibrate(data.time);
+    if (parts.length>3 && parts[3]=='true') {
+      $window.navigator.vibrate([200,200,200,200,200]);
     }
     //visualMapBuilder.openToolTip($scope.cstage, data);
   })
