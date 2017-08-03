@@ -341,7 +341,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         //     d3.select('#circle_3b').style("filter", "url(#glow)")
                         //     d3.select('#circle_p2c').style("filter", "url(#glow)")
                         //     d3.select('#circle_2b').style("filter", "url(#glow)")
-                            
+
 
                         // })
                     }
@@ -457,7 +457,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 pname = ''
             var stageChange = pname + '->' + sname;
             journeyRecord.push(stageChange);
-            passedRecord.push(sname);
+
+            if (!_.includes(passedRecord, sname)) {
+                passedRecord.push(sname);
+            }
+
 
             console.log('passedRecord:', passedRecord)
             console.log('Journey Record: ' + journeyRecord);
@@ -506,10 +510,12 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         pastPerfConfig: function () {
             return $q(function (resolve, reject) {
-                $http.get('/allPerformances').then(function (data) {
-                    var performances = _.sortBy(data.data, 'time').reverse();
+                $http.get('/allPerformances').then(function (d) {
+                    var performances = _.sortBy(d.data, 'time').reverse();
+                    console.log('getPastPerfs:', performances)
                     resolve(performances);
                 }), function (err) {
+                    alert('Missing data of past performance ')
                     reject(err);
                 }
             })

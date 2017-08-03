@@ -67,6 +67,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.alertMsg = 'The challenge was performed successfully'
   $scope.prePerf = true;
   $scope.showLeftArrow = true;
+  $scope.existPmap = false;
 
   // d3Service.d3().then(function (d3) {
   //   d3.select('.alert')
@@ -195,14 +196,14 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       } else if (op == 0.95) {
         $scope.mapIconColor = 'white'
         d3.select(d).transition().duration(400).attr('opacity', 0);
-      }else{
+      } else {
         d3.select(d).transition().duration(400).attr('opacity', 1);
       }
-   
-      if (op==1 && glow=='none') {
+
+      if (op == 1 && glow == 'none') {
         d3.select(d)
           .style("filter", "url(#glow)");
-      }else if(glow){
+      } else if (glow) {
         d3.select(d)
           .style("filter", "");
       }
@@ -212,6 +213,13 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   function loadPastPerf(index) {
     if (!$scope.pastPerfs) {
       visualMapBuilder.pastPerfConfig().then(function (data) {
+
+        if (!data) {
+          $scope.existPmap = false;
+          console.log("No past performance")
+          return;
+        }
+
         console.log(data)
         $scope.pastPerfs = data;
         getPastPerfInfo(index);

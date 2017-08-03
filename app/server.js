@@ -101,9 +101,29 @@ app.get('/allPerformances/', function (req, res) {
       return;
     }
   });
-  fs.readFile(__dirname + '/performances.json', function (err, data) {
+  fs.readFile(__dirname + '/public/config/performances.json', function (err, perfData) {
+    var data = [];
     if (err) throw err;
-    res.set('Content-Type', 'application/json').send(data);
+    var pperf = JSON.parse(perfData);
+    fs.readFile(__dirname + '/public/config/performances_metadata.json',
+      // get configrations from two files
+      function (err, perfMeta) {
+        if (err) throw err;
+        var pperfMeta = JSON.parse(perfMeta);
+        var ppKeys = _.keys(pperf);
+        _.forEach(ppKeys, function (ppKey) {
+          var obj1 = _.get(pperfMeta, ppKey);
+          var obj2 = _.get(pperf, ppKey);
+          var newObj = _.assign(obj1, obj2);
+          newObj.time = JSON.parse(newObj.value[0]).time;
+         // _.concat(data,newObj);
+          data.push(newObj);
+          //console.log("New Object: ", );
+        })
+        //console.log('get pperf data', data)
+        res.set('Content-Type', 'application/json').send(data);
+      });
+
   });
 });
 
@@ -207,9 +227,9 @@ function processData(data, res) {
 var port = process.env.PORT || 8000;
 http.listen(port, function () {
   console.log('Visual listening on port ' + port + '!');
-  logging.log('server','http.listen',{port:port},logging.LEVEL_INFO);
+  logging.log('server', 'http.listen', { port: port }, logging.LEVEL_INFO);
 
-  var serverSocket = socketClient('http://localhost:'+port);
+  var serverSocket = socketClient('http://localhost:' + port);
   serverSocket.emit('serverSocket');
 
   serverSocket.on('vStart', function (data) {
@@ -263,7 +283,7 @@ http.listen(port, function () {
     redisClient.rpush(key, JSON.stringify({ name: 'vStageChange', data: data, time: (new Date()).getTime() }));
     io.to(key).emit('vStageChange', data);
   });
-  
+
   serverSocket.on('vEvent', function (data) {
     var parts = data.split(':');
     var perf = parts[0];
@@ -273,7 +293,7 @@ http.listen(port, function () {
     redisClient.rpush(key, JSON.stringify({ name: 'vEvent', data: data, time: (new Date()).getTime() }));
     io.to(key).emit('vEvent', data);
   });
-  
+
   serverSocket.on('vStop', function (data) {
     if (!data) {
       return;
