@@ -11,24 +11,24 @@
     <d3-map></d3-map>
   </div>
 
-  <div ng-show="!stop" id="fragment">
+  <div ng-show="performing" id="fragment">
     <p>
       <h1 id="narrative-title">{{title}}</h1>
     </p>
-    <p ng-show="!stop" id="narrative">{{narrative}}</p>
+    <p ng-show="performing" id="narrative">{{narrative}}</p>
     <!--<p>{{narrativeData}}</p>-->
   </div>
 
-  <div ng-show="!preview" class="map-title-container">
+  <div class="map-title-container">
     <!-- <span style="color:lightgray; font-size:14px;padding-top:2px" ng-style="{opacity: pastCounter? 1:0}">{{mapIndicator}}</span> -->
     <div style="display:inline-block">
-      <span ng-show="pastCounter" class="pperf-indicator">P</span>
+      <span ng-show="pastCounter && !preview" class="pperf-indicator">P</span>
       <h1 class="map-title">{{mapTitle}}</h1>
     </div>
     <h4 style="margin-top:0px">{{performer}} in {{location}}</h4>
   </div>
 
-  <div ng-show="!preview && (prePerf && pastCounter)" style="margin-top:-40%">
+  <div ng-show="!preview && !performing && pastCounter" style="margin-top:-40%">
     <div style="margin-bottom:20px; color:#FAFAFB">
       <h1>Journey</h1>
     </div>
@@ -36,7 +36,6 @@
       <h3> {{j.stageName}} </h3>
       <div style="display:inline-block;margin-top:20px">
         <div class="narrative-content">{{j.narrative}} </div>
-        <!-- <div ng-if="j.stageName!=='Summit'" style="float:left;display:block; width:10%; overflow:hidden;font-size:2em; "><b>|</b></div>  -->
       </div>
     </div>
     <div style='height:100px;width:100%'></div>
@@ -48,11 +47,13 @@
   <div class="black-bkg"></div>
   <h1>{{backBtnLink}}</h1>
   <div>
-    <div ng-show="showLeftArrow && existPmap" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
+    <div ng-show="!preview && (showLeftArrow && existPmap)" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
     <div ng-show='pastCounter && pastCounter!=100' class='map-right'><span class='glyphicon glyphicon-menu-right' ng-click="getNextPerf()"></span></div>
-    <div ng-show='!pastCounter' class='map-right'><span class='glyphicon glyphicon-picture' ng-style="{color: mapIconColor}" ng-click="preview()"></span></div>
+    <div ng-show='!pastCounter || preview' class='map-right'><span class='glyphicon glyphicon-picture' style="color: #1D8DEE" ng-click="previewBack()"></span></div>
   </div>
 
-  <div class="alert alert-success" role="alert" style="opacity:0">
+
+  
+  <!-- <div class="alert alert-success" role="alert" style="opacity:0">
     <span>{{alertMsg}}</span>
-  </div>
+  </div> -->

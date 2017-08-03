@@ -8,11 +8,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     var mapData;
     var narrativeData;
     var pperfData = null; // pperf does not exist
-    var stop_flag;
     var journeyRecord = [];
     var passedRecord = [];
     var lastMapRecorder = [];
     var performanceid;
+    var performing = false;
 
     function pastPerfConfig() {
         return $q(function (resolve, reject) {
@@ -67,9 +67,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function getCircleFillColor(d) { // check if its a path or a stage 
-        if (stop_flag) {
-            return;
-        }
+        // if (stop_flag) {
+        //     return;
+        // }
 
         if (d.state === 'rev_succ') {
             return 'orange'
@@ -127,9 +127,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function updateMapStage(stage, toState, delay) {
-        if (stop_flag) {
-            return;
-        }
+        // if (stop_flag) {
+        //     return;
+        // }
 
         _.find(mapData, { 'stage': stage }).state = toState;
 
@@ -233,6 +233,12 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             }
             return performanceid;
         },
+        getPerfStatus: function () {
+            return performing;
+        },
+        setPerfStatus: function (d) {
+            performing = d;
+        },
         getPastPerf: function (index) {
             return pperfData[index - 1];
         },
@@ -247,20 +253,21 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             })
         },
         updateMap: function (cstage, pstage) {
-            if (stop_flag) {
-                return;
-            }
+            // if (stop_flag) {
+            //     return;
+            // }
 
             console.log(cstage, pstage);
             var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
 
-            // active new path
-            cs = _.find(mapData, { 'stage': cstage });
-            var cname = cs.name;
-            updateMapStage(cstage, 'active', delaybase)
-
-            // turn the previous active stage into past -  succ / fail
             if (pstage) {
+                // active new path
+                cs = _.find(mapData, { 'stage': cstage });
+                var cname = cs.name;
+                updateMapStage(cstage, 'active', delaybase)
+
+                // turn the previous active stage into past -  succ / fail
+
                 ps = _.find(mapData, { 'stage': pstage });
                 updateMapStage(pstage, 'rev_succ', 0)
 
@@ -276,6 +283,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         updateMapStage(rs.stage, 'missed', delaybase + 1)
                     });
                 }
+            } else {
+                // summit case
+                ps = _.find(mapData, { 'stage': cstage });
+                updateMapStage(cstage, 'rev_succ', 0)
+                return;
             }
 
             // reveal new stages
@@ -345,10 +357,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         drawPastMap: function (msgs, perfIndex) {
             var pjourney = [];
-
-            console.log('This is the performance index: -', perfIndex)
-
-            console.log('draw new past')
             var narrative = '';
             var name = '';
             _.forEach(msgs, function (m) {
@@ -396,18 +404,25 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             return pjourney;
         },
         drawCurrentMap: function (stages) {
-            var records;
-            if(passedRecord.length>0){
-                records = passedRecord;
-            }else{
-                records = stages;
-            }
             var cid;
+
+            var i = 0;
+            var lid;
+            var lids = [];
+            while (i < stages.length) {
+                lid = '#line_' + stages[i] + '_' + stages[i + 1];
+                i++;
+                lids.push(lid)
+            }
+
             d3Service.d3().then(function () {
-                _.forEach(records, function (stage) {
-                    console.log('draw current stage:', stage)
+                _.forEach(stages, function (stage) {
                     cid = '#circle_' + stage;
                     d3.select(cid).transition().duration(400).attr('opacity', 1).style('filter', "url(#glow)").attr('fill', 'orange').style('z-index', 200)
+                })
+
+                _.forEach(lids, function (lid) {
+                    d3.select(lid).transition().duration(200).attr('opacity', 1).style('filter', "url(#glow)").attr('stroke', 'orange').style('z-index', 400).style('stroke-dasharray', ("0", "0"))
                 })
             })
         },
@@ -493,34 +508,29 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 resolve(true)
             })
         },
-
-        getStop: function () {
-            return stop_flag;
-        },
-        setStop: function (bool) {
-            stop_flag = bool;
-        },
         startPerformMode: function (sname, pname) {  // cs
-            if (stop_flag) {
-                return;
-            }
+            // if (stop_flag) {
+            //     return;
+            // // }
+            // passedRecord = [];
+            // journeyRecord = [];
 
             var stageDatum = _.find(mapData, { 'stage': sname })
 
             if (pname === null)
                 pname = ''
             var stageChange = pname + '->' + sname;
-            journeyRecord.push(stageChange);
+
+            if (!_.includes(journeyRecord, stageChange)) {
+                journeyRecord.push(stageChange);
+                console.log('Journey Record: ' + journeyRecord);
+            }
 
             if (!_.includes(passedRecord, sname)) {
                 passedRecord.push(sname);
+                console.log('passedRecord:', passedRecord)
             }
 
-
-            console.log('passedRecord:', passedRecord)
-            console.log('Journey Record: ' + journeyRecord);
-
-            console.log('current stage name ', sname)
             if (sname === 'summit') {
                 var delay = INTERVAL * (delaybase + 3);
             } else {
@@ -528,32 +538,30 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             }
 
             $timeout(function () {
-                if (!stop_flag) {
-                    d3Service.d3().then(function (d3) {
-                        d3.select('#circle_' + sname)
-                            .transition()
-                            .duration(200)
-                            .attr('fill', function () {
+                d3Service.d3().then(function (d3) {
+                    d3.select('#circle_' + sname)
+                        .transition()
+                        .duration(200)
+                        .attr('fill', function () {
+                            return getCircleFillColor(stageDatum)
+                        })
+                        .transition()
+                        .duration(200)
+                        .attr('fill', function () {
+                            if (stageDatum.state === 'active') {
+                                return 'red'
+                            } else {
                                 return getCircleFillColor(stageDatum)
-                            })
-                            .transition()
-                            .duration(200)
-                            .attr('fill', function () {
-                                if (stageDatum.state === 'active') {
-                                    return 'red'
-                                } else {
-                                    return getCircleFillColor(stageDatum)
-                                }
-                            })
-                    });
-                }
+                            }
+                        })
+                });
             }, delay)
 
             return $q(function (resolve, reject) {
-                if (!stop_flag)
-                    setTimeout(function () {
-                        resolve(true)
-                    }, delay);  // 
+                //if (!stop_flag)
+                setTimeout(function () {
+                    resolve(true)
+                }, delay);  // 
             })
         },
         getMapRecord: function () {

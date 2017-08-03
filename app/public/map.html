@@ -11,11 +11,11 @@
     <d3-map></d3-map>
   </div>
 
-  <div ng-show="!stop" id="fragment">
+  <div ng-show="performing" id="fragment">
     <p>
       <h1 id="narrative-title">{{title}}</h1>
     </p>
-    <p ng-show="!stop" id="narrative">{{narrative}}</p>
+    <p ng-show="performing" id="narrative">{{narrative}}</p>
     <!--<p>{{narrativeData}}</p>-->
   </div>
 
@@ -28,7 +28,7 @@
     <h4 style="margin-top:0px">{{performer}} in {{location}}</h4>
   </div>
 
-  <div ng-show="stop||(prePerf && pastCounter)" style="margin-top:-40%">
+  <div ng-show="!performing || prePerf && pastCounter" style="margin-top:-40%">
     <div style="margin-bottom:20px; color:#FAFAFB">
       <h1>Journey</h1>
     </div>

@@ -1,0 +1,3 @@
+{"time":1501793220165,"datetime":"2017-08-03T20:47:00.165Z","level":4,"component":"server","event":"log.start","info":{"logVersion":"1.0","application":"muzivisual","installId":"f3871b60-73a7-11e7-875f-470acdd35ec5"}}
+{"time":1501793220185,"datetime":"2017-08-03T20:47:00.185Z","level":4,"component":"server","event":"http.listen","info":{"port":8000}}
+{"time":1501793220277,"datetime":"2017-08-03T20:47:00.277Z","level":4,"component":"server","event":"git.commit","info":"67b1787b24608ab39fecb11c6852a927f6d252bc"}

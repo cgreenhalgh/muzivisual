@@ -24,7 +24,7 @@ socket.factory('socket', ['$rootScope', '$timeout', function ($rootScope, $timeo
       var msgs = [];
       for (var i in queue) {
         var item = queue[i];
-        if (item.name == eventName) {
+        if (item.name == eventName && !_.includes(msgs, item.msg)) {
           msgs.push(item.msg);
         }
       }
