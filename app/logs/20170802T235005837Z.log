@@ -1,0 +1,11 @@
+{"time":1501717805844,"datetime":"2017-08-02T23:50:05.844Z","level":4,"component":"server","event":"log.start","info":{"logVersion":"1.0","application":"muzivisual","installId":"f3871b60-73a7-11e7-875f-470acdd35ec5"}}
+{"time":1501717805883,"datetime":"2017-08-02T23:50:05.883Z","level":4,"component":"server","event":"http.listen","info":{"port":8000}}
+{"time":1501717805958,"datetime":"2017-08-02T23:50:05.958Z","level":4,"component":"server","event":"git.commit","info":"696f43f18a563941e0402ad2c26e22d2818bc341"}
+{"time":1501717807375,"datetime":"2017-08-02T23:50:07.375Z","level":4,"component":"loguse","event":"loguse.client.add","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1}}
+{"time":1501717807406,"datetime":"2017-08-02T23:50:07.406Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501717806799}}
+{"time":1501717807410,"datetime":"2017-08-02T23:50:07.410Z","level":4,"component":"loguse:1","event":"loguse.client.view","info":{"userid":1,"clienttime":1501717806800,"path":"/performance/","info":{}}}
+{"time":1501717847108,"datetime":"2017-08-02T23:50:47.108Z","level":4,"component":"loguse:1","event":"loguse.client.hidden","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501717846998,"after":40199}}
+{"time":1501717848203,"datetime":"2017-08-02T23:50:48.203Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501717848096,"after":1098}}
+{"time":1501717849084,"datetime":"2017-08-02T23:50:49.084Z","level":4,"component":"loguse:1","event":"loguse.client.hidden","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501717848976,"after":880}}
+{"time":1501717852908,"datetime":"2017-08-02T23:50:52.908Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501717852802,"after":3826}}
+{"time":1501717854164,"datetime":"2017-08-02T23:50:54.164Z","level":4,"component":"loguse:1","event":"loguse.client.hidden","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501717854058,"after":1256}}

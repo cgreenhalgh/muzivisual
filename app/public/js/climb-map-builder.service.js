@@ -219,8 +219,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     fs = _.find(mapData, { 'stage': s })
                     flist.push(fs);
 
-                    //console.log('update to new: ', s);
-
                     if (!_.includes(passedRecord, fs.stage)) {
                         console.log('reveal new stage:', fs.stage);
                         updateMapStage(fs.stage, 'revealed', delaybase + 4)
@@ -274,38 +272,37 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 })
                 .attr('r', R)
                 .attr('class', 'circle')
-                // .attr('ng-click', function (d) {
-                //     var len = d.visual.length;
-                //     if (len) {
-                //         return d.visual[0];
-                //     }
-                //     return '#';
-                // })
                 .attr('opacity', 0)
                 .attr('stroke', 'orange')
                 .attr('fill', 'orange')
                 .attr('opacity', 1)
         },
         getPastMap: function (msgs, perfIndex) {
-             var journey = [];
+            var journey = [];
+            console.log('This is last map recorder', lastMapRecorder)
             console.log('This is the performance index: -', perfIndex)
+
+            // clean past map
             //cancel last draw if there was
             if (lastMapRecorder.length > 0) {
                 d3Service.d3().then(function (d3) {
-                    console.log('last draw', lastMapRecorder)
                     _.forEach(lastMapRecorder, function (draw) {
                         d3.select(draw.cid).attr('opacity', draw.opacity).attr('fill', draw.fill)
                     })
                     lastMapRecorder = [];
-                    if (perfIndex) {
-                        drawPastPerfMap(msgs);
-                    }
+                    console.log('clean map')
+
+                    drawPastPerfMap(msgs);
+
                 })
             } else {
+
                 drawPastPerfMap(msgs);
+
             }
 
             function drawPastPerfMap(msgs) {
+                console.log('draw new past')
                 var narrative = '';
                 var name = '';
                 _.forEach(msgs, function (m) {
@@ -319,7 +316,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         name = _.find(mapData, { 'stage': narrative.from }).name;
                         narrative.stageName = name;
                         journey.push(narrative);
-                        if(narrative.to === 'summit'){
+                        if (narrative.to === 'summit') {
                             narrative = {}
                             narrative.stageName = 'Summit';
                             journey.push(narrative);
@@ -334,6 +331,19 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                             var cid = '#circle_' + stages[0];
                             recordOneDraw(cid);
                         }
+                    } else {
+                        // var cid = '#circle_' + stages[0];
+                        // d3Service.d3().then(function (d3) {
+                        //     d3.select('#circle_basecamp').style("filter", "url(#glow)")
+                        //     d3.select('#circle_1b').style("filter", "url(#glow)")
+                        //     d3.select('#circle_p2a').style("filter", "url(#glow)")
+                        //     d3.select('#circle_p2b').style("filter", "url(#glow)")
+                        //     d3.select('#circle_3b').style("filter", "url(#glow)")
+                        //     d3.select('#circle_p2c').style("filter", "url(#glow)")
+                        //     d3.select('#circle_2b').style("filter", "url(#glow)")
+
+
+                        // })
                     }
 
                     if (!stages[1]) {
@@ -343,11 +353,11 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     recordOneDraw(cid);
                 });
 
-                d3Service.d3().then(function (d3) {
-                    _.forEach(lastMapRecorder, function (draw) {
-                        d3.select(draw.cid).transition().duration(INTERVAL).attr('opacity', 0.6).attr('fill', '#FAFAFB') //white
-                    })
-                })
+                // d3Service.d3().then(function (d3) {
+                //     _.forEach(lastMapRecorder, function (draw) {
+                //         d3.select(draw.cid).transition().duration(INTERVAL).attr('opacity', 1)
+                //     })
+                // })
 
                 function recordOneDraw(cid) {
                     d3Service.d3().then(function (d3) {
@@ -359,10 +369,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                             "opacity": cop
                         }
                         lastMapRecorder.push(draw)
+                        d3.select(cid).transition().duration(400).attr('opacity', 0.95)
                     })
                 }
-
-                console.log('Get narratives for the past performance: '+ JSON.stringify(journey))
             }
             return journey;
         },
@@ -370,6 +379,8 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             if (stop_flag && mode != "preview") {
                 return;
             }
+
+            //Container for the gradients
             _.forEach(data, function (cStageDatum) {
                 if (cStageDatum.stage !== 'summit') {
                     // get all the cues of this stage
@@ -423,13 +434,17 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
 
             // initialize begin stage
             d3.select('#circle_begin').attr('opacity', 1).attr('fill', 'white').attr('r', R);
+
+            return $q(function (resolve, rej) {
+                resolve(true)
+            })
         }
         ,
         getStop: function () {
             return stop_flag;
         },
-        setStop: function () {
-            stop_flag = true;            //updateMapStage('summit', 'rev_succ', delaybase+1) 
+        setStop: function (bool) {
+            stop_flag = bool;
         },
         startPerformMode: function (sname, pname) {  // cs
             if (stop_flag) {
@@ -442,13 +457,13 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 pname = ''
             var stageChange = pname + '->' + sname;
             journeyRecord.push(stageChange);
-            passedRecord.push(sname);
 
-            //  _.find(mapData, { to: pname }).to = '';
-            // console.log(mapData)
+            if (!_.includes(passedRecord, sname)) {
+                passedRecord.push(sname);
+            }
+
 
             console.log('passedRecord:', passedRecord)
-
             console.log('Journey Record: ' + journeyRecord);
 
             console.log('current stage name ', sname)
@@ -495,10 +510,12 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         pastPerfConfig: function () {
             return $q(function (resolve, reject) {
-                $http.get('allPerformances').then(function (data) {
-                    var performances = _.sortBy(data.data, 'time').reverse();
+                $http.get('allPerformances').then(function (d) {
+                    var performances = _.sortBy(d.data, 'time').reverse();
+                    console.log('getPastPerfs:', performances)
                     resolve(performances);
                 }), function (err) {
+                    alert('Missing data of past performance ')
                     reject(err);
                 }
             })

@@ -1,0 +1,14 @@
+{"time":1501715448463,"datetime":"2017-08-02T23:10:48.463Z","level":4,"component":"server","event":"log.start","info":{"logVersion":"1.0","application":"muzivisual","installId":"f3871b60-73a7-11e7-875f-470acdd35ec5"}}
+{"time":1501715448484,"datetime":"2017-08-02T23:10:48.484Z","level":4,"component":"server","event":"http.listen","info":{"port":8000}}
+{"time":1501715448567,"datetime":"2017-08-02T23:10:48.567Z","level":4,"component":"server","event":"git.commit","info":"696f43f18a563941e0402ad2c26e22d2818bc341"}
+{"time":1501715451057,"datetime":"2017-08-02T23:10:51.057Z","level":4,"component":"loguse:null","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":null,"clienttime":1501715449411,"after":24856}}
+{"time":1501715451702,"datetime":"2017-08-02T23:10:51.702Z","level":4,"component":"loguse:null","event":"loguse.client.hidden","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":null,"clienttime":1501715451607,"after":2196}}
+{"time":1501715452652,"datetime":"2017-08-02T23:10:52.652Z","level":4,"component":"loguse","event":"loguse.client.add","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1}}
+{"time":1501715452660,"datetime":"2017-08-02T23:10:52.660Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501715452324}}
+{"time":1501715452661,"datetime":"2017-08-02T23:10:52.661Z","level":4,"component":"loguse:1","event":"loguse.client.view","info":{"userid":1,"clienttime":1501715452325,"path":"/performance/","info":{}}}
+{"time":1501715457333,"datetime":"2017-08-02T23:10:57.333Z","level":4,"component":"loguse:1","event":"loguse.client.hidden","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501715457236,"after":4912}}
+{"time":1501715472940,"datetime":"2017-08-02T23:11:12.940Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501715472844,"after":15608}}
+{"time":1501715474166,"datetime":"2017-08-02T23:11:14.166Z","level":4,"component":"loguse:1","event":"loguse.client.hidden","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501715474071,"after":1227}}
+{"time":1501715475184,"datetime":"2017-08-02T23:11:15.184Z","level":4,"component":"loguse","event":"loguse.client.add","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":"1"}}
+{"time":1501715475208,"datetime":"2017-08-02T23:11:15.208Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":"1","clienttime":1501715474833}}
+{"time":1501715475209,"datetime":"2017-08-02T23:11:15.209Z","level":4,"component":"loguse:1","event":"loguse.client.view","info":{"userid":"1","clienttime":1501715474835,"path":"/performance/","info":{}}}

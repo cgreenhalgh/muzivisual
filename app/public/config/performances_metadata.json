@@ -1,0 +1,20 @@
+{
+    "performance:9333e7a2-16a9-4352-a45a-f6f42d848cde": {
+        "title": "June 8 Dress Rehearsal",
+        "performer":"Maria Kallionpää",
+        "location":"Nottingham",
+        "description": "Dress Rehearsal, June 8 2017"
+    },
+    "performance:be418821-436d-41c2-880c-058dffb57d91": {
+        "title": "June 8 Premiere",
+        "performer":"Maria Kallionpää",
+        "location":"Nottingham",
+        "description": "The premiere performance, June 8 2017"
+    },
+    "performance:13a7fa70-ae91-4541-9526-fd3b332b585d": {
+        "title": "June 8 Second Performance",
+        "performer":"Maria Kallionpää",
+        "location":"Nottingham",
+        "description": "The second performance, June 8 2017"
+    }
+}

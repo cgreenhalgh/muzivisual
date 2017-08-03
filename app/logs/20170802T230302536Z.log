@@ -1,0 +1,6 @@
+{"time":1501714982541,"datetime":"2017-08-02T23:03:02.541Z","level":4,"component":"server","event":"log.start","info":{"logVersion":"1.0","application":"muzivisual","installId":"f3871b60-73a7-11e7-875f-470acdd35ec5"}}
+{"time":1501714982564,"datetime":"2017-08-02T23:03:02.564Z","level":4,"component":"server","event":"http.listen","info":{"port":8000}}
+{"time":1501714982647,"datetime":"2017-08-02T23:03:02.647Z","level":4,"component":"server","event":"git.commit","info":"696f43f18a563941e0402ad2c26e22d2818bc341"}
+{"time":1501714984128,"datetime":"2017-08-02T23:03:04.128Z","level":4,"component":"loguse","event":"loguse.client.add","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1}}
+{"time":1501714984151,"datetime":"2017-08-02T23:03:04.151Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":1,"clienttime":1501714983819}}
+{"time":1501714984153,"datetime":"2017-08-02T23:03:04.153Z","level":4,"component":"loguse:1","event":"loguse.client.view","info":{"userid":1,"clienttime":1501714983820,"path":"/performance/","info":{}}}
