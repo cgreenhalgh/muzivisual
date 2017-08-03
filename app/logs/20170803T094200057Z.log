@@ -28,3 +28,5 @@
 {"time":1501753969732,"datetime":"2017-08-03T09:52:49.732Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":"1","clienttime":1501753969321}}
 {"time":1501753969735,"datetime":"2017-08-03T09:52:49.735Z","level":4,"component":"loguse:1","event":"loguse.client.view","info":{"userid":"1","clienttime":1501753969322,"path":"/performance/","info":{}}}
 {"time":1501753976962,"datetime":"2017-08-03T09:52:56.962Z","level":4,"component":"loguse:1","event":"loguse.client.hidden","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":"1","clienttime":1501753976895,"after":7574}}
+{"time":1501754091924,"datetime":"2017-08-03T09:54:51.924Z","level":4,"component":"loguse:1","event":"loguse.client.visible","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":"1","clienttime":1501754091856,"after":114961}}
+{"time":1501754093704,"datetime":"2017-08-03T09:54:53.704Z","level":4,"component":"loguse:1","event":"loguse.client.hidden","info":{"clientid":"3d8acb40-737a-11e7-aab6-5bbd2ded9f8b","userid":"1","clienttime":1501754093635,"after":1779}}

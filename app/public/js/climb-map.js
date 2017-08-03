@@ -63,7 +63,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.performer = 'Maria'
   $scope.pastPerfs = '';
   $scope.pastCounter = 0;
-  $scope.alert = true;
   $scope.alertMsg = 'The challenge was performed successfully'
   $scope.prePerf = true;
   $scope.showLeftArrow = true;
@@ -120,28 +119,31 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
 
   socket.on('vEvent', function (data) {
+    // format: perfid:msg:time:bool
     console.log('get content: ' + data)
-    $scope.alert = true;
-    $scope.alertMsg = data.data;
+    var splitedData = _.split(data, ':');
+    $scope.alertMsg = splitedData[1];
+    var alertTime = parseInt(splitedData[2])*1000;
+    var vib = splitedData[3];
 
     d3Service.d3().then(function (d3) {
       d3.select('.alert')
         .transition()
-        .duration(1000)
+        .duration(500)
         .style('opacity', '1')
         .style('z-index', 100)
 
       $timeout(function () {
         d3.select('.alert')
           .transition()
-          .duration(1000)
+          .duration(500)
           .style('opacity', '0')
           .style('z-index', 0)
-      }, 2000)
+      }, alertTime)
     })
 
-    if (data.vibration && data.time) {
-      $window.navigator.vibrate(data.time);
+    if (vib) {
+      $window.navigator.vibrate(1000);
     }
     //visualMapBuilder.openToolTip($scope.cstage, data);
   })
