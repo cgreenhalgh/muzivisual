@@ -36,6 +36,18 @@ MuziVisual: localhost:8000
 
 Note, to run behind a reverse proxy on a non-root path change the `base` href in `app/public/index.html`.
 
+## History
+
+Past performance data is read from `app/performances.json` which is based on a dump from redis of performance-related visual events.
+
+Specifically it is a JSON object with fields that are the redis key of the performance, i.e. `performance:PERFID` and each value is a JSON object with fields:
+- `type`: `list` - from redis
+- `performer`: name of performer
+- `location`: name of location
+- `time`: UNIX time ms (first event time), string?
+- `title`: title of performance
+- `value`: array of visual events, each a string containing a JSON-encoded object with `name` (e.g. 'vStart'), `data` (event data string, starts with PERFID), `time` (UNIX time ms)
+
 # Logs
 
 Writes client usage logs to `app/logs`. Log file name is time created, i.e. time server (re)started.
