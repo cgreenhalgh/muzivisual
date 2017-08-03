@@ -67,10 +67,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function getCircleFillColor(d) { // check if its a path or a stage 
-        // if (stop_flag) {
-        //     return;
-        // }
-
         if (d.state === 'rev_succ') {
             return 'orange'
         }
@@ -127,10 +123,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function updateMapStage(stage, toState, delay) {
-        // if (stop_flag) {
-        //     return;
-        // }
-
         _.find(mapData, { 'stage': stage }).state = toState;
 
         var data = _.find(mapData, { 'stage': stage });
@@ -151,12 +143,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     }
 
     function updateMapLine(p, c, fss, pcstages, delay) {
-
-        // if (_.includes(passedRecord, c.stage)) {
-        //     console.log('stage already visited', p.stage)
-        //     return;
-        // }
-
         console.log(p.stage, c.stage)
         var cstage = c.stage;
         var cs = c.state;
@@ -253,9 +239,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             })
         },
         updateMap: function (cstage, pstage) {
-            // if (stop_flag) {
-            //     return;
-            // }
 
             console.log(cstage, pstage);
             var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
@@ -377,7 +360,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     }
                 }
 
-                //if (!_.includes(passedRecord, stages[0])) {
                 var cid;
                 if (msg.name === "vStop") {
                     cid = "#circle_summit"
@@ -386,7 +368,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     cid = '#circle_' + stages[0];
                     draw(cid);
                 }
-                // }
 
                 if (!stages[1]) {
                     return;
@@ -509,11 +490,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             })
         },
         startPerformMode: function (sname, pname) {  // cs
-            // if (stop_flag) {
-            //     return;
-            // // }
-            // passedRecord = [];
-            // journeyRecord = [];
 
             var stageDatum = _.find(mapData, { 'stage': sname })
 
@@ -558,7 +534,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             }, delay)
 
             return $q(function (resolve, reject) {
-                //if (!stop_flag)
                 setTimeout(function () {
                     resolve(true)
                 }, delay);  // 

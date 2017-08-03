@@ -27,12 +27,6 @@ map.config(['$routeProvider', function ($routeProvider) {
     .otherwise({
       redirectTo: '/',
     });
-
-
-  // $locationProvider.html5Mode({
-  //   enabled: true,
-  //   requireBase: false
-  // });
 }])
 
 map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '$location', 'visualMapBuilder', '$compile', function (d3Service, $http, $window, $timeout, socket, $location, visualMapBuilder, $compile) {
@@ -123,9 +117,6 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   $scope.narrativeData = visualMapBuilder.getNarrativeData();
   $scope.pperfData = visualMapBuilder.getPPerfData();
 
-  // if ($scope.mapData || $scope.narrativeData || $scope.pperfData) {
-  //   $location.path('/').search({ 'p': visualMapBuilder.getPerfId() });
-  // }
 
   $scope.showLeftArrow = true;
   $scope.existPmap = true;
@@ -230,7 +221,6 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
     }
   }
 
-  // var narrativeData = _.find($scope.narrativeData, { "stageChange": stageChange });
 
   var plength = visualMapBuilder.getPassedRecord().length
   $scope.cstage = visualMapBuilder.getPassedRecord()[plength - 1]
@@ -240,9 +230,6 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   if (stageData) {
     $scope.title = stageData.name;
   }
-  // $scope.narrative = narrativeData ? narrativeData.narrative : '';
-
-
 }])
 
 
@@ -315,7 +302,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   // })
 
   var performanceid = $location.search()['p'];
-
   visualMapBuilder.setPerfId(performanceid);
 
   if (performanceid) {
@@ -325,12 +311,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     alert('Sorry, this URL is wrong! (there is no performance specified)');
     return;
   }
-
-
-  // if ($scope.prePerf && $scope.mapData) {
-  //   visualMapBuilder.initMap();
-  // }
-
 
   socket.on('vEvent', function (data) {
     // format: perfid:msg:time:bool
@@ -359,7 +339,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     if (vib) {
       $window.navigator.vibrate(1000);
     }
-    //visualMapBuilder.openToolTip($scope.cstage, data);
   })
 
 
@@ -389,7 +368,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       'i': ++$scope.pastCounter,
       'p': performanceid
     });
-    return;
   }
 
   $scope.preview = function () {
@@ -397,7 +375,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
       'i': 100,  // special for preview
       'p': performanceid
     });
-    return;
   }
 
 
@@ -439,7 +416,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     visualMapBuilder.updateMap('summit', '');
     $scope.journey = visualMapBuilder.getJourney();
   });
-  //}
 
   $scope.$watch('cstage', function (ns, os) {
     console.log('stage change: ' + os + '->' + ns);
