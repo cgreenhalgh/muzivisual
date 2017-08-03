@@ -51,17 +51,17 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
   }
 }])
 
-map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'visualMapBuilder', function ($scope, socket, d3Service, $location, visualMapBuilder) {
+map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'visualMapBuilder', '$window', function ($scope, socket, d3Service, $location, visualMapBuilder, $window) {
   console.log('pastPerfCtrl');
 
   var getPassedRecord = [];
 
   var index = parseInt($location.search()['i']);
-  var pid = $location.search()['p']
+  var performanceid = $location.search()['p']
 
-  console.log('pid:', pid)
+  console.log('performanceid:', performanceid)
 
-  socket.emit('client', pid);
+  socket.emit('client', performanceid);
 
   socket.on('vStart', function (data) {
     console.log('get start in pastperf:', _.split(data, ':')[1])
@@ -71,7 +71,7 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   socket.on('vStageChange', function (data) {
     var sc = _.split(data, ':');
     var sts = _.split(sc, '->')
-     console.log('get start in pastperf:', sts[1])
+    console.log('get start in pastperf:', sts[1])
     getPassedRecord.push(sts[1]);
   })
 
@@ -80,6 +80,10 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
     var sts = _.split(sc, '->')
     getPassedRecord.push(sts[1]);
   })
+
+  $scope.goToMenu = function () {
+    $window.location.href = "http://localhost:8000/#!/?p=" + performanceid;
+  }
 
   if (!visualMapBuilder.getPassedRecord().length) {
     $scope.prePerf = true;
@@ -179,16 +183,16 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
 
 
   function drawCurrentMap() {
-      visualMapBuilder.drawCurrentMap(getPassedRecord);  
+    visualMapBuilder.drawCurrentMap(getPassedRecord);
   }
 
   $scope.getLastPerf = function () {
     if (index == 100) {
-      $location.path('/performance/').search({ 'p': pid });
+      $location.path('/performance/').search({ 'p': performanceid });
     } else {
       $location.path('/performance/past/').search({
         'i': ++index
-        , 'p': pid
+        , 'p': performanceid
       });
     }
   }
@@ -196,10 +200,10 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   $scope.getNextPerf = function () {
     if (index == 1 || index == 100) {
       console.log("get next in pastCtrl")
-      $location.path('/performance/').search({ 'p': pid });
+      $location.path('/performance/').search({ 'p': performanceid });
     } else {
       $location.path('/performance/past/').search({
-        'i': --index, 'p': pid
+        'i': --index, 'p': performanceid
       });
     }
   }
