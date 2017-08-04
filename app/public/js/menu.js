@@ -219,7 +219,6 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
                 .style('max-height', MAP_HEIGHT + 'px')
             var canvas = d3.select('#map-container');
 
-            visualMapBuilder.setStop(true);
             visualMapBuilder.initMap(canvas, $scope.mapData, 'preview');
 
             d3.selectAll('line').attr('opacity', '1').attr('stroke', '#FAFAFB') //white
@@ -231,7 +230,6 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
                 })
             var circles = document.getElementsByClassName('circle');
             $compile(angular.element(circles))($scope);
-            visualMapBuilder.setStop(false);
         });
     }
 }])
