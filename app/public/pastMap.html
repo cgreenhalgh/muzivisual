@@ -11,22 +11,23 @@
     <d3-map></d3-map>
   </div>
 
+<!-- 
   <div ng-show="performing" id="fragment">
     <p>
       <h1 id="narrative-title">{{title}}</h1>
     </p>
     <p ng-show="performing" id="narrative">{{narrative}}</p>
   </div>
-
+-->
   <div class="map-title-container">
     <div style="display:inline-block">
-      <span ng-show="pastCounter && !preview" class="pperf-indicator">P</span>
+      <!-- <span ng-show="pastCounter && !preview" class="pperf-indicator">P</span> -->
       <h1 class="map-title">{{mapTitle}}</h1>
     </div>
     <h4 style="margin-top:0px">{{performer}} in {{location}}</h4>
   </div>
 
-  <div ng-show="!preview && !performing && pastCounter" style="margin-top:-40%">
+  <div ng-show="!preview && pastCounter" style="margin-top:-40%">
     <div style="margin-bottom:20px; color:#FAFAFB">
       <h1>Journey</h1>
     </div>
@@ -46,6 +47,7 @@
   <h1>{{backBtnLink}}</h1>
   <div>
     <div ng-show="!preview && (showLeftArrow && existPmap)" class='map-left' ng-click="getLastPerf()"><span class='glyphicon glyphicon-menu-left'></span></div>
+    <div ng-show="preview" class='map-left' ng-click="previewBack()"><span class='glyphicon glyphicon-menu-left'></span></div>
     <div ng-show='pastCounter && pastCounter!=100' class='map-right'><span class='glyphicon glyphicon-menu-right' ng-click="getNextPerf()"></span></div>
     <div ng-show='!pastCounter || preview' class='map-right'><span class='glyphicon glyphicon-picture' style="color: #1D8DEE" ng-click="previewBack()"></span></div>
   </div>

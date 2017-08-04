@@ -13,7 +13,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     var lastMapRecorder = [];
     var performanceid;
     var performing = false;
-
+    
     function pastPerfConfig() {
         return $q(function (resolve, reject) {
             $http.get('allPerformances').then(function (d) {
@@ -343,13 +343,16 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             var pjourney = [];
             var narrative = '';
             var name = '';
+            var visited = [];
             _.forEach(msgs, function (m) {
                 var msg = JSON.parse(m)
 
                 var msgData = _.split(msg.data, ':');
                 var stages = _.split(msgData[1], '->')
                 narrative = _.find(narrativeData, { 'stageChange': msgData[1] })
-
+                if (stages.length>1)
+                	visited.push(stages[0]);
+                
                 if (narrative) {
                     name = _.find(mapData, { 'stage': narrative.from }).name;
                     narrative.stageName = name;
@@ -363,6 +366,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
 
                 var cid;
                 if (msg.name === "vStop") {
+                	visited.push('summit');
                     cid = "#circle_summit"
                     draw(cid);
                 } else if (stages[0]) {
@@ -376,13 +380,23 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 var lid = '#line_' + stages[0] + '_' + stages[1];
                 draw(lid);
             });
-
+            //console.log('visited:',visited);
+            for (var s in mapData) {
+            	var data = mapData[s];
+            	if (visited.indexOf(data.stage)<0) {
+            		hide('#circle_'+data.stage);
+            	}
+            }
             function draw(cid) {
                 d3Service.d3().then(function (d3) {
-                    d3.select(cid).transition().duration(400).attr('opacity', 1)
+                    d3.select(cid).transition().duration(400).attr('opacity', 1)//.attr('fill', '#000')
                 })
             }
-
+            function hide(cid) {
+            	d3Service.d3().then(function (d3) {
+            		d3.select(cid).attr('fill','#000')
+            	});
+            }
             return pjourney;
         },
         drawCurrentMap: function (stages) {
@@ -400,7 +414,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             d3Service.d3().then(function () {
                 _.forEach(stages, function (stage) {
                     cid = '#circle_' + stage;
-                    d3.select(cid).transition().duration(400).attr('opacity', 1).style('filter', "url(#glow)").attr('fill', 'orange').style('z-index', 200)
+                    d3.select(cid).transition().duration(400).attr('opacity', 1).style('filter', "url(#glow)").attr('stroke', 'orange').style('z-index', 200)
                 })
 
                 _.forEach(lids, function (lid) {
@@ -408,9 +422,9 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 })
             })
         },
-        initMap: function () {
+        initMap: function (preview) {
             console.log("initmap")
-            var mode = 'perf'
+            var mode = preview ? 'preview' : 'perf'
             d3Service.d3().then(function (d3) {
                 d3.select('#visualImg').style('width', '100%')
                     .style('max-height', MAP_HEIGHT + 'px')
@@ -472,8 +486,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                     .attr('r', function (d) { return getCircleRadius(d) })
                     .attr('id', function (d) { return 'circle_' + d.stage })
                     .attr('fill', function (d) {
-                        if (mode === "preview") {
-                            console.log('preview mode')
+                    	if (mode === "preview") {
                             return getPreviewCircleFillColor(d)
                         }
                         return getCircleFillColor(d)
@@ -491,7 +504,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             })
         },
         startPerformMode: function (sname, pname) {  // cs
-
+        	console.log('startPerformMode('+sname+','+pname+')');
             var stageDatum = _.find(mapData, { 'stage': sname })
 
             if (pname === null)
@@ -514,14 +527,18 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                 var delay = INTERVAL * (delaybase + 6);
             }
 
-            $timeout(function () {
-                d3Service.d3().then(function (d3) {
-                    d3.select('#circle_' + sname)
-                        .transition()
-                        .duration(200)
-                        .attr('fill', function () {
-                            return getCircleFillColor(stageDatum)
-                        })
+            var state = stageDatum.state;
+
+            d3Service.d3().then(function (d3) {
+                d3.select('#circle_' + sname)
+                    .transition()
+                    .delay(delaybase * INTERVAL)
+                    .duration(INTERVAL)
+                    .attr('fill', function () { return getCircleFillColor(stageDatum) })
+                    .attr('r', function () { return getCircleRadius(stageDatum) })
+                    .attr('opacity', function () { return getStageOpacity(state) })
+
+                        //.transition().duration(400).attr('opacity', 1).style('filter', "url(#glow)").attr('fill', 'orange').style('z-index', 200)
                         .transition()
                         .duration(200)
                         .attr('fill', function () {
@@ -531,8 +548,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                                 return getCircleFillColor(stageDatum)
                             }
                         })
-                });
-            }, delay)
+            });
 
             return $q(function (resolve, reject) {
                 setTimeout(function () {

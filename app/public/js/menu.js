@@ -25,19 +25,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
     $scope.performing = false;
     $scope.archiveHighlight = false;
 
-    var params = $location.search();
-    var performanceid = params['p'] === undefined ? '' : params['p'];
-
-    console.log('performanceid: ', performanceid)
-
-    if (performanceid) {
-        $scope.goToMenu = function () { $window.location.href = 'http://localhost:8000/#!/?p=' + performanceid; }
-        socket.emit('client', performanceid);
-    } else {
-        console.log('no performance id!');
-        alert('Sorry, this URL is wrong! (there is no performance specified)');
-        return;
-    }
+    $scope.goToMenu = function () { $location.path('/'); };
 
     socket.on('vStart', function () {
         $scope.performing = true;
@@ -180,12 +168,7 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
 
     var tempRecord = {};
 
-    var performanceid = $location.search()['p'];
     $scope.goToMenu = function () { $location.path('/'); }
-    if (!performanceid) {
-        console.log('no performance id!');
-        alert('Sorry, this URL is wrong! (there is no performance specified)');
-    }
 
     $scope.showStageTitle = function (name, stage) {
         $scope.title = name;

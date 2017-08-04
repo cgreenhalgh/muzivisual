@@ -1,7 +1,11 @@
 'use strict'
 
 var socket = angular.module('MuziVisual.socket', []);
-socket.factory('socket', ['$rootScope', '$timeout', function ($rootScope, $timeout) {
+socket.factory('socket', ['$rootScope', '$timeout', '$location', function ($rootScope, $timeout, $location) {
+  var params = $location.search();
+  var performanceid = params['p'] === undefined ? '' : params['p'];
+  console.log('performanceid: ', performanceid);
+  
   var socket = io.connect();  // connect to visual channel 
   var queue = [];
   socket.on('vStart', function (msg) {
@@ -13,6 +17,15 @@ socket.factory('socket', ['$rootScope', '$timeout', function ($rootScope, $timeo
   socket.on('vStageChange', function (msg) {
     queue.push({ name: 'vStageChange', msg: msg });
   });
+  
+  if (performanceid) {
+      socket.emit('client', performanceid);
+  } else {
+      console.log('no performance id!');
+      alert('Sorry, this URL is wrong! (there is no performance specified)');
+      return;
+  }
+
   return {
     on: function (eventName, callback) {
       socket.on(eventName, function () {

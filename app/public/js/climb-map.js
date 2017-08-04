@@ -3,9 +3,9 @@
 'use strict'
 var map = angular.module('MuziVisual.map', ['ngRoute', 'MuziVisual.visualmapbuilder']);
 // used as unit for time delay
-var INTERVAL = 500;
+var INTERVAL = 250;
 var MAP_WIDTH, MAP_HEIGHT;
-var delaybase = 1;
+var delaybase = 0.5;
 
 var ANI_DURATION = 8;
 
@@ -40,7 +40,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
       visualMapBuilder.setMapSize(MAP_WIDTH, MAP_HEIGHT);
 
       console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
-      angular.element(document).find('d3-map').append('<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 '+MAP_WIDTH+' '+MAP_HEIGHT+'" width="100%" height="auto" id="map-container"></svg>')
+      angular.element(document).find('d3-map').append('<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 '+MAP_WIDTH+' '+MAP_HEIGHT+'" id="map-container"></svg>')
     }
   }
 }])
@@ -51,6 +51,7 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   $scope.cpassedRecord = [];
 
   socket.on('vStart', function (data) {
+    console.log('pastPerf '+$location.search()['i']+' vStart');
     visualMapBuilder.setPerfStatus(true);
     $scope.performing = true;
     var d = _.split(data, ':')[1];
@@ -80,16 +81,15 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   var index = parseInt($location.search()['i']);
   var performanceid = $location.search()['p']
 
-  socket.emit('client', performanceid);
   console.log('current passed:', $scope.cpassedRecord)
 
   $scope.goToMenu = function () {
-    $window.location.href = "http://localhost:8000/#!/?p=" + performanceid;
+    $location.path('/');
   }
 
   if (index == 100) {
     $scope.mapTitle = 'Climb!';
-    $scope.performer = "Maria";
+    $scope.performer = "Maria Kallionpää";
     $scope.location = 'London'
   }
 
@@ -110,15 +110,10 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   $scope.pastCounter = index;
   console.log('index', index);
 
-  $scope.mapData = visualMapBuilder.getMapData();
-  $scope.narrativeData = visualMapBuilder.getNarrativeData();
-  $scope.pperfData = visualMapBuilder.getPPerfData();
-
   $scope.showLeftArrow = true;
   $scope.existPmap = true;
 
-  if (!($scope.mapData && $scope.narrativeData)) {
-    visualMapBuilder.loadData().then(function () {
+  visualMapBuilder.loadData().then(function () {
 
       $scope.mapData = visualMapBuilder.getMapData();
       $scope.narrativeData = visualMapBuilder.getNarrativeData();
@@ -126,7 +121,7 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
 
       if (index == 100) {
         $scope.preview = true;
-        visualMapBuilder.initMap().then(function () {
+        visualMapBuilder.initMap(true).then(function () {
           visualMapBuilder.drawPreviewMap()
           drawCurrentMap();
           return;
@@ -140,28 +135,13 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
             return;
           }
           $scope.existPmap = true;
-          visualMapBuilder.initMap().then(function () {
+          visualMapBuilder.initMap(true).then(function () {
             drawPastMap();
             drawCurrentMap();
           })
         }
       }
-    })
-  } else {
-    if (index == 100) {
-      $scope.preview = true;
-      console.log("im in 100 part")
-      visualMapBuilder.initMap().then(function () {
-        visualMapBuilder.drawPreviewMap()
-        drawCurrentMap();
-      })
-    } else {
-      visualMapBuilder.initMap().then(function () {
-        drawPastMap();
-        drawCurrentMap();
-      })
-    }
-  }
+  })
 
 
   function drawPastMap() {
@@ -256,44 +236,40 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.history = false;
   $scope.popWindow = true;
 
-  $scope.mapTitle = "Climb!"
+  $scope.mapTitle = "This Performance"
   $scope.location = "London"
-  $scope.performer = 'Maria'
+  $scope.performer = 'Maria Kallionpää'
   $scope.pastPerfs = '';
-  $scope.pastCounter = 0;
   $scope.alertMsg = 'The challenge was performed successfully'
   $scope.prePerf = true;
   $scope.showLeftArrow = true;
   $scope.existPmap = false;
+  $scope.inited = false;
+  
+  visualMapBuilder.loadData().then(init);
 
-  if (visualMapBuilder.getPPerfData()) {
-    $scope.existPmap = true;
-  }
-
-  $scope.mapData = visualMapBuilder.getMapData();
-  $scope.narrativeData = visualMapBuilder.getNarrativeData();
-
-  if (!($scope.mapData && $scope.narrativeData)) {
-    visualMapBuilder.loadData().then(function () {
-      if (visualMapBuilder.getPPerfData()) {
-        $scope.existPmap = true;
-      }
-      visualMapBuilder.initMap()
-    })
-  } else {
-    visualMapBuilder.initMap()
-
-    if (!$scope.cstage && !$scope.prePerf) {
-      $scope.cstage = 'basecamp'
-    } else {
-      $scope.$watch('prePerf', function (n, o) {
-        if (!n) {
-          $scope.cstage = 'basecamp'
+  function init() {
+    if (!$scope.inited) {
+        console.log('init!');
+        $scope.inited = true;
+        $scope.mapData = visualMapBuilder.getMapData();
+        $scope.narrativeData = visualMapBuilder.getNarrativeData();
+        if (visualMapBuilder.getPPerfData()) {
+          $scope.existPmap = true;
         }
-      })
+        visualMapBuilder.initMap(false);
+     
     }
   }
-
+//  if (!$scope.cstage && !$scope.prePerf) {
+//    $scope.cstage = 'basecamp'
+//  } else {
+//    $scope.$watch('prePerf', function (n, o) {
+//      if (!n) {
+//        $scope.cstage = 'basecamp'
+//      }
+//    })
+//  }
   // d3Service.d3().then(function (d3) {
   //   d3.select('.alert')
   //     .transition()
@@ -312,14 +288,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
   var performanceid = $location.search()['p'];
   visualMapBuilder.setPerfId(performanceid);
-
-  if (performanceid) {
-    socket.emit('client', performanceid);
-  } else {
-    console.log('no performance id!');
-    alert('Sorry, this URL is wrong! (there is no performance specified)');
-    return;
-  }
 
 $scope.alertTimeout = null;
   socket.on('vEvent', function (data) {
@@ -359,30 +327,17 @@ $scope.alertTimeout = null;
 
 
   socket.on('vStart', function () {
+    console.log('mapCtrl vStart');
     $scope.performing = true;
     $scope.prePerf = false;
-    if (!$scope.mapData) {
-      visualMapBuilder.loadData().then(function () {
-        $scope.mapData = visualMapBuilder.getMapData();
-        $scope.narrativeData = visualMapBuilder.getNarrativeData();
-
-        if (visualMapBuilder.getPPerfData()) {
-          $scope.existPmap = true;
-        }
-        visualMapBuilder.initMap()
-        $scope.cstage = 'basecamp'
-      })
-    } else {
-      visualMapBuilder.initMap()
-      $scope.cstage = 'basecamp'
-    }
+    $scope.cstage = 'basecamp'
   })
 
 
   $scope.getLastPerf = function () {
     var path = $location.path();
     $location.path('/performance/past/').search({
-      'i': ++$scope.pastCounter,
+      'i': 1,
       'p': performanceid
     });
   }
@@ -439,24 +394,9 @@ $scope.alertTimeout = null;
     console.log('stage change: ' + os + '->' + ns);
 
     if ($scope.cstage) {
-      visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
-      visualMapBuilder.startPerformMode($scope.cstage, $scope.pstage).then(function (t) {
-        $scope.narrativeData = visualMapBuilder.getNarrativeData();
-        if (!$scope.narrativeData) {
-          visualMapBuilder.narrativeConfig().then(function (data) {
-            console.log('load narrative: ' + JSON.stringify(data));
-            $scope.narrativeData = data;
-          })
-        }
-
-        $scope.mapData = visualMapBuilder.getMapData();
-        if (!$scope.mapData) {
-          visualMapBuilder.mapConfig().then(function (data) {
-            console.log("load map: " + JSON.stringify(data));
-            visualMapBuilder.setMapData(data);
-            $scope.mapData = data;
-          });
-        }
+      visualMapBuilder.loadData().then(function() {
+        init();
+        visualMapBuilder.updateMap($scope.cstage, $scope.pstage);
 
         if ($scope.performing) {
           console.log('performMode on');
@@ -469,6 +409,7 @@ $scope.alertTimeout = null;
             stageChange = '->' + $scope.cstage;
           }
 
+          visualMapBuilder.startPerformMode($scope.cstage, $scope.pstage);
           var narrativeData = _.find($scope.narrativeData, { "stageChange": stageChange });
 
           var stageData = _.find($scope.mapData, { 'stage': $scope.cstage });
@@ -476,18 +417,20 @@ $scope.alertTimeout = null;
           $scope.narrative = narrativeData ? narrativeData.narrative : '';
 
           d3Service.d3().then(function (d3) {
-            d3.select('#title')
+            d3.select('#narrative-title')
+              .style('opacity', '0')
               .transition()
               .duration(INTERVAL)
               .style('opacity', '1')
 
             d3.select('#narrative')
+              .style('opacity', '0')
               .transition()
               .duration(INTERVAL)
               .style('opacity', '1')
           });
         }
-      })
+      });
     }
   });
 
