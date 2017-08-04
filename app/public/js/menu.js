@@ -203,24 +203,18 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
     }
 
     if (!$scope.mapData) {
-        visualMapBuilder.mapConfig().then(function (data) {
-            console.log("LOAD MAP: " + JSON.stringify(data));
-            visualMapBuilder.setMapData(data);
-            $scope.mapData = data;
-            initMap();
+        visualMapBuilder.loadData().then(function () {
+          $scope.mapData = visualMapBuilder.getMapData();
+          initMap();
         })
     } else {
         initMap();
     }
 
     function initMap() {
+      visualMapBuilder.initMap().then(function() {
         d3Service.d3().then(function (d3) {
-            d3.select('#visualImg').style('width', '100%')
-                .style('max-height', MAP_HEIGHT + 'px')
-            var canvas = d3.select('#map-container');
-
-            visualMapBuilder.initMap(canvas, $scope.mapData, 'preview');
-
+            console.log('initMap preview');
             d3.selectAll('line').attr('opacity', '1').attr('stroke', '#FAFAFB') //white
 
             d3.selectAll('circle')
@@ -231,5 +225,6 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
             var circles = document.getElementsByClassName('circle');
             $compile(angular.element(circles))($scope);
         });
+      })
     }
 }])

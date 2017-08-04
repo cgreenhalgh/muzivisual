@@ -16,7 +16,6 @@
         <div class="black-bkg"></div>
     </div>
     <div id="fragment">
-        <p>
-            <h2 id="narrative-title">{{title}}</h2>
-        </p>
+        <h2 id="narrative-title" ng-if="!!title">{{title}}</h2>
+        <p ng-if="!title" class="preview-prompt">Select a stage</p>
     </div>

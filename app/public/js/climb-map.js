@@ -40,7 +40,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
       visualMapBuilder.setMapSize(MAP_WIDTH, MAP_HEIGHT);
 
       console.log("WINDOW: width: " + MAP_WIDTH + "  height: " + MAP_HEIGHT);
-      angular.element(document).find('d3-map').append('<svg width=' + MAP_WIDTH + ' height=' + MAP_HEIGHT + ' id="map-container"></svg>')
+      angular.element(document).find('d3-map').append('<svg preserveAspectRatio="xMidYMid meet" viewBox="0 0 '+MAP_WIDTH+' '+MAP_HEIGHT+'" width="100%" height="auto" id="map-container"></svg>')
     }
   }
 }])
