@@ -171,6 +171,7 @@ menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$htt
     $scope.goToMenu = function () { $location.path('/'); }
 
     $scope.showStageTitle = function (name, stage) {
+    	mpmLoguse.log({event:'selectStage', stage:stage, title:name});
         $scope.title = name;
         d3Service.d3().then(function (d3) {
             if (tempRecord) {

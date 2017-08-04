@@ -45,8 +45,9 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
   }
 }])
 
-map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'visualMapBuilder', '$window', function ($scope, socket, d3Service, $location, visualMapBuilder, $window) {
+map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'visualMapBuilder', '$window', 'mpmLoguse', function ($scope, socket, d3Service, $location, visualMapBuilder, $window, mpmLoguse) {
   console.log('pastPerfCtrl');
+  mpmLoguse.view('/performance/past?i='+$location.search()['i'], {});
 
   $scope.cpassedRecord = [];
 

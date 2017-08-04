@@ -66,6 +66,7 @@ visual.controller('AlertCtrl', ['$scope', 'socket', '$timeout', 'mpmLoguse', 'd3
 		var alertTime = parseInt(splitedData[2]) * 1000;
 		var vib = 'true'==splitedData[3];
 		$scope.vibrate = vib;
+		mpmLoguse.log({event:'alert', message: splitedData[1], duration: alertTime, vibrate: vib});
 
 		d3Service.d3().then(function (d3) {
 			d3.select('.alert')
