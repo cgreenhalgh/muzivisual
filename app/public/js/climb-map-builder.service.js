@@ -233,22 +233,28 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         drawPreviewMap: function () {
             d3Service.d3().then(function (d3) {
-                d3.selectAll('line').attr('opacity', 1)
+                d3.selectAll('line').transition().duration(500).attr('opacity', 1)
 
-                d3.selectAll('circle').attr('opacity', 1)
+                d3.selectAll('circle').transition().duration(500).attr('opacity', 1)
             })
         },
         updateMap: function (cstage, pstage) {
-
             console.log(cstage, pstage);
+
+            if (pstage == 'summit') {
+                updateMapStage(pstage, 'rev_succ', 0);
+                return;
+            }
+
             var ps = 0, cs = 0, fss = 0, fs = 0, psCues = 0, psCuesWithoutCs = 0, revealeds = [], flist = [];
 
-            if (pstage) {
-                // active new path
-                cs = _.find(mapData, { 'stage': cstage });
-                var cname = cs.name;
-                updateMapStage(cstage, 'active', delaybase)
+            // active new path
+            cs = _.find(mapData, { 'stage': cstage });
+            var cname = cs.name;
+            updateMapStage(cstage, 'active', delaybase)
 
+
+            if (pstage) {
                 // turn the previous active stage into past -  succ / fail
 
                 ps = _.find(mapData, { 'stage': pstage });
@@ -266,11 +272,6 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
                         updateMapStage(rs.stage, 'missed', delaybase + 1)
                     });
                 }
-            } else {
-                // summit case
-                ps = _.find(mapData, { 'stage': cstage });
-                updateMapStage(cstage, 'rev_succ', 0)
-                return;
             }
 
             // reveal new stages

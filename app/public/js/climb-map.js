@@ -52,6 +52,7 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
 
   socket.on('vStart', function (data) {
     visualMapBuilder.setPerfStatus(true);
+    $scope.performing = true;
     var d = _.split(data, ':')[1];
     if (!_.includes($scope.cpassedRecord, d)) {
       $scope.cpassedRecord.push(d);
@@ -72,18 +73,15 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   })
 
   socket.on('vStop', function (data) {
+    $scope.performing = false;
     visualMapBuilder.setPerfStatus(false);
   })
 
   var index = parseInt($location.search()['i']);
   var performanceid = $location.search()['p']
 
-  console.log('performanceid:', performanceid)
   socket.emit('client', performanceid);
-
   console.log('current passed:', $scope.cpassedRecord)
-
-  $scope.performing = visualMapBuilder.getPerfStatus();
 
   $scope.goToMenu = function () {
     $window.location.href = "http://localhost:8000/#!/?p=" + performanceid;
@@ -94,7 +92,6 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
     $scope.performer = "Maria";
     $scope.location = 'London'
   }
-
 
   $scope.previewBack = function () {
     if (index == 100) {
@@ -116,7 +113,6 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   $scope.mapData = visualMapBuilder.getMapData();
   $scope.narrativeData = visualMapBuilder.getNarrativeData();
   $scope.pperfData = visualMapBuilder.getPPerfData();
-
 
   $scope.showLeftArrow = true;
   $scope.existPmap = true;
@@ -143,7 +139,6 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
             $location.path('/').search({ 'p': visualMapBuilder.getPerfId() });
             return;
           }
-
           $scope.existPmap = true;
           visualMapBuilder.initMap().then(function () {
             drawPastMap();
@@ -153,7 +148,6 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
       }
     })
   } else {
-
     if (index == 100) {
       $scope.preview = true;
       console.log("im in 100 part")
@@ -168,6 +162,7 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
       })
     }
   }
+
 
   function drawPastMap() {
     if (index && index != 100) {
@@ -197,6 +192,20 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
 
   function drawCurrentMap() {
     visualMapBuilder.drawCurrentMap($scope.cpassedRecord);
+
+    if ($scope.cpassedRecord.length && $scope.narrativeData) {
+      var plen = $scope.cpassedRecord.length;
+      var cstage = $scope.cpassedRecord[plen - 1];
+      var stageChange = $scope.cpassedRecord[plen - 2] + '->' + $scope.cpassedRecord[plen - 1];
+
+      var narrativeData = _.find($scope.narrativeData, { "stageChange": stageChange });
+
+      if ($scope.mapData) {
+        var stageData = _.find($scope.mapData, { 'stage': cstage });
+        $scope.title = stageData.name;
+        $scope.narrative = narrativeData ? narrativeData.narrative : '';
+      }
+    }
   }
 
   $scope.getLastPerf = function () {
@@ -343,6 +352,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 
 
   socket.on('vStart', function () {
+    $scope.performing = true;
     $scope.prePerf = false;
     if (!$scope.mapData) {
       visualMapBuilder.loadData().then(function () {
@@ -413,7 +423,8 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   })
 
   socket.on('vStop', function () {
-    visualMapBuilder.updateMap('summit', '');
+    visualMapBuilder.updateMap('summit', 'summit');
+    $scope.performing = false;
     $scope.journey = visualMapBuilder.getJourney();
   });
 
@@ -440,7 +451,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
           });
         }
 
-        if (visualMapBuilder.getPerfStatus()) {
+        if ($scope.performing) {
           console.log('performMode on');
           $scope.showLeftArrow = true;
           var stageChange = '';
