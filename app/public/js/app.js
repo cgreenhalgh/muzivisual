@@ -55,6 +55,44 @@ visual.factory('d3Service', ['$document', '$q', '$rootScope',
   }
 ])
 
+visual.controller('AlertCtrl', ['$scope', 'socket', '$timeout', 'mpmLoguse', 'd3Service', '$window', function ($scope, socket, $timeout, mpmLoguse, d3Service, $window) {
+	console.log('AlertCtrl');
+	$scope.alertTimeout = null;
+	socket.on('vEvent', function (data) {
+		// format: perfid:msg:time:bool
+		console.log('get event content: ' + data)
+		var splitedData = _.split(data, ':');
+		$scope.alertMsg = splitedData[1];
+		var alertTime = parseInt(splitedData[2]) * 1000;
+		var vib = 'true'==splitedData[3];
+		$scope.vibrate = vib;
+
+		d3Service.d3().then(function (d3) {
+			d3.select('.alert')
+			//.transition()
+			//.duration($scope.alertTimeout ? 100 : 0)
+			.style('opacity', '0')
+			.transition()
+			.duration($scope.alertTimeout ? 200 : 500)
+			.style('opacity', '1')
+
+			if ($scope.alertTimeout)
+				$timeout.cancel($scope.alertTimeout);
+			$scope.alertTimeout = $timeout(function () {
+				$scope.alertTimeout = null;
+				d3.select('.alert')
+				.transition()
+				.duration(500)
+				.style('opacity', '0')
+			}, alertTime)
+		})
+
+		if (vib) {
+			$window.navigator.vibrate([200,200,200,200,200]);
+		}
+	})
+
+}]);
 
 
 

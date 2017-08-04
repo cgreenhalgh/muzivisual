@@ -31,7 +31,13 @@
 </head>
 
 <body>
-  <div ng-view></div>
+	<div ng-controller="AlertCtrl">
+		<div id='alert1' class="alert" ng-class="{'alert-info': vibrate, 'alert-success': !vibrate}" role="alert" style="opacity: 0">
+			<span>{{alertMsg}}</span>
+		</div>
+	</div>
+
+	<div ng-view></div>
 
   <!--[if lt IE 7]>
       <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>

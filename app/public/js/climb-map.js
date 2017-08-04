@@ -289,43 +289,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   var performanceid = $location.search()['p'];
   visualMapBuilder.setPerfId(performanceid);
 
-$scope.alertTimeout = null;
-  socket.on('vEvent', function (data) {
-    // format: perfid:msg:time:bool
-    console.log('get content: ' + data)
-    var splitedData = _.split(data, ':');
-    $scope.alertMsg = splitedData[1];
-    var alertTime = parseInt(splitedData[2]) * 1000;
-    var vib = splitedData[3];
-
-    d3Service.d3().then(function (d3) {
-      d3.select('.alert')
-        .transition()
-        .duration($scope.alertTimeout ? 100 : 0)
-        .style('opacity', '0')
-        .transition()
-        .duration($scope.alertTimeout ? 200 : 500)
-        .style('opacity', '1')
-        .style('z-index', 100)
-
-      if ($scope.alertTimeout)
-        $timeout.cancel($scope.alertTimeout);
-      $scope.alertTimeout = $timeout(function () {
-        $scope.alertTimeout = null;
-        d3.select('.alert')
-          .transition()
-          .duration(500)
-          .style('opacity', '0')
-          .style('z-index', 0)
-      }, alertTime)
-    })
-
-    if (vib) {
-        $window.navigator.vibrate([200,200,200,200,200]);
-    }
-  })
-
-
   socket.on('vStart', function () {
     console.log('mapCtrl vStart');
     $scope.performing = true;
