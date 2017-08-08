@@ -9,12 +9,15 @@ socket.factory('socket', ['$rootScope', '$timeout', '$location', function ($root
   var socket = io.connect();  // connect to visual channel 
   var queue = [];
   socket.on('vStart', function (msg) {
+    //console.log('socket vStart '+msg);
     queue.push({ name: 'vStart', msg: msg });
   });
   socket.on('vStop', function (msg) {
+    //console.log('socket vStop '+msg);
     queue.push({ name: 'vStop', msg: msg });
   });
   socket.on('vStageChange', function (msg) {
+    //console.log('socket vStageChange '+msg);
     queue.push({ name: 'vStageChange', msg: msg });
   });
   
@@ -23,17 +26,11 @@ socket.factory('socket', ['$rootScope', '$timeout', '$location', function ($root
   } else {
       console.log('no performance id!');
       alert('Sorry, this URL is wrong! (there is no performance specified)');
-      return;
   }
 
   return {
     on: function (eventName, callback) {
-      socket.on(eventName, function () {
-        var args = arguments;
-        $rootScope.$apply(function () {
-          callback.apply(socket, args);
-        });
-      });
+      //console.log('socket on '+eventName+'...');
       var msgs = [];
       for (var i in queue) {
         var item = queue[i];
@@ -52,6 +49,14 @@ socket.factory('socket', ['$rootScope', '$timeout', '$location', function ($root
           }
         }, 0);
       }
+      socket.on(eventName, function () {
+          var args = arguments;
+          $timeout(function () {
+            $rootScope.$apply(function () {
+              callback.apply(socket, args);
+            });
+          }, 0);
+        });
     },
     emit: function (eventname, data, callback) {
       socket.emit(eventname, data, function () {

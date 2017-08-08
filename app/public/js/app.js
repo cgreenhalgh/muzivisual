@@ -76,6 +76,7 @@ visual.controller('AlertCtrl', ['$scope', 'socket', '$timeout', 'mpmLoguse', 'd3
 			.transition()
 			.duration($scope.alertTimeout ? 200 : 500)
 			.style('opacity', '1')
+			.style('z-index', '200')
 
 			if ($scope.alertTimeout)
 				$timeout.cancel($scope.alertTimeout);
@@ -85,6 +86,7 @@ visual.controller('AlertCtrl', ['$scope', 'socket', '$timeout', 'mpmLoguse', 'd3
 				.transition()
 				.duration(500)
 				.style('opacity', '0')
+				.style('z-index', '50')
 			}, alertTime)
 		})
 

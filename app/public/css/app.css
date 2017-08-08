@@ -327,7 +327,7 @@ h4 {
 .alert {
   position:fixed;
   top:0px;
-  z-index:200; 
+  z-index:50; 
   width:100%;
   height:auto;
   font-size:1.25em;

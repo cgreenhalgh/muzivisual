@@ -259,7 +259,7 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
           $scope.existPmap = true;
         }
         visualMapBuilder.initMap(false);
-     
+        getEvents();
     }
   }
 //  if (!$scope.cstage && !$scope.prePerf) {
@@ -290,14 +290,6 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   var performanceid = $location.search()['p'];
   visualMapBuilder.setPerfId(performanceid);
 
-  socket.on('vStart', function () {
-    console.log('mapCtrl vStart');
-    $scope.performing = true;
-    $scope.prePerf = false;
-    $scope.cstage = 'basecamp'
-  })
-
-
   $scope.getLastPerf = function () {
     var path = $location.path();
     $location.path('/performance/past/').search({
@@ -326,7 +318,16 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 	$location.path('/');
   }
 
-  socket.on('vStageChange', function (data) {
+  function getEvents() {
+   socket.on('vStart', function (data) {
+	    //console.log('mapCtrl vStart '+data);
+	    $scope.performing = true;
+	    $scope.prePerf = false;
+	    $scope.cstage = 'basecamp'
+	  })
+
+   socket.on('vStageChange', function (data) {
+    //console.log('mapCtrl vStageChange '+data);
     var da = data.split(':');
 
     var stageChange = da[1];
@@ -346,14 +347,16 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
         .duration(INTERVAL)
         .style('opacity', '0')
     });
-  })
+   })
 
-  socket.on('vStop', function () {
+   socket.on('vStop', function (data) {
+    //console.log('mapCtrl vStop '+data);
     visualMapBuilder.updateMap('summit', 'summit');
     $scope.performing = false;
     $scope.journey = visualMapBuilder.getJourney();
-  });
-
+   });
+  }
+  
   $scope.$watch('cstage', function (ns, os) {
     console.log('stage change: ' + os + '->' + ns);
 
