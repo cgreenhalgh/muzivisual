@@ -324,7 +324,7 @@ h4 {
   text-decoration: underline
 }
 
-.alert {
+.event-alert {
   position:fixed;
   top:0px;
   z-index:50; 

@@ -9,6 +9,10 @@
         <div><a href="#!cus-map">Your Map</a></div>
     </ul>-->
         <!--<div class="menu-title"><h2>Climb!</h2></div>-->
+    <div ng-if="showStudyAlert" class="alert alert-warning alert-dismissible">
+      <button type="button" class="close" ng-click="hideStudyAlert()" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      This app collects <b>anonymous</b> data about how it is used; see <em ng-click='openContent("Research")'>Research Study</em> (below) for more information.
+    </div>
 
         <ul class="list-btn-menu">
             <div class='bg-img-container'>
