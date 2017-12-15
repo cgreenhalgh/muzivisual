@@ -4,6 +4,7 @@ var visualMapBuilder = angular.module('MuziVisual.visualmapbuilder', []);
 visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$http', '$location', function (d3Service, $timeout, $q, $http, $location) {
     console.log('visualMapBuilder');
     var MAP_WIDTH, MAP_HEIGHT;
+    var allData;
     var recordMap;
     var mapData;
     var narrativeData;
@@ -14,38 +15,20 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
     var performanceid;
     var performing = false;
     
-    function pastPerfConfig() {
+    var performanceid = $location.search()['p']
+
+    function internalLoadData() {
         return $q(function (resolve, reject) {
-            $http.get('allPerformances').then(function (d) {
-                var performances = _.sortBy(d.data, 'time').reverse();
-                console.log('getPastPerfs:', performances)
-                if (performances) {
-                    resolve(performances);
+            $http.get('data/'+encodeURIComponent(performanceid)+'.json').then(function (d) {
+                var data = d.data;
+                console.log('loadData:', data)
+                if (data) {
+                    resolve(data);
                 } else {
                     resolve(null);
                 }
             }), function (err) {
-                alert('Missing data files for past performances (performance.json & performance_metadata.json)')
-                reject(err);
-            }
-        })
-    }
-
-    function mapConfig(d) {
-        return $q(function (resolve, reject) {
-            $http.get('maps').then(function (rawdata) {
-                resolve(rawdata.data);
-            }), function (err) {
-                reject(err);
-            }
-        })
-    }
-
-    function narrativeConfig(d) {
-        return $q(function (resolve, reject) {
-            $http.get('fragments/').then(function (rawdata) {
-                resolve(rawdata.data);
-            }), function (err) {
+                alert('Missing data file for performance')
                 reject(err);
             }
         })
@@ -563,7 +546,7 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             mapRecord = mapData;
         },
         loadData: function () {
-            if (mapData && narrativeData) {
+            if (allData) {
                 return $q(function (res, rej) {
                     res(true)
                 });
@@ -571,22 +554,16 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
             else {
                 return $q(function (res, rej) {
                     console.log('Load data...')
-                    mapConfig().then(function (mapd) {
-                        console.log('Load mapdata:', mapd);
-                        mapData = mapd;
-                        narrativeConfig().then(function (nd) {
-                            console.log('Narrative data:', nd);
-                            narrativeData = nd;
-                            pastPerfConfig().then(function (ppd) {
-                                pperfData = ppd;
-                                console.log('Past Perf data:', ppd);
-                                if (mapData && narrativeData) {
-                                    res(true);
-                                } else {
-                                    rej(true)
-                                }
-                            })
-                        })
+                    internalLoadData().then(function (data) {
+                        allData = data;
+                        mapData = allData.map;
+                        narrativeData = allData.narrative;
+                        pperfData =  _.sortBy(allData.pastPerformances, 'time').reverse();
+                        if (allData) {
+                            res(true);
+                        } else {
+                            rej(true)
+                        }
                     })
                 })
             }
@@ -599,6 +576,20 @@ visualMapBuilder.factory('visualMapBuilder', ['d3Service', '$timeout', '$q', '$h
         },
         getMapData: function () {
             return mapData;
+        },
+        getPerformances: function() {
+            if (!allData) {
+                console.log('Warning: getPerformances is null before load')
+                return null;
+            }
+            return allData.performances;
+        },
+        getPerformers: function() {
+            if(!allData) {
+                console.log('Warning: getPerformers is null before load')
+                return null;
+            }
+            return allData.performers;
         },
         setMapData: function (d) {
             mapData = d;

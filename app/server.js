@@ -97,100 +97,18 @@ app.get('/js/*', returnPublicFile);
 app.get('/vendor/*', returnPublicFile);
 app.get('/components/*', returnPublicFile);
 
-app.get('/allPerformances/', function (req, res) {
-  fs.readdir(__dirname, function (err, fnames) {
-    if (err) {
-      res.status(500).send('Could not read performances file directory (' + err + ')');
-      return;
-    }
-  });
-  fs.readFile(__dirname + '/public/config/performances.json', function (err, perfData) {
-    var data = [];
-    if (err) throw err;
-    var pperf = JSON.parse(perfData);
-    fs.readFile(__dirname + '/public/config/performances_metadata.json',
-      // get configrations from two files
-      function (err, perfMeta) {
-        if (err) throw err;
-        var pperfMeta = JSON.parse(perfMeta);
-        var ppKeys = _.keys(pperf);
-        _.forEach(ppKeys, function (ppKey) {
-          var obj1 = _.get(pperfMeta, ppKey);
-          var obj2 = _.get(pperf, ppKey);
-          var newObj = _.assign(obj1, obj2);
-          newObj.time = JSON.parse(newObj.value[0]).time;
-         // _.concat(data,newObj);
-          data.push(newObj);
-          //console.log("New Object: ", );
-        })
-        //console.log('get pperf data', data)
-        res.set('Content-Type', 'application/json').send(data);
-      });
-
-  });
-});
-
-
-var DATA_DIR = __dirname + '/maps/';
-app.get('/maps/', function (req, res) {
-  console.log('get map data');
-  fs.readdir(DATA_DIR, function (err, fnames) {
-    if (err) {
-      res.status(500).send('Could not read map data directory (' + err + ')');
-      return;
-    }
-  });
-
-  fs.readFile(DATA_DIR + '/Climb!London.csv', function (err, data) {
-    if (err) throw err;
-    processData(data, res);
-  });
-});
-
-
-var NARR_DIR = __dirname + '/visualcontent/';
-app.get('/fragments/', function (req, res) {
-  console.log('get visual fragments');
-  fs.readdir(NARR_DIR, function (err, fnames) {
-    if (err) {
-      res.status(500).send('Could not read map data directory (' + err + ')');
-      return;
-    }
-  });
-
-  fs.readFile(NARR_DIR + '/narrativesLondon.csv', function (err, data) {
-    if (err) throw err;
-    processNarrativeData(data, res);
-  });
-})
-
-function processNarrativeData(data, res) {
-  var rows = _.split(data, /\r\n|\n/);
-  var resp = [];
-
-  var narratives = [];
-  var rlength = rows.length;
-  var stageChange = '';
-
-  for (var i = 1; i < rlength; i++) {
-    row = rows[i].split('/');
-
-    stageChange = row[0] + '->' + row[1];
-    var narrative = row[2].substring(0, row[2].length - 1)
-
-    narrativeData = {
-      "from": row[0],
-      "to": row[1],
-      "stageChange": stageChange,
-      "narrative": narrative
-    }
-    resp.push(narrativeData);
+function returnDataFile(req, res) {
+  var url = require('url').parse(req.url);
+  if (url.pathname.substring(0,6)!='/data/') {
+    console.log('Error: get data ' + req.url + ' -> ' + url.pathname+' doesn\'t start with /data/');
+    res.sendStatus(500);
+    return;
   }
+  console.log('get ' + req.url + ' -> ' + url.pathname);
+  res.sendFile(__dirname + url.pathname);
+};
 
-  res.set('Content-Type', 'application/json').send(JSON.stringify(resp));
-  console.log('narrative data sent.');
-  //console.log(resp);
-}
+app.get('/data/*.json', returnDataFile);
 
 function processData(data, res) {
   // split content based on new line

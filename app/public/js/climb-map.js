@@ -89,9 +89,9 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   }
 
   if (index == 100) {
-    $scope.mapTitle = 'Climb!';
-    $scope.performer = "Maria Kallionpää";
-    $scope.location = 'London'
+    $scope.mapTitle = '';
+    $scope.performer = "";
+    $scope.location = ''
   }
 
   $scope.previewBack = function () {
@@ -154,10 +154,12 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
       $scope.performer = pperf.performer;
       $scope.location = pperf.location;
       msgs = pperf.value;
+      if (!msgs)
+        msgs = pperf.value = [];
     } else {
-      $scope.mapTitle = 'Climb!'; // config file later
-      $scope.location = 'Earth';
-      $scope.performer = 'Maria';
+      $scope.mapTitle = ''; // config file later
+      $scope.location = '';
+      $scope.performer = '';
     }
 
     if (index == $scope.pperfData.length) {
@@ -168,6 +170,26 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
     $scope.journey = visualMapBuilder.drawPastMap(msgs, index)
     console.log('pjourney', $scope.journey)
     console.log($scope.prePerf, $scope.pastCounter)
+    if (pperf.guid) {
+      console.log('subscribe to events for (recent) past performance '+pperf.guid)
+      function addMsg(eventName,data) {
+        var msg = JSON.stringify({name:eventName,data:data});
+        if (msgs.indexOf(msg)<0) {
+          console.log('add past performance message '+msg)
+          msgs.push(msg);
+          $scope.journey = visualMapBuilder.drawPastMap(msgs, index)
+        }
+      }
+      socket.on2('vStart', pperf.guid, function(msg) {
+        addMsg('vStart',msg);
+      });
+      socket.on2('vStageChange', pperf.guid, function(msg) {
+        addMsg('vStageChange', msg);
+      });
+      socket.on2('vStop', pperf.guid, function(msg) {
+        addMsg('vStop',msg);
+      });
+    }
   }
 
 
@@ -237,22 +259,48 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   $scope.history = false;
   $scope.popWindow = true;
 
-  $scope.mapTitle = "This Performance"
-  $scope.location = "London"
-  $scope.performer = 'Maria Kallionpää'
+  $scope.mapTitle = ""
+  $scope.location = ""
+  $scope.performer = ''
   $scope.pastPerfs = '';
   $scope.alertMsg = 'The challenge was performed successfully'
   $scope.prePerf = true;
   $scope.showLeftArrow = true;
+  $scope.showRightArrow = false;
   $scope.existPmap = false;
   $scope.inited = false;
   
   visualMapBuilder.loadData().then(init);
 
+  var performanceid = $location.search()['p'];
+  var performanceindex = parseInt($location.search()['i']);
+  if (!performanceindex)
+    performanceindex = 0
+
   function init() {
     if (!$scope.inited) {
         console.log('init!');
         $scope.inited = true;
+        var performances = visualMapBuilder.getPerformances()
+        // more than one performance?
+        $scope.showRightArrow = performances.length>performanceindex+1;
+        var performance = performances[performanceindex];
+        // future performance? has it started => reload to focus on that
+        if (performanceindex>0 && performance.guid) {
+          socket.on2('vStart', performance.guid, function() {
+            console.log('vStart for future performance - swith to p='+performance.guid)
+            var href = String($window.location.href);
+            var ix = href.indexOf('?');
+            if (ix>=0) {
+              var url = href.substring(0, ix)+'?p='+performance.guid
+              // hard load?!
+              $window.location.href = url
+            }
+          });
+        }
+        $scope.mapTitle = performance.title;
+        $scope.performer = performance.performer;
+        $scope.location = performance.location;
         $scope.mapData = visualMapBuilder.getMapData();
         $scope.narrativeData = visualMapBuilder.getNarrativeData();
         if (visualMapBuilder.getPPerfData()) {
@@ -287,22 +335,38 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   //   }, 2000)
   // })
 
-  var performanceid = $location.search()['p'];
   visualMapBuilder.setPerfId(performanceid);
 
   $scope.getLastPerf = function () {
     var path = $location.path();
-    $location.path('/performance/past/').search({
-      'i': 1,
+    if(performanceindex>0) {
+      $location.path('/performance/').search({
+        'i': performanceindex-1,
+        'p': performanceid
+      });
+    } else {
+      $location.path('/performance/past/').search({
+        'i': 1,
+        'p': performanceid
+      });
+    }
+  }
+
+  $scope.getNextPerf = function () {
+    var path = $location.path();
+    $location.path('/performance/').search({
+      'i': performanceindex+1,
       'p': performanceid
     });
   }
 
   $scope.preview = function () {
-    $location.path('/performance/past/').search({
-      'i': 100,  // special for preview
-      'p': performanceid
-    });
+    // disable for now
+    console.log('preview ignored');
+    //$location.path('/performance/past/').search({
+    //  'i': 100,  // special for preview
+    //  'p': performanceid
+    //});
   }
 
 
@@ -319,6 +383,10 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
   }
 
   function getEvents() {
+   if (performanceindex>0) {
+    console.log('suppress normal events for future performance');
+    return;
+   }
    socket.on('vStart', function (data) {
 	    //console.log('mapCtrl vStart '+data);
 	    $scope.performing = true;

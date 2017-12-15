@@ -86,7 +86,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
     $scope.openPerformance = function () {
         var performanceid = $location.search()['p'];
         if (performanceid) {
-            $location.path('/performance');
+            $location.path('/performance').search({p:performanceid,i:0});
         } else {
             alert('Sorry, this URL is wrong! (there is no performance specified)');
             return;
@@ -140,7 +140,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 }]);
 
 
-menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window', '$location', '$timeout', function ($scope, $routeParams, mpmLoguse, $window, $location, $timeout) {
+menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window', '$location', '$timeout', 'visualMapBuilder', function ($scope, $routeParams, mpmLoguse, $window, $location, $timeout, visualMapBuilder) {
     console.log('open: ', $routeParams.inquery)
     mpmLoguse.view('/content/' + $routeParams.inquery, {});
     var title = $scope.title = $routeParams.inquery;
@@ -161,8 +161,16 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window'
     //change contents for different parts
     if (title === 'Programme Note') {
         $scope.text = '<p>Climb! is a new interactive work for piano by composer and pianist Maria Kallionpää.</p><p>Climb! combines contemporary piano with elements of computer games to create a non-linear musical journey in which the pianist negotiates an ascent of a mountain, choosing their path as they go and encountering weather, animals and other obstacles along the way.</p><p>Climb! employs the Mixed Reality Lab’s Muzicodes technology to embed musical triggers within the composition. Like hyperlinks, these may transport the player to another point in the score when successfully played, and may also trigger additional musical effects or control visuals. Climb! also uses a Disklavier piano which physically plays alongside the human pianist during key passages, engaging them in a human-machine musical dialogue. The interactive score is delivered using The University of Oxford’s MELD dynamic annotated score renderer.</p><p>Climb! is supported by the EPSRC-funded FAST project (EP/L019981/1) and University of Nottingham’s Research Priority Area (RPA) Development Fund.</p>'
-    } else if (title === 'Performer') {
-        $scope.text = '<div><b>Dr. Maria Kallionpää (1981)</b> is an internationally active composer and pianist. She earned her PhD in composition at the University of Oxford in 2015. Kallionpää won the first prize of the OUPHIL composition competition in 2013. She has graduated from the Royal Academy of Music (2009) and Universität für Musik and Darstellende Kunst Wien (2010) and has also studied composition and piano at Sibelius Academy and Universität Mozarteum Salzburg. Her works have been performed at Musikverein Wien, Philharmonie Luxembourg, and Sibiu Philharmonia. In 2011 Kallionpää was a commissioned composer of the Turku European Culture Capital and a finalist of the Tenso European Chamber Choir Composition Competition. Kallionpää has performed at numerous music festivals including Rainy Days Festival at Philharmonie Luxembourg, Musica Nova (Helsinki), Spitalfields Festival (London), and Neue Musik von Thuringen. In 2016 her music was performed at the Florida International Toy Piano Festival.</div>'
+    } else if (title === 'Performers') {
+        $scope.text = '';
+        visualMapBuilder.loadData().then(function() {
+            var performers = visualMapBuilder.getPerformers();
+            if (performers) {
+                for (var i=0; i<performers.length; i++) {
+                    $scope.text = $scope.text+performers[i];
+                }
+            }
+        });
     } else if (title === 'What can see and hear') {
         $scope.text = '<p>A performance of Climb! contains a number of audio visual interactions that are triggered by musical codes (muzicodes) embedded in the pianist’s piano part.</p>'+
         	'<p>On stage, the pianist plays the Disklavier piano and at times the Disklavier self-plays, taking over from the pianist or duets alongside them. These Disklavier parts are triggered by simple musical codes played by the pianist in the preceding musical material. Difficult to perform musical codes, (challenge codes) determine the route that the performer takes through the branching composition, where a ‘correct’ performance will find the performer staying on their chosen path, but an incorrect performance will result in being forced over to a different path. The performer reads the music from a dynamic digital score, where the result of ‘challenge codes’ automatically queues the next appropriate score section. The sound of the piano is fed through audio processing effects that aim to mimic weather conditions, which are also triggered by Muzicodes.</p>'+
