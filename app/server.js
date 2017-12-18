@@ -201,7 +201,7 @@ http.listen(port, function () {
     var perf = data;
     console.log('stop performance ' + perf);
     var key = 'performance:' + perf;
-    redisClient.rpush(key, JSON.stringify({ name: 'vStop', time: (new Date()).getTime() }));
-    io.to(key).emit('vStop');
+    redisClient.rpush(key, JSON.stringify({ name: 'vStop', data:data, time: (new Date()).getTime() }));
+    io.to(key).emit('vStop', data);
   });
 })
