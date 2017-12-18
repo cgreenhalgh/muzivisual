@@ -22,7 +22,13 @@ if (process.env.REDIS_PASSWORD) {
   redis_config.auth_pass = process.env.REDIS_PASSWORD;
 }
 console.log('using redis config ' + JSON.stringify(redis_config));
-io.adapter(redisAdapter(redis_config));
+var readonly = true;
+if (readonly) {
+  console.log('Warning: running in readonly mode')
+  // Don't sync any more!! clashes with version 2
+} else {
+  io.adapter(redisAdapter(redis_config));
+}
 
 var redisClient = redis.createClient(redis_config);
 
