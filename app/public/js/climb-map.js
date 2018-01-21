@@ -50,7 +50,6 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
   mpmLoguse.view('/performance/past?i='+$location.search()['i'], {});
 
   $scope.cpassedRecord = [];
-
   socket.on('vStart', function (data) {
     console.log('pastPerf '+$location.search()['i']+' vStart');
     visualMapBuilder.setPerfStatus(true);
@@ -387,6 +386,30 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     console.log('suppress normal events for future performance');
     return;
    }
+   // heartbeat
+   var loadtime = (new Date()).getTime();
+   var lastHeartbeat = 0;
+   
+   socket.on('heartbeat', function() {
+     console.log('heartbeat!');
+     lastHeartbeat = (new Date()).getTime();
+   });
+   var CHECK_HEARTBEAT_INTERVAL = 4900;
+   var HEARTBEAT_MAX_INTERVAL = 5100;
+   var STARTUP_INTERVAL = 30000;
+   setInterval(function() {
+     console.log('check heartbeat...');
+     var now = (new Date()).getTime();
+     var elapsed = now-lastHeartbeat;
+     if (elapsed > HEARTBEAT_MAX_INTERVAL) {
+       if (now < loadtime + STARTUP_INTERVAL) {
+         console.log('WARNING: no heartbeat for 5s, waiting for 30s ('+(now-loadtime)+' so far)');
+       } else {
+         console.log('WARNING: no heartbeat for 5s, reload...');
+         $window.location.reload(true);
+       }
+     }
+   }, CHECK_HEARTBEAT_INTERVAL);
    socket.on('vStart', function (data) {
 	    //console.log('mapCtrl vStart '+data);
 	    $scope.performing = true;

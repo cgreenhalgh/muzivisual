@@ -28,6 +28,43 @@ if (process.env.REDIS_PASSWORD) {
 console.log('using redis config ' + JSON.stringify(redis_config));
 io.adapter(redisAdapter(redis_config));
 
+//key -> last event time (ms)
+var heartbeatRooms = {};
+function heartbeatEvent(room) {
+if (!room)
+ return;
+if (!heartbeatRooms[room])
+ console.log('start heartbeats to '+room);
+heartbeatRooms[room] = (new Date()).getTime();
+}
+var HEARTBEAT_INTERVAL = 2500;
+var HEARTBEAT_END_AFTER = 30*60*1000;
+var debug = true;
+setInterval(function() {
+var now = (new Date()).getTime();
+var end = [];
+for (var room in heartbeatRooms) {
+ var time = heartbeatRooms[room];
+ var elapsed = now - time;
+ if (elapsed>HEARTBEAT_END_AFTER)
+   end.push(room);
+ else {
+   try {
+     if(debug) console.log('send heartbeat to '+room);
+     io.to(room).emit('heartbeat');
+   }
+   catch (err) {
+     console.log('error doing heartbeat to '+room+': '+err.message);
+   }
+ }
+}
+for (var ei in end) {
+ var room = end[ei];
+ console.log('stop heartbeats to room '+room+' at '+now+' vs '+heartbeatRooms[room])
+ delete heartbeatRooms[room];
+}
+}, 2500);
+
 var redisClient = redis.createClient(redis_config);
 
 io.on('connection', function (socket) {
@@ -52,6 +89,7 @@ io.on('connection', function (socket) {
       console.log('new client for performance ' + perf);
       var key = 'performance:' + perf;
       socket.join(key);
+      heartbeatEvent(key);
       redisClient.lrange(key, 0, -1, function (err, msgs) {
         if (err) {
           console.log('error getting saved messages for performance ' + perf, err);
@@ -182,6 +220,7 @@ http.listen(port, function () {
     var key = 'performance:' + perf;
     redisClient.rpush(key, JSON.stringify({ name: 'vStageChange', data: data, time: (new Date()).getTime() }));
     io.to(key).emit('vStageChange', data);
+    heartbeatEvent(key);
   });
 
   serverSocket.on('vEvent', function (data) {
@@ -192,6 +231,7 @@ http.listen(port, function () {
     var key = 'performance:' + perf;
     // don't persist
     io.to(key).emit('vEvent', data);
+    heartbeatEvent(key);
   });
 
   serverSocket.on('vStop', function (data) {
@@ -203,5 +243,6 @@ http.listen(port, function () {
     var key = 'performance:' + perf;
     redisClient.rpush(key, JSON.stringify({ name: 'vStop', data:data, time: (new Date()).getTime() }));
     io.to(key).emit('vStop', data);
+    heartbeatEvent(key);
   });
 })
