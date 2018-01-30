@@ -1,0 +1,28 @@
+{
+	"name": "muzivisual-logtools",
+	"version": "0.1.0",
+	"description": "muzivisual logtools",
+	"main": "index.js",
+	"directories": {
+		"doc": "docs"
+	},
+	"scripts": {
+		"build": "tsc",
+		"dev": "tsc --watch & nodemon dist",
+		"tsc": "tsc",
+		"test":"echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/cgreenhalgh/muzivisual.git"
+	},
+	"author": "Chris Greenhalgh",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/cgreenhalgh/muzivisual/issues"
+	},
+	"homepage": "https://github.com/cgreenhalgh/muzivisual/#readme",
+	"dependencies": {
+		"@types/node":  "^8.0.53"
+	}
+}
