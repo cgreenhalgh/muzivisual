@@ -1,0 +1,220 @@
+// log2views.ts
+// Convert muzivisual log file to data on users and page views suitable for timeline visualisation.
+
+import * as fs from 'fs' 
+
+if (process.argv.length != 6) {
+  console.log("usage: node dist/log2views.js <muzivisual-logfile.json> <start-datetime> <end-datetime> <outfile>")
+  process.exit(-1)
+}
+
+let logfilename = process.argv[2]
+let fromdatetime = process.argv[3]
+let fromtime = new Date(fromdatetime).getTime()
+let todatetime = process.argv[4]
+let totime = new Date(todatetime).getTime()
+console.log(`time range ${fromtime} - ${totime} (${totime-fromtime} ms)`)
+let outfilename = process.argv[5]
+let logfile = fs.readFileSync(logfilename, 'utf-8')
+let lines = logfile.split('\n')
+
+// log input
+class LogInfo {
+  //log.start
+  logversion?:string
+  application?:string
+  installId?:string
+  //http.listen
+  port?:number
+  //loguse.client.add
+  clientid?:string
+  userid?:string
+  //loguse.client.visible
+  //clientid, userid
+  clienttime?:number
+  //loguse.client.view
+  //userid,clientid
+  path?:string
+  info?:any
+  //loguse.client.hidden
+  //userid,clientid,clienttime
+  after?:number
+  //loguse.client.log
+  event?:string
+  message?:string
+  vibrate?:boolean
+  duration?:number
+}
+class LogEntry {
+  time:number
+  datetime:string
+  component:string
+  event:string
+  info:LogInfo
+}
+
+// output classes
+class User {
+  userid:string
+  ix:number
+  constructor(userid:string, ix:number) { this.userid = userid; this.ix = ix; }
+}
+class Page {
+  page:string
+  ix:number
+  constructor(page:string, ix:number) { this.page = page; this.ix = ix; }
+}
+class View {
+  //datetime:string
+  time:number
+  userix:number
+  startOffset:number // seconds
+  duration:number // seconds
+  navigation:boolean // explicit navigation event?
+  pageix:number // index of page viewed
+}
+class Views {
+  views:View[] = []
+  pages:Page[] = []
+  users:User[] = []
+  getPage(page:string):number {
+    let p = this.pages.find(p => p.page == page)
+    if (!p) {
+      console.log(` add page ${page} as ${this.pages.length}`)
+      p = new Page(page, this.pages.length)
+      this.pages.push(p)
+    }
+    return p.ix
+  }
+  getUser(userid:string):number {
+    let u = this.users.find(p => p.userid == userid)
+    if (!u) {
+      console.log(` add user ${userid} as ${this.users.length}`)
+      u = new User(userid,this.users.length)
+      this.users.push(u)
+    }
+    return u.ix
+  }
+}
+let views = new Views()
+
+let PAGES = [
+  '/',
+  '/content/Programme Note',
+  '/content/Performers',
+  '/content/map',
+  '/content/What can see and hear',
+  '/content/How it works',
+  '/content/Archive',
+  '/content/Research',
+  '/performance/',
+  '/performance/past?i=1',
+  '/performance/past?i=2',
+  '/performance/past?i=3',
+  '/performance/past?i=4'
+]
+
+for (let page of PAGES)
+  views.getPage(page)
+
+// client state-tracking
+class Client {
+  userid:string
+  clientid:string
+  visible:boolean
+  lastVisibleChangeTime:number
+  lastPage:string
+  lastPageTime:number
+  lastPageNavigation:boolean
+}
+let clients:Client[] = []
+
+function getClient(userid:string, clientid:string) : Client {
+  let client = clients.find(c => c.userid == userid)
+  if (client===null || client===undefined) {
+    console.log(`adding client ${userid}`)
+    client = new Client()
+    client.userid = userid
+    client.clientid = clientid
+    clients.push(client)
+  }
+  return client
+}
+
+function addView(client:Client, time:number) {
+  let page = views.getPage(client.lastPage)
+  let view = new View()
+  view.time = client.lastPageTime
+  view.startOffset = client.lastPageTime - fromtime
+  view.duration = time - client.lastPageTime
+  view.pageix = page
+  view.navigation = client.lastPageNavigation
+  view.userix = views.getUser(client.userid)
+  views.views.push(view)
+}
+
+let intime = false
+for (let l in lines) {
+  let line = lines[l].trim()
+  if (line.length==0)
+    continue
+  try {
+    let entry:LogEntry = JSON.parse(line) as LogEntry
+    if (!intime && entry.time >= fromtime) {
+      intime = true
+      console.log(`reached start time`)
+      // clip off prior state
+      for (let client of clients) {
+        client.lastPageNavigation = false
+        client.lastPageTime = fromtime
+        client.lastVisibleChangeTime = fromtime
+      }
+    }
+    if (entry.time > totime) {
+      // dump final entries
+      for (let client of clients) {
+        if (client.lastPage && client.visible) {
+          addView(client, totime)
+        }
+      }
+      console.log(`passed end time`)
+      break;
+    }
+    if ('loguse.client.add'==entry.event) {
+    }
+    else if ('loguse.client.view'==entry.event && entry.info.userid!==null) {
+      let client = getClient(entry.info.userid, entry.info.clientid)
+      if (intime && client.lastPage && client.visible) {
+        addView(client, entry.time)
+      }
+      client.lastPage = entry.info.path
+      client.lastPageTime = entry.time
+      client.lastPageNavigation = true
+      //let page = views.getPage(client.lastPage)
+    }
+    else if ('loguse.client.visible'==entry.event && entry.info.userid!==null) {
+      let client = getClient(entry.info.userid, entry.info.clientid)
+      if (intime && client.lastPage) {
+        client.lastPageNavigation = false
+        client.lastPageTime = entry.time
+      }
+      client.visible = true
+      client.lastVisibleChangeTime = entry.time
+    } 
+    else if ('loguse.client.hidden'==entry.event && entry.info.userid!==null) {
+      let client = getClient(entry.info.userid, entry.info.clientid)
+      if (intime && client.lastPage && client.visible) {
+        addView(client, entry.time)
+      }
+      client.visible = false
+      client.lastVisibleChangeTime = entry.time
+    } 
+  } catch (err) {
+    console.log(`Error processing log line ${l}: ${err.message}: ${line}`, err)
+  }
+}
+console.log(`read ${lines.length} lines`)
+
+let text = JSON.stringify(views, null, 4)
+fs.writeFileSync(outfilename, text, 'utf-8')
+console.log(`written to ${outfilename}`)
