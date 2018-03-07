@@ -3,8 +3,8 @@
 
 import * as fs from 'fs' 
 
-if (process.argv.length != 6) {
-  console.log("usage: node dist/log2views.js <muzivisual-logfile.json> <start-datetime> <end-datetime> <outfile>")
+if (process.argv.length != 6 && process.argv.length != 7) {
+  console.log("usage: node dist/log2views.js <muzivisual-logfile.json> <start-datetime> <end-datetime> <outfile> [<markerfile.json>]")
   process.exit(-1)
 }
 
@@ -72,8 +72,23 @@ class View {
   duration:number // seconds
   navigation:boolean // explicit navigation event?
   pageix:number // index of page viewed
+  lastPageix?:number
+}
+class Marker {
+  time:number
+  datetime:string
+  label:string
+}
+class Metadata {
+  fromtime:number
+  fromdatetime:string
+  totime:number
+  todatetime:string
+  logfilename:string
+  markers:Marker[]
 }
 class Views {
+  metadata:Metadata = new Metadata()
   views:View[] = []
   pages:Page[] = []
   users:User[] = []
@@ -97,6 +112,27 @@ class Views {
   }
 }
 let views = new Views()
+views.metadata.fromtime = fromtime
+views.metadata.totime = totime;
+views.metadata.todatetime = todatetime;
+views.metadata.fromdatetime = fromdatetime;
+views.metadata.logfilename = logfilename;
+views.metadata.markers = []
+
+if (process.argv.length>6) {
+  let markerfilename = process.argv[6]
+  console.log(`read markers from ${markerfilename}`)
+  let markerfile = fs.readFileSync(markerfilename, 'utf-8')
+  let markers = JSON.parse(markerfile)
+  for (let marker of markers) {
+    if (!marker.time)
+      marker.time = new Date(marker.datetime).getTime()
+    if (marker.time >= fromtime && marker.time <=totime)
+      views.metadata.markers.push(marker)
+    else
+      console.log(`ignore marker ${JSON.stringify(marker)}`)
+  }
+}
 
 let PAGES = [
   '/',
@@ -118,6 +154,11 @@ for (let page of PAGES)
   views.getPage(page)
 
 // client state-tracking
+class PageTotal {
+  page:string
+  visits:number = 0
+  duration:number = 0
+}
 class Client {
   userid:string
   clientid:string
@@ -126,6 +167,8 @@ class Client {
   lastPage:string
   lastPageTime:number
   lastPageNavigation:boolean
+  lastLastPage:string
+  pageTotals:PageTotal[]
 }
 let clients:Client[] = []
 
@@ -136,6 +179,7 @@ function getClient(userid:string, clientid:string) : Client {
     client = new Client()
     client.userid = userid
     client.clientid = clientid
+    client.pageTotals = []
     clients.push(client)
   }
   return client
@@ -149,8 +193,21 @@ function addView(client:Client, time:number) {
   view.duration = time - client.lastPageTime
   view.pageix = page
   view.navigation = client.lastPageNavigation
+  if (view.navigation && client.lastLastPage) {
+    view.lastPageix = views.getPage(client.lastLastPage)
+  } else {
+    view.lastPageix = view.pageix;
+  }
   view.userix = views.getUser(client.userid)
   views.views.push(view)
+  let pt = client.pageTotals[view.pageix]
+  if (!pt) {
+      pt = new PageTotal()
+      pt.page = client.lastPage
+      client.pageTotals[view.pageix] = pt
+  }
+  pt.visits = pt.visits+1
+  pt.duration  = pt.duration+0.001*view.duration
 }
 
 let intime = false
@@ -187,6 +244,7 @@ for (let l in lines) {
       if (intime && client.lastPage && client.visible) {
         addView(client, entry.time)
       }
+      client.lastLastPage = client.lastPage
       client.lastPage = entry.info.path
       client.lastPageTime = entry.time
       client.lastPageNavigation = true
@@ -218,3 +276,27 @@ console.log(`read ${lines.length} lines`)
 let text = JSON.stringify(views, null, 4)
 fs.writeFileSync(outfilename, text, 'utf-8')
 console.log(`written to ${outfilename}`)
+
+let totalsfilename = 'pagetotals.csv'
+console.log(`write page totals to ${totalsfilename}`)
+let totals = 'user'
+for (let page of views.pages) {
+  totals += ','+page.page+'-v,'+page.page+'-s'
+}
+totals += '\n'
+
+for (let user of views.users) {
+  let client = getClient(user.userid, null)
+  totals += 'U'+user.userid
+  for (let page of views.pages) {
+    totals += ','
+    if(client.pageTotals[page.ix]) {
+      totals += client.pageTotals[page.ix].visits+','+client.pageTotals[page.ix].duration
+    } else {
+      totals += ','
+    }
+  }
+  totals += '\n'
+}
+
+fs.writeFileSync(totalsfilename, totals)

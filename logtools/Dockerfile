@@ -12,4 +12,6 @@ COPY tsconfig.json /root/work/
 COPY src/ /root/work/src/
 RUN tsc
 
+EXPOSE 8089
+
 ENTRYPOINT ["/bin/bash"]

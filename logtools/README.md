@@ -12,12 +12,23 @@ docker build -t mvlogtools .
 docker run -it --rm --name mvlogtools mvlogtools
 ```
 ```
-docker cp src/* mvlogtools:/root/work/src/
+docker cp src/. mvlogtools:/root/work/src/
+docker cp data/. mvlogtools:/root/work/data/
+
+docker cp mvlogtools:/root/work/out.json public/out.json
+
 ```
 
 ```
-node dist/log2views.js data/muzivisual-20171219T115909802Z.json 2018-01-19T17:30:00.000Z 2018-01-19T19:30:00.000Z 
+node dist/log2views.js data/muzivisual-20171219T115909802Z.log \
+ 2018-01-19T17:50:00.000Z 2018-01-19T19:10:00.000Z out.json data/markers.json
 ```
+
+```
+cp public/* /vagrant/html/1/logs/
+```
+
+
 
 ## Plan
 
