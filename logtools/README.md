@@ -21,7 +21,7 @@ docker cp mvlogtools:/root/work/out.json public/out.json
 
 ```
 node dist/log2views.js data/muzivisual-20171219T115909802Z.log \
- 2018-01-19T17:50:00.000Z 2018-01-19T19:10:00.000Z out.json data/markers.json
+ 2018-01-19T17:57:00.000Z 2018-01-19T18:57:00.000Z out.json data/markers.json
 ```
 
 ```
