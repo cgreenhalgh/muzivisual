@@ -1,7 +1,10 @@
 'use strict'
 
 var socket = angular.module('MuziVisual.socket', []);
-socket.factory('socket', ['$rootScope', '$timeout', '$location', function ($rootScope, $timeout, $location) {
+socket.factory('socket', ['$rootScope', '$timeout', '$location', 'linkapp', function ($rootScope, $timeout, $location, linkapp) {
+  // TODO optional
+  return linkapp();
+  
   var params = $location.search();
   var performanceid = params['p'] === undefined ? '' : params['p'];
   console.log('performanceid: ', performanceid);
