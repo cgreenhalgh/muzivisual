@@ -3,7 +3,7 @@ var socket = angular.module('linkapps', []);
 socket.factory('linkapp', ['$rootScope', '$timeout', '$location', '$window', function ($rootScope, $timeout, $location, $window) {
   return function() {
     console.log('init linkapp');
-
+/*
     // Create peer connections and add behavior.
     var peerConnection = new RTCPeerConnection({iceServers:[]});
     console.log('Created peer connection object.');
@@ -28,7 +28,7 @@ socket.factory('linkapp', ['$rootScope', '$timeout', '$location', '$window', fun
     });
     
     // single fixed id and name (=[out of band] negotiated)
-    let channel = peerConnection.createDataChannel('linkapps', {ordered:true/*, negotiated:true, id:123*/})
+    let channel = peerConnection.createDataChannel('linkapps', {ordered:true});//, negotiated:true, id:123
     channel.onopen = function(event) {
       console.log('channel open');
       channel.send('Hi you!');
@@ -49,7 +49,7 @@ socket.factory('linkapp', ['$rootScope', '$timeout', '$location', '$window', fun
     .catch(function(err) {
       console.log('error creating offer', err);
     });
-    
+*/
     
     console.log('wait for window message(s)')
     // option to get archive end from window message
