@@ -47,7 +47,7 @@ map.directive('d3Map', ['d3Service', '$http', '$window', '$timeout', 'socket', '
 
 map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'visualMapBuilder', '$window', 'mpmLoguse', function ($scope, socket, d3Service, $location, visualMapBuilder, $window, mpmLoguse) {
   console.log('pastPerfCtrl');
-  mpmLoguse.view('/performance/past?i='+$location.search()['i'], {});
+  mpmLoguse.view('/performance/past', {  performance:$location.search()['p'], index:$location.search()['i']  });
 
   $scope.cpassedRecord = [];
 
@@ -247,7 +247,7 @@ map.controller('pastPerfCtrl', ['$scope', 'socket', 'd3Service', '$location', 'v
 
 map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout', '$window', 'visualMapBuilder', '$location', '$route', 'mpmLoguse', function ($scope, $http, socket, d3Service, $timeout, $window, visualMapBuilder, $location, $route, mpmLoguse) {
   console.log('mapCtrl')
-  mpmLoguse.view('/performance/', {});
+  mpmLoguse.view('/performance/', { performance:$location.search()['p'], index:$location.search()['i'] });
 
   // $scope.mapIndicator = 'Past Performance'
   $scope.cstage = '';

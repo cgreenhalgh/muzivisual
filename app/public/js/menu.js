@@ -21,7 +21,7 @@ menu.config(['$routeProvider', function ($routeProvider) {
 
 
 menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$anchorScroll', 'mpmLoguse', function ($scope, $location, socket, $window, $anchorScroll, mpmLoguse) {
-    mpmLoguse.view('/', {});
+    mpmLoguse.view('/', { performance:$location.search()['p'] });
     $scope.performing = false;
     $scope.archiveHighlight = false;
     
@@ -142,7 +142,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 
 menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window', '$location', '$timeout', 'visualMapBuilder', function ($scope, $routeParams, mpmLoguse, $window, $location, $timeout, visualMapBuilder) {
     console.log('open: ', $routeParams.inquery)
-    mpmLoguse.view('/content/' + $routeParams.inquery, {});
+    mpmLoguse.view('/content/' + $routeParams.inquery, { performance:$location.search()['p'] });
     var title = $scope.title = $routeParams.inquery;
     $scope.links = [];
     $scope.userid = null;
@@ -201,7 +201,7 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window'
 
 menu.controller('previewCtrl', ['$scope', 'd3Service', 'visualMapBuilder', '$http', '$location', '$compile', 'mpmLoguse', '$window', function ($scope, d3Service, visualMapBuilder, $http, $location, $compile, mpmLoguse, $window) {
     console.log('PreviewCtrl')
-    mpmLoguse.view('/content/map', {});
+    mpmLoguse.view('/content/map', { performance:$location.search()['p'] });
 
     $scope.mapTitle = 'Climb!';
     $scope.cstage = ''

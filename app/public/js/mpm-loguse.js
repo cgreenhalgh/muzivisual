@@ -4,7 +4,8 @@ var loguse = angular.module('mpm-loguse', ['MuziVisual.socket']);
 // note: needs uuid.js
 
 //socket.io wrapper, exposes on() and emit()
-loguse.factory('mpmLoguse', ['socket', 'clientid', '$interval', function (socket, clientid, $interval) {
+loguse.factory('mpmLoguse', ['socket', 'clientid', '$interval', function (socket, clientidin, $interval) {
+  var clientid = clientidin;
 	console.log('mpmLoguse '+clientid);
 	socket.emit('loguse.client.id', {clientid:clientid});
 	var userid = null;
@@ -12,7 +13,7 @@ loguse.factory('mpmLoguse', ['socket', 'clientid', '$interval', function (socket
 	// callback with userid
 	socket.on('loguse.client.userid', function(msg) {
 		userid = msg.userid;
-		console.log('mpm.cliend.userid '+userid);
+		console.log('mpm.client.userid '+userid);
 		if (userid) {
 			for (var i in fns) {
 				var fn = fns[i];
@@ -117,12 +118,13 @@ loguse.factory('mpmLoguse', ['socket', 'clientid', '$interval', function (socket
 		log: function(data) {
 		    var time = (new Date()).getTime();
 		    data.clienttime = time;
+		    data.clientid = clientid;
 		    // clientid and userid added by server
 			socket.emit('loguse.client.log', data);
 		},
 		view: function(path, info) {
 		    var time = (new Date()).getTime();
-			var data = { clienttime: time, path: path, info: info };
+			var data = { clienttime: time, clientid: clientid, path: path, info: info };
 		    // clientid and userid added by server
 			socket.emit('loguse.client.view', data);
 		}
