@@ -25,7 +25,7 @@
       <!-- <span ng-show="pastCounter" class="pperf-indicator">P</span> -->
       <h1 class="map-title">{{mapTitle}}</h1>
     </div>
-    <h4 style="margin-top:0px">{{performer}} in {{location}}</h4>
+    <h4 style="margin-top:0px">{{performer}}<span ng-show="!!location"> in {{location}}</span></h4>
   </div>
 
   <div ng-show="!prePerf && !performing" style="margin-top:-40%">

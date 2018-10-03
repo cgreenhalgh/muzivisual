@@ -140,7 +140,7 @@ menu.controller('menuCtrl', ['$scope', '$location', 'socket', '$window', '$ancho
 }]);
 
 
-menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window', '$location', '$timeout', 'visualMapBuilder', function ($scope, $routeParams, mpmLoguse, $window, $location, $timeout, visualMapBuilder) {
+menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window', '$location', '$timeout', 'visualMapBuilder', 'socket', function ($scope, $routeParams, mpmLoguse, $window, $location, $timeout, visualMapBuilder, socket) {
     console.log('open: ', $routeParams.inquery)
     mpmLoguse.view('/content/' + $routeParams.inquery, { performance:$location.search()['p'] });
     var title = $scope.title = $routeParams.inquery;
@@ -149,6 +149,10 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window'
     
     $scope.goToMenu = function () { $location.path('/'); }
     $scope.navigate = function($event,url) {
+        if (socket.ignoreLinks()) {
+          console.log('ignore navigate '+url);
+          return;
+        }
     	console.log('navigate '+url);
     	mpmLoguse.log({event:'link.out', url: url});
     	$event.preventDefault();
@@ -170,6 +174,12 @@ menu.controller('contentCtrl', ['$scope', '$routeParams', 'mpmLoguse', '$window'
                     $scope.text = $scope.text+performers[i];
                 }
             }
+            // special msg for archive slave view
+            socket.on('archive.init', function(data) {
+              console.log('archive.init', data);
+              $scope.text = data.performers.join(' & ');
+            })
+
         });
     } else if (title === 'What can see and hear') {
         $scope.text = '<p>A performance of Climb! contains a number of audio visual interactions that are triggered by musical codes (muzicodes) embedded in the pianist’s piano part.</p>'+

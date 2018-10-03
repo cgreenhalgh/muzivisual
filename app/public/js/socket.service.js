@@ -1,11 +1,14 @@
 'use strict'
 
 var socket = angular.module('MuziVisual.socket', []);
-socket.factory('socket', ['$rootScope', '$timeout', '$location', 'linkapp', function ($rootScope, $timeout, $location, linkapp) {
-  // TODO optional
-  return linkapp();
-  
+socket.factory('socket', ['$rootScope', '$timeout', '$location', 'linkapp', '$window', function ($rootScope, $timeout, $location, linkapp, $window) {
   var params = $location.search();
+  console.log('$location: ',$location)
+  var inArchive = ($location.search()['archive']!==undefined);
+  console.log('app inArchive: '+inArchive);
+  if (inArchive) {
+    return linkapp();
+  }
   var performanceid = params['p'] === undefined ? '' : params['p'];
   console.log('performanceid: ', performanceid);
   var subscribedTo = []
@@ -81,6 +84,7 @@ socket.factory('socket', ['$rootScope', '$timeout', '$location', 'linkapp', func
   }
 
   return {
+    ignoreLinks: function() { return false; },
     on: function (eventName, callback) {
       onPerformance(eventName, performanceid, callback);
     },

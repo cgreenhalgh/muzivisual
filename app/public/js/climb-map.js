@@ -387,6 +387,13 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
     console.log('suppress normal events for future performance');
     return;
    }
+   // special msg for archive slave view
+   socket.on('archive.init', function(data) {
+     console.log('archive.init', data);
+     $scope.mapTitle = data.performanceTitle;
+     $scope.performer = data.performers.join(' & ');
+     $scope.location = data.venue;
+   })
    socket.on('vStart', function (data) {
 	    //console.log('mapCtrl vStart '+data);
 	    $scope.performing = true;
