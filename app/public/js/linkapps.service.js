@@ -87,13 +87,20 @@ socket.factory('linkapp', ['$rootScope', '$timeout', '$location', '$window', fun
               $window.location.reload();
             return;
           }
-          if (playState.length>0 && msg.stages && playState[0].stages && playState[0].stages.length > msg.stages.length) {
-            console.log('reload app for going back from stage '+playState[0].stages.length+' -> '+msg.stages.length);
-            if ($location.search()['archive']===undefined)
-              $window.location.href = $window.location.href+'&archive=';
-            else
-              $window.location.reload();
-            return;
+          if (playState.length>0 && msg.stages && playState[0].stages) {
+            let changed = playState[0].stages.length > msg.stages.length;
+            for (var si=0; !changed && si<msg.stages.length && si<playState[0].stages.length; si++) {
+              if (msg.stages[si] != playState[0].stages[si])
+                changed = true;
+            }
+            if (changed) {
+              console.log('reload app for going from stages '+playState[0].stages+' -> '+msg.stages);
+              if ($location.search()['archive']===undefined)
+                $window.location.href = $window.location.href+'&archive=';
+              else
+                $window.location.reload();
+              return;
+            }
           }
           if (playState.length==0) {
             playState.push(msg);

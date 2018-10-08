@@ -398,7 +398,9 @@ map.controller('mapCtrl', ['$scope', '$http', 'socket', 'd3Service', '$timeout',
 	    //console.log('mapCtrl vStart '+data);
 	    $scope.performing = true;
 	    $scope.prePerf = false;
-	    $scope.cstage = 'basecamp'
+	    var da = data.split(':');
+	    var stageChange = da[1];
+	    $scope.cstage = stageChange;
 	  })
 
    socket.on('vStageChange', function (data) {
